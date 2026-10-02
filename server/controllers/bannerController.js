@@ -102,14 +102,6 @@ const getBannerById = asyncHandler(async (req, res) => {
 // @route   PUT /api/banners/:id
 // @access  Private/Admin
 const updateBanner = asyncHandler(async (req, res) => {
-  if (req.body.title || req.body.image || req.body.position) {
-    const validation = validateBanner(req.body);
-    if (!validation.isValid) {
-      res.status(400);
-      throw new Error(validation.errors.join(', '));
-    }
-  }
-
   const banner = await Banner.findById(req.params.id);
 
   if (!banner) {
@@ -123,6 +115,16 @@ const updateBanner = asyncHandler(async (req, res) => {
       banner[field] = req.body[field];
     }
   });
+
+  const validation = validateBanner({
+    title: banner.title,
+    image: banner.image,
+    position: banner.position,
+  });
+  if (!validation.isValid) {
+    res.status(400);
+    throw new Error(validation.errors.join(', '));
+  }
 
   const updatedBanner = await banner.save();
   res.json(updatedBanner);

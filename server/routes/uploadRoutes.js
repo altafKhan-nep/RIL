@@ -1,3 +1,4 @@
+const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
 const express = require('express');
@@ -5,9 +6,12 @@ const { protect, admin } = require('../middleware/authMiddleware');
 const asyncHandler = require('../utils/asyncHandler');
 const router = express.Router();
 
+const UPLOADS_DIR = path.join(__dirname, '..', 'uploads');
+fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+
 const storage = multer.diskStorage({
   destination(req, file, cb) {
-    cb(null, path.join(__dirname, '..', 'uploads'));
+    cb(null, UPLOADS_DIR);
   },
   filename(req, file, cb) {
     const ext = path.extname(file.originalname);
@@ -16,13 +20,13 @@ const storage = multer.diskStorage({
 });
 
 function fileFilter(req, file, cb) {
-  const allowed = /jpeg|jpg|png|gif|webp/;
+  const allowed = /jpeg|jpg|png|gif|webp|avif/;
   const extOk = allowed.test(path.extname(file.originalname).toLowerCase());
   const mimeOk = allowed.test(file.mimetype);
   if (extOk && mimeOk) {
     cb(null, true);
   } else {
-    cb(new Error('Only image files (jpg, png, gif, webp) are allowed'));
+    cb(new Error('Only image files (jpg, png, gif, webp, avif) are allowed'));
   }
 }
 

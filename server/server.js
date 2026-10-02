@@ -185,7 +185,14 @@ app.use('/api/payments', paymentRoutes);
 app.use('/api/upload', uploadRoutes);
 
 // --- Static files ---
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use(
+  '/uploads',
+  express.static(path.join(__dirname, 'uploads'), {
+    setHeaders(res) {
+      if (res.req.url.endsWith('.avif')) res.setHeader('Content-Type', 'image/avif');
+    },
+  })
+);
 
 // --- Serve client build in production ---
 if (process.env.NODE_ENV === 'production') {
