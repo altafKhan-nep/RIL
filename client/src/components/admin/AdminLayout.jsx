@@ -29,7 +29,7 @@ const ROLE_COLORS = {
   admin: 'bg-blue-100 text-blue-800',
   content_manager: 'bg-teal-100 text-teal-800',
   order_manager: 'bg-amber-100 text-amber-800',
-  customer: 'bg-gray-100 text-gray-800',
+  customer: 'bg-surface-container-high text-on-surface',
 };
 
 const AdminLayout = ({ children }) => {
@@ -134,7 +134,7 @@ const AdminLayout = ({ children }) => {
   };
 
   const roleBadge = user?.role
-    ? ROLE_COLORS[user.role] || 'bg-gray-100 text-gray-800'
+    ? ROLE_COLORS[user.role] || 'bg-surface-container-high text-on-surface'
     : null;
   const roleLabel = ROLE_LABELS[user?.role] || user?.role || 'Admin';
 
@@ -147,17 +147,16 @@ const AdminLayout = ({ children }) => {
         {/* Logo */}
         <div className={`flex items-center h-16 px-4 border-b border-surface-container/60 ${collapsed ? 'justify-center' : 'gap-3'}`}>
           <Link to="/admin" className="flex items-center gap-2 group">
-            <span className="w-9 h-9 rounded-xl bg-primary-container flex items-center justify-center group-hover:animate-wiggle transition-transform shrink-0">
-              <span
-                className="material-symbols-outlined text-on-primary-container text-xl"
-                style={{ fontVariationSettings: "'FILL' 1" }}
-              >
-                local_mall
-              </span>
-            </span>
+            <img
+              src="/logo_lip.png"
+              alt="Life In Pieces"
+              width={500}
+              height={627}
+              className="h-10 w-auto rounded-lg object-cover group-hover:opacity-85 transition-opacity shrink-0"
+            />
             {!collapsed && (
-              <span className="font-headline-md text-headline-md font-bold text-primary whitespace-nowrap">
-                NovaCart
+              <span className="font-serif text-xl font-semibold text-primary whitespace-nowrap">
+                Life In Pieces
               </span>
             )}
           </Link>
@@ -171,7 +170,7 @@ const AdminLayout = ({ children }) => {
         {/* Role badge + collapse toggle */}
         <div className="border-t border-surface-container/60 p-3 space-y-3">
           {!collapsed && (
-            <div className={`text-center text-xs font-semibold py-1.5 rounded-lg ${ROLE_COLORS[role] || 'bg-gray-100 text-gray-800'}`}>
+            <div className={`text-center text-xs font-semibold py-1.5 rounded-lg ${ROLE_COLORS[role] || 'bg-surface-container-high text-on-surface'}`}>
               {ROLE_LABELS[role] || role}
             </div>
           )}
@@ -208,16 +207,15 @@ const AdminLayout = ({ children }) => {
         {/* Mobile logo */}
         <div className="flex items-center justify-between h-16 px-4 border-b border-surface-container/60">
           <Link to="/admin" className="flex items-center gap-2 group" onClick={closeMobileSidebar}>
-            <span className="w-9 h-9 rounded-xl bg-primary-container flex items-center justify-center group-hover:animate-wiggle transition-transform shrink-0">
-              <span
-                className="material-symbols-outlined text-on-primary-container text-xl"
-                style={{ fontVariationSettings: "'FILL' 1" }}
-              >
-                local_mall
-              </span>
-            </span>
-            <span className="font-headline-md text-headline-md font-bold text-primary">
-              NovaCart
+            <img
+              src="/logo_lip.png"
+              alt="Life In Pieces"
+              width={500}
+              height={627}
+              className="h-10 w-auto rounded-lg object-cover shrink-0"
+            />
+            <span className="font-serif text-xl font-semibold text-primary">
+              Life In Pieces
             </span>
           </Link>
           <button
@@ -377,7 +375,7 @@ const AdminLayout = ({ children }) => {
                       </span>
                       <div className="min-w-0">
                         <p className="text-sm font-semibold text-on-surface truncate">{user?.name || 'Admin User'}</p>
-                        <p className="text-xs text-on-surface-variant truncate">{user?.email || 'admin@novacart.com'}</p>
+                        <p className="text-xs text-on-surface-variant truncate">{user?.email || 'admin@lifeinpieces.com'}</p>
                         {roleBadge && (
                           <span className={`inline-block mt-1 text-[10px] font-bold px-2 py-0.5 rounded-full ${roleBadge}`}>
                             {roleLabel}

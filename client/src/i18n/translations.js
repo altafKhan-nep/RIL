@@ -75,7 +75,7 @@ const translations = {
     'flash.seconds': 'Seconds',
 
     // Why Choose Us
-    'why.title': 'Why Choose NovaCart',
+    'why.title': 'Why Choose Life In Pieces',
     'why.subtitle': 'We are committed to providing the best shopping experience',
     'why.quality': 'Quality Products',
     'why.qualityDesc': 'Every product is carefully curated and quality-checked',
@@ -310,7 +310,7 @@ const translations = {
     'flash.seconds': 'सेकेन्ड',
 
     // Why Choose Us
-    'why.title': 'NovaCart किन छान्नुहुन्छ',
+    'why.title': 'Life In Pieces किन छान्नुहुन्छ',
     'why.subtitle': 'हामी उत्कृष्ट किनमेल अनुभव प्रदान गर्न प्रतिबद्ध छौं',
     'why.quality': 'गुणस्तरीय उत्पादन',
     'why.qualityDesc': 'हरेक उत्पादन सावधानीपूर्वक छनोट र गुणस्तर जाँच गरिएको छ',

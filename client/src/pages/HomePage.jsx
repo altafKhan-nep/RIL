@@ -5,11 +5,11 @@ import ProductCard from '../components/ProductCard';
 import HeroSection from '../components/HeroSection';
 
 const TrustBadge = ({ icon, title, desc }) => (
-  <div className="flex items-center gap-3 bg-surface-container-lowest rounded-xl border border-outline-variant/15 px-4 py-3 group hover:shadow-ambient-surface hover:border-primary/20 transition-all duration-200">
-    <span className="material-symbols-outlined text-primary text-xl">{icon}</span>
+  <div className="flex items-center gap-3 bg-[#2C1E12] rounded-xl border border-white/5 px-4 py-3 group hover:border-[#D4AF37]/30 transition-all duration-200">
+    <span className="material-symbols-outlined text-[#D4AF37] text-xl">{icon}</span>
     <div>
-      <p className="text-[13px] font-semibold text-on-surface leading-tight">{title}</p>
-      <p className="text-[11px] text-on-surface-variant/60 leading-tight">{desc}</p>
+      <p className="text-[13px] font-semibold text-white leading-tight">{title}</p>
+      <p className="text-[11px] text-white/60 leading-tight">{desc}</p>
     </div>
   </div>
 );
@@ -166,16 +166,16 @@ const HomePage = () => {
       </section>
 
       {/* CTA Banner */}
-      <section className="bg-inverse-surface rounded-2xl p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-4">
+      <section className="bg-[#2C1E12] rounded-2xl p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-4">
         <div>
-          <h2 className="text-lg font-bold text-inverse-on-surface mb-1">Join the NovaCart Community</h2>
-          <p className="text-inverse-on-surface/60 text-sm">Get exclusive deals, early access to new arrivals, and 10% off your first order.</p>
+          <h2 className="text-lg font-bold text-white mb-1">Join the Life In Pieces Community</h2>
+          <p className="text-white/60 text-sm">Get exclusive deals, early access to new arrivals, and 10% off your first order.</p>
         </div>
         <div className="flex w-full md:w-auto gap-2">
           <input
             type="email"
             placeholder="Enter your email"
-            className="flex-1 md:w-56 bg-inverse-on-surface/10 text-inverse-on-surface placeholder-inverse-on-surface/40 rounded-xl px-4 py-2.5 text-sm border border-inverse-on-surface/10 outline-none focus:border-primary transition-colors"
+            className="flex-1 md:w-56 bg-white/10 text-white placeholder-white/40 rounded-xl px-4 py-2.5 text-sm border border-white/10 outline-none focus:border-[#D4AF37] transition-colors"
           />
           <button className="btn-primary font-semibold px-5 py-2.5 rounded-xl text-sm shrink-0">
             Subscribe
@@ -211,8 +211,8 @@ const HomePage = () => {
                 )}
                 <div className="p-3.5">
                   <h3 className="text-[13px] font-semibold text-on-surface mb-0.5">{banner.title}</h3>
-                  {banner.subtitle && <p className="text-[11px] text-on-surface-variant/60 mb-1.5">{banner.subtitle}</p>}
-                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary">
+                  {banner.subtitle && <p className="text-[11px] text-white/60 mb-1.5">{banner.subtitle}</p>}
+                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-on-surface">
                     {banner.ctaText || 'Shop Now'}
                     <span className="material-symbols-outlined text-sm">arrow_forward</span>
                   </span>
@@ -230,11 +230,11 @@ const HomePage = () => {
           { icon: 'local_shipping', title: 'Fast & Free Shipping', desc: 'Free shipping on orders over $50.' },
           { icon: 'handshake', title: 'Trusted by Thousands', desc: '10,000+ happy customers and counting.' },
         ].map((item) => (
-          <div key={item.title} className="flex items-center gap-3 bg-surface-container-lowest rounded-xl border border-outline-variant/15 px-4 py-3 group hover:shadow-ambient-surface hover:border-primary/20 transition-all duration-200">
-            <span className="material-symbols-outlined text-primary text-xl">{item.icon}</span>
+          <div key={item.title} className="flex items-center gap-3 bg-[#2C1E12] rounded-xl border border-white/5 px-4 py-3 group hover:border-[#D4AF37]/30 transition-all duration-200">
+            <span className="material-symbols-outlined text-[#D4AF37] text-xl">{item.icon}</span>
             <div>
-              <p className="text-[13px] font-semibold text-on-surface">{item.title}</p>
-              <p className="text-[11px] text-on-surface-variant/60">{item.desc}</p>
+              <p className="text-[13px] font-semibold text-white">{item.title}</p>
+              <p className="text-[11px] text-white/60">{item.desc}</p>
             </div>
           </div>
         ))}

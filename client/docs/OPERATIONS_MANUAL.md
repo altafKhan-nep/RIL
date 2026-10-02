@@ -1,6 +1,6 @@
-# NovaCart Operations Manual
+# Life In Pieces Operations Manual
 
-> Complete guide for marketing teams to manage the NovaCart e-commerce website and CRM admin panel.
+> Complete guide for marketing teams to manage the Life In Pieces e-commerce website and CRM admin panel.
 
 ---
 
@@ -746,4 +746,4 @@ https://nova-cart-dun.vercel.app    https://novacart-api-j9um.onrender.com    At
 ---
 
 *Last updated: September 2026*
-*NovaCart E-Commerce Platform*
+*Life In Pieces E-Commerce Platform*

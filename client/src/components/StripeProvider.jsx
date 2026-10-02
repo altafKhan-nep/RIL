@@ -13,22 +13,22 @@ export const StripeProvider = ({ children, amount }) => {
         appearance: {
           theme: 'stripe',
           variables: {
-            colorPrimary: '#a43c12',
-            colorBackground: '#ffffff',
-            colorText: '#1c1b1f',
+            colorPrimary: '#a17c6b',
+            colorBackground: '#FFFFFF',
+            colorText: '#1F1A16',
             colorDanger: '#dc2626',
-            fontFamily: 'Inter, system-ui, sans-serif',
+            fontFamily: 'Poppins, system-ui, sans-serif',
             borderRadius: '9999px',
           },
           rules: {
             '.Input': {
-              border: '1px solid #e0e0e0',
+              border: '1px solid #D8CCC2',
               padding: '12px 16px',
               borderRadius: '9999px',
             },
             '.Input:focus': {
-              border: '2px solid #a43c12',
-              boxShadow: '0 0 0 2px rgba(164, 60, 18, 0.1)',
+              border: '2px solid #a17c6b',
+              boxShadow: '0 0 0 2px rgba(212, 175, 55, 0.1)',
             },
           },
         },

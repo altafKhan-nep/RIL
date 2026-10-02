@@ -68,7 +68,7 @@ const TrendBadge = ({ value }) => {
   const isPositive = value > 0;
   const isZero = value === 0;
   return (
-    <span className={`inline-flex items-center gap-0.5 text-xs font-semibold px-1.5 py-0.5 rounded-full ${isZero ? 'bg-gray-100 text-gray-500' : isPositive ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'}`}>
+    <span className={`inline-flex items-center gap-0.5 text-xs font-semibold px-1.5 py-0.5 rounded-full ${isZero ? 'bg-surface-container-high text-on-surface-variant' : isPositive ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'}`}>
       <span className="material-symbols-outlined text-[14px]" style={{ fontVariationSettings: "'FILL' 1" }}>
         {isZero ? 'remove' : isPositive ? 'trending_up' : 'trending_down'}
       </span>
@@ -77,7 +77,7 @@ const TrendBadge = ({ value }) => {
   );
 };
 
-const MiniAreaChart = ({ data, height = 100, color = '#a43c12' }) => {
+const MiniAreaChart = ({ data, height = 100, color = '#a17c6b' }) => {
   if (!data || data.length === 0) return null;
   const values = data.map(d => d.total || d.value || 0);
   const max = Math.max(...values, 1);
@@ -245,7 +245,7 @@ const AdminDashboard = () => {
           <div className="bg-surface-container-lowest rounded-2xl p-4 shadow-sm border border-surface-container hover:shadow-md transition-shadow">
             <div className="flex items-center gap-2 mb-2">
               <div className="w-8 h-8 rounded-xl bg-blue-50 flex items-center justify-center">
-                <span className="material-symbols-outlined text-blue-600 text-lg">shopping_cart</span>
+                <span className="material-symbols-outlined text-blue-700 text-lg">shopping_cart</span>
               </div>
               <span className="text-xs text-on-surface-variant font-medium">Orders</span>
             </div>
@@ -255,7 +255,7 @@ const AdminDashboard = () => {
           <div className="bg-surface-container-lowest rounded-2xl p-4 shadow-sm border border-surface-container hover:shadow-md transition-shadow">
             <div className="flex items-center gap-2 mb-2">
               <div className="w-8 h-8 rounded-xl bg-emerald-50 flex items-center justify-center">
-                <span className="material-symbols-outlined text-emerald-600 text-lg">people</span>
+                <span className="material-symbols-outlined text-emerald-700 text-lg">people</span>
               </div>
               <span className="text-xs text-on-surface-variant font-medium">Customers</span>
             </div>
@@ -265,7 +265,7 @@ const AdminDashboard = () => {
           <div className="bg-surface-container-lowest rounded-2xl p-4 shadow-sm border border-surface-container hover:shadow-md transition-shadow">
             <div className="flex items-center gap-2 mb-2">
               <div className="w-8 h-8 rounded-xl bg-amber-50 flex items-center justify-center">
-                <span className="material-symbols-outlined text-amber-600 text-lg">inventory_2</span>
+                <span className="material-symbols-outlined text-amber-700 text-lg">inventory_2</span>
               </div>
               <span className="text-xs text-on-surface-variant font-medium">Low Stock</span>
             </div>
@@ -275,7 +275,7 @@ const AdminDashboard = () => {
           <div className="bg-surface-container-lowest rounded-2xl p-4 shadow-sm border border-surface-container hover:shadow-md transition-shadow">
             <div className="flex items-center gap-2 mb-2">
               <div className="w-8 h-8 rounded-xl bg-teal-50 flex items-center justify-center">
-                <span className="material-symbols-outlined text-teal-600 text-lg">receipt_long</span>
+                <span className="material-symbols-outlined text-teal-700 text-lg">receipt_long</span>
               </div>
               <span className="text-xs text-on-surface-variant font-medium">Avg Order</span>
             </div>
@@ -288,13 +288,13 @@ const AdminDashboard = () => {
 
         {/* Quick Actions */}
         <div className="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-8 gap-2">
-          <QuickAction icon="add_box" label="Add Product" to="/admin/products" color="#a43c12" />
+          <QuickAction icon="add_box" label="Add Product" to="/admin/products" color="#a17c6b" />
           <QuickAction icon="receipt_long" label="Orders" to="/admin/orders" color="#3b82f6" />
           <QuickAction icon="people" label="Customers" to="/admin/customers" color="#10b981" />
           <QuickAction icon="inventory_2" label="Inventory" to="/admin/inventory" color="#f59e0b" />
           <QuickAction icon="campaign" label="Promotions" to="/admin/promotions" color="#8b5cf6" />
           <QuickAction icon="image" label="Banners" to="/admin/banners" color="#ec4899" />
-          <QuickAction icon="analytics" label="Analytics" to="/admin/analytics" color="#006a62" />
+          <QuickAction icon="analytics" label="Analytics" to="/admin/analytics" color="#6B8FD4" />
           <QuickAction icon="settings" label="Settings" to="/admin/settings" color="#6b7280" />
         </div>
 
@@ -304,7 +304,7 @@ const AdminDashboard = () => {
             <h3 className="text-sm font-bold text-on-surface uppercase tracking-wider">Revenue Trend</h3>
             <span className="text-xs text-on-surface-variant">Last 6 months</span>
           </div>
-          <MiniAreaChart data={chartData} color="#a43c12" />
+          <MiniAreaChart data={chartData} color="#a17c6b" />
           <div className="flex justify-between mt-2">
             {chartData.map((d, i) => (
               <span key={i} className="text-[9px] text-on-surface-variant font-medium">{d.month}</span>
@@ -345,7 +345,7 @@ const AdminDashboard = () => {
                           <td className="py-2.5 pr-3 text-xs text-on-surface-variant">{formatDate(order.createdAt)}</td>
                           <td className="py-2.5 pr-3 text-xs font-bold text-on-surface text-right">${(order.totalPrice || 0).toFixed(2)}</td>
                           <td className="py-2.5 text-right">
-                            <span className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded-full ${ORDER_STATUS_STYLES[status] || 'bg-gray-100 text-gray-600'}`}>
+                            <span className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded-full ${ORDER_STATUS_STYLES[status] || 'bg-surface-container-high text-on-surface-variant'}`}>
                               {status}
                             </span>
                           </td>
@@ -404,7 +404,7 @@ const AdminDashboard = () => {
                   const pct = (sold / maxSold) * 100;
                   return (
                     <div key={product._id || idx} className="flex items-center gap-3">
-                      <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-[10px] font-bold shrink-0 ${idx === 0 ? 'bg-amber-100 text-amber-700' : idx === 1 ? 'bg-gray-100 text-gray-600' : idx === 2 ? 'bg-amber-50 text-amber-700' : 'bg-surface-container text-on-surface-variant'}`}>
+                      <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-[10px] font-bold shrink-0 ${idx === 0 ? 'bg-amber-100 text-amber-700' : idx === 1 ? 'bg-surface-container-high text-on-surface-variant' : idx === 2 ? 'bg-amber-50 text-amber-700' : 'bg-surface-container text-on-surface-variant'}`}>
                         {idx + 1}
                       </div>
                       <div className="w-9 h-9 rounded-lg bg-surface-container overflow-hidden shrink-0">
@@ -493,7 +493,7 @@ const AdminDashboard = () => {
                     </span>
                     <div className="min-w-0">
                       <p className="text-xs font-semibold text-on-surface truncate">{product.name}</p>
-                      <p className={`text-[10px] font-bold ${isUrgent ? 'text-red-600' : 'text-amber-600'}`}>
+                      <p className={`text-[10px] font-bold ${isUrgent ? 'text-red-700' : 'text-amber-700'}`}>
                         {stock === 0 ? 'Out of stock' : `${stock} left`}
                       </p>
                     </div>

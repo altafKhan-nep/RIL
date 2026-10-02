@@ -222,7 +222,7 @@ Singleton document with 7 sections:
 ```javascript
 {
   store: {
-    name:            String,     // "NovaCart"
+    name:            String,     // "Life In Pieces"
     tagline:         String,
     logo:            String,
     favicon:         String,

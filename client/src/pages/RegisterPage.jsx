@@ -89,15 +89,11 @@ const RegisterPage = () => {
 
       <div className="w-full max-w-md relative z-10">
         <Link to="/" className="flex items-center justify-center gap-2 mb-8 group">
-          <span className="w-10 h-10 rounded-xl bg-primary-container flex items-center justify-center group-hover:animate-wiggle transition-transform">
-            <span className="material-symbols-outlined text-on-primary-container" style={{ fontVariationSettings: "'FILL' 1" }}>
-              local_mall
-            </span>
-          </span>
-          <span className="text-xl font-bold text-primary">NovaCart</span>
+          <img src="/logo_lip.png" alt="Life In Pieces" width={500} height={627} className="h-12 w-auto rounded-lg object-cover shrink-0" />
+          <span className="text-xl font-bold text-primary">Life In Pieces</span>
         </Link>
 
-        <div className="bg-surface-container-lowest rounded-xl p-8 shadow-[0_8px_30px_rgba(164,60,18,0.06)] border border-surface-container/60">
+        <div className="bg-surface-container-lowest rounded-xl p-8 shadow-[0_8px_30px_rgba(212, 175, 55, 0.06)] border border-surface-container/60">
           <h1 className="text-xl font-bold text-on-surface mb-1">Create Account</h1>
           <p className="text-sm text-on-surface-variant mb-6">Join the joyful shopping experience.</p>
 

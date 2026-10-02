@@ -51,7 +51,7 @@ const createPromotion = asyncHandler(async (req, res) => {
     sidebarTitle: sidebarTitle || 'Special Offer',
     sidebarSubtitle: sidebarSubtitle || '',
     sidebarButtonText: sidebarButtonText || 'Shop Now',
-    sidebarBgColor: sidebarBgColor || '#a43c12',
+    sidebarBgColor: sidebarBgColor || '#a17c6b',
   });
 
   res.status(201).json(promotion);

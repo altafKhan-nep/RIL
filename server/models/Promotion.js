@@ -22,7 +22,7 @@ const promotionSchema = mongoose.Schema(
     sidebarTitle: { type: String, default: 'Special Offer' },
     sidebarSubtitle: { type: String, default: '' },
     sidebarButtonText: { type: String, default: 'Shop Now' },
-    sidebarBgColor: { type: String, default: '#a43c12' },
+    sidebarBgColor: { type: String, default: '#a17c6b' },
   },
   { timestamps: true }
 );

@@ -30,9 +30,9 @@ const SkeletonPulse = ({ className }) => (
 );
 
 const getStockColor = (stock) => {
-  if (stock === 0) return 'text-red-600 bg-red-50';
-  if (stock < 5) return 'text-amber-600 bg-amber-50';
-  return 'text-emerald-600 bg-emerald-50';
+  if (stock === 0) return 'text-red-700 bg-red-50';
+  if (stock < 5) return 'text-amber-700 bg-amber-50';
+  return 'text-emerald-700 bg-emerald-50';
 };
 
 const getStockDot = (stock) => {
@@ -71,13 +71,13 @@ const StockHistoryModal = ({ product, onClose }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg mx-4 max-h-[80vh] flex flex-col animate-fade-up">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+      <div className="bg-surface-container rounded-2xl shadow-xl w-full max-w-lg mx-4 max-h-[80vh] flex flex-col animate-fade-up">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-surface-container">
           <div>
-            <h3 className="text-lg font-bold text-gray-900">Stock History</h3>
-            <p className="text-sm text-gray-500">{product.name}</p>
+            <h3 className="text-lg font-bold text-on-surface">Stock History</h3>
+            <p className="text-sm text-on-surface-variant">{product.name}</p>
           </div>
-          <button onClick={onClose} className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors">
+          <button onClick={onClose} className="p-2 rounded-lg hover:bg-surface-container-high text-on-surface-variant transition-colors">
             <span className="material-symbols-outlined">close</span>
           </button>
         </div>
@@ -85,30 +85,30 @@ const StockHistoryModal = ({ product, onClose }) => {
           {loading ? (
             <div className="space-y-3">
               {Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} className="h-16 bg-gray-100 rounded-lg animate-pulse" />
+                <div key={i} className="h-16 bg-surface-container-high rounded-lg animate-pulse" />
               ))}
             </div>
           ) : !history?.stockHistory?.length ? (
-            <div className="text-center py-8 text-gray-400">
+            <div className="text-center py-8 text-on-surface-variant">
               <span className="material-symbols-outlined text-4xl mb-2">history</span>
               <p className="text-sm">No stock history yet</p>
             </div>
           ) : (
             <div className="space-y-3">
               {history.stockHistory.slice().reverse().map((entry, i) => (
-                <div key={i} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full capitalize ${typeColors[entry.type] || 'bg-gray-100 text-gray-700'}`}>
+                <div key={i} className="flex items-center gap-3 p-3 bg-surface-container-low rounded-lg">
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full capitalize ${typeColors[entry.type] || 'bg-surface-container-high text-on-surface'}`}>
                     {entry.type}
                   </span>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-700 truncate">{entry.note || entry.type}</p>
-                    <p className="text-xs text-gray-400">{formatDate(entry.date)}</p>
+                    <p className="text-sm font-medium text-on-surface truncate">{entry.note || entry.type}</p>
+                    <p className="text-xs text-on-surface-variant">{formatDate(entry.date)}</p>
                   </div>
                   <div className="text-right shrink-0">
-                    <p className="text-sm font-bold text-gray-900">
+                    <p className="text-sm font-bold text-on-surface">
                       {entry.previousStock} → {entry.newStock}
                     </p>
-                    <p className={`text-xs font-semibold ${entry.quantity > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    <p className={`text-xs font-semibold ${entry.quantity > 0 ? 'text-green-700' : 'text-red-700'}`}>
                       {entry.quantity > 0 ? '+' : ''}{entry.quantity}
                     </p>
                   </div>
@@ -344,15 +344,15 @@ const AdminInventory = () => {
           </div>
           <div className="bg-surface-container-lowest rounded-xl shadow-sm p-4">
             <p className="text-xs font-bold text-emerald-700 uppercase tracking-wider">In Stock</p>
-            <p className="text-2xl font-bold text-emerald-600 mt-1">{stats.inStock}</p>
+            <p className="text-2xl font-bold text-emerald-700 mt-1">{stats.inStock}</p>
           </div>
           <div className="bg-surface-container-lowest rounded-xl shadow-sm p-4">
             <p className="text-xs font-bold text-amber-700 uppercase tracking-wider">Low Stock</p>
-            <p className="text-2xl font-bold text-amber-600 mt-1">{stats.lowStock}</p>
+            <p className="text-2xl font-bold text-amber-700 mt-1">{stats.lowStock}</p>
           </div>
           <div className="bg-surface-container-lowest rounded-xl shadow-sm p-4">
             <p className="text-xs font-bold text-red-700 uppercase tracking-wider">Out of Stock</p>
-            <p className="text-2xl font-bold text-red-600 mt-1">{stats.outOfStock}</p>
+            <p className="text-2xl font-bold text-red-700 mt-1">{stats.outOfStock}</p>
           </div>
         </div>
 
@@ -676,7 +676,7 @@ const AdminInventory = () => {
                                   </span>
                                 </button>
                                 {product.minStockLevel !== undefined && stock > 0 && stock <= product.minStockLevel && (
-                                  <span className="text-[10px] text-amber-600 font-semibold">Min: {product.minStockLevel}</span>
+                                  <span className="text-[10px] text-amber-700 font-semibold">Min: {product.minStockLevel}</span>
                                 )}
                               </div>
                             )}

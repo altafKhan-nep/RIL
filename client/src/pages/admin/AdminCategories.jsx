@@ -628,7 +628,7 @@ const AdminCategories = () => {
             className={`inline-block text-xs font-bold px-2.5 py-1 rounded-full capitalize ${
               cat.isActive !== false
                 ? 'bg-emerald-100 text-emerald-800'
-                : 'bg-gray-100 text-gray-700'
+                : 'bg-surface-container-high text-on-surface'
             }`}
           >
             {cat.isActive !== false ? 'active' : 'inactive'}

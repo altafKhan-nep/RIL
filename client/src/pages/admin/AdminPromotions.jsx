@@ -22,7 +22,7 @@ const INITIAL_FORM = {
   sidebarTitle: 'Special Offer',
   sidebarSubtitle: '',
   sidebarButtonText: 'Shop Now',
-  sidebarBgColor: '#a43c12',
+  sidebarBgColor: '#a17c6b',
 };
 
 const Toast = ({ message, type, onClose }) => {
@@ -104,7 +104,7 @@ const PromoFormPanel = ({ open, promotion, categories, onSave, onClose }) => {
         sidebarTitle: promotion.sidebarTitle || 'Special Offer',
         sidebarSubtitle: promotion.sidebarSubtitle || '',
         sidebarButtonText: promotion.sidebarButtonText || 'Shop Now',
-        sidebarBgColor: promotion.sidebarBgColor || '#a43c12',
+        sidebarBgColor: promotion.sidebarBgColor || '#a17c6b',
       });
     } else {
       setForm(INITIAL_FORM);
@@ -436,7 +436,7 @@ const PromoFormPanel = ({ open, promotion, categories, onSave, onClose }) => {
                       value={form.sidebarBgColor}
                       onChange={(e) => handleChange('sidebarBgColor', e.target.value)}
                       className={inputClass('sidebarBgColor')}
-                      placeholder="#a43c12"
+                      placeholder="#a17c6b"
                     />
                   </div>
                 </div>
@@ -445,7 +445,7 @@ const PromoFormPanel = ({ open, promotion, categories, onSave, onClose }) => {
                   <p className="text-[10px] font-bold text-on-surface-variant/40 uppercase tracking-wider mb-2">Preview</p>
                   <div
                     className="rounded-lg p-3 text-center max-w-[200px]"
-                    style={{ backgroundColor: form.sidebarBgColor || '#a43c12' }}
+                    style={{ backgroundColor: form.sidebarBgColor || '#a17c6b' }}
                   >
                     <p className="text-white text-[11px] font-bold uppercase tracking-wide mb-0.5">
                       {form.sidebarTitle || 'Special Offer'}
@@ -456,7 +456,7 @@ const PromoFormPanel = ({ open, promotion, categories, onSave, onClose }) => {
                     <p className="text-white/70 text-[11px] mb-2">
                       Code: {form.code || 'CODE'}
                     </p>
-                    <div className="w-full bg-white text-[12px] font-bold py-1.5 rounded text-center" style={{ color: form.sidebarBgColor || '#a43c12' }}>
+                    <div className="w-full bg-white text-[12px] font-bold py-1.5 rounded text-center" style={{ color: form.sidebarBgColor || '#a17c6b' }}>
                       {form.sidebarButtonText || 'Shop Now'}
                     </div>
                   </div>
@@ -549,9 +549,9 @@ const TYPE_CONFIG = {
 
 const STATUS_CONFIG = {
   active: 'bg-emerald-100 text-emerald-800',
-  expired: 'bg-gray-100 text-gray-700',
+  expired: 'bg-surface-container-high text-on-surface',
   upcoming: 'bg-blue-100 text-blue-800',
-  inactive: 'bg-gray-100 text-gray-600',
+  inactive: 'bg-surface-container-high text-on-surface-variant',
 };
 
 const AdminPromotions = () => {
@@ -894,7 +894,7 @@ const AdminPromotions = () => {
                         <td className="py-3.5 px-4">
                           <span
                             className={`inline-block text-xs font-bold px-2.5 py-1 rounded-full capitalize ${
-                              STATUS_CONFIG[status] || 'bg-gray-100 text-gray-700'
+                              STATUS_CONFIG[status] || 'bg-surface-container-high text-on-surface'
                             }`}
                           >
                             {status}

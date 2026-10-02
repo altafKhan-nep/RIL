@@ -168,7 +168,7 @@ const OrderDetailsPanel = ({ order, onClose, onUpdateStatus }) => {
                 <p className="text-xs text-on-surface-variant">Status</p>
                 <span
                   className={`inline-block text-xs font-bold px-2.5 py-1 rounded-full capitalize ${
-                    ORDER_STATUS_STYLES[order.status] || 'bg-gray-100 text-gray-700'
+                    ORDER_STATUS_STYLES[order.status] || 'bg-surface-container-high text-on-surface'
                   }`}
                 >
                   {order.status || 'Pending'}
@@ -749,7 +749,7 @@ const AdminOrders = () => {
                           <td className="py-3.5 px-4">
                             <span
                               className={`inline-block text-xs font-bold px-2.5 py-1 rounded-full capitalize ${
-                                ORDER_STATUS_STYLES[status] || 'bg-gray-100 text-gray-700'
+                                ORDER_STATUS_STYLES[status] || 'bg-surface-container-high text-on-surface'
                               }`}
                             >
                               {status}

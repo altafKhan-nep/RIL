@@ -111,7 +111,7 @@ const OrderSuccessPage = () => {
                       </span>
                     </div>
                     <span className={`text-[10px] font-semibold mt-1.5 text-center ${
-                      idx === currentIdx ? 'text-primary' : step.done ? 'text-green-600' : 'text-on-surface-variant/40'
+                      idx === currentIdx ? 'text-primary' : step.done ? 'text-green-700' : 'text-on-surface-variant/40'
                     }`}>
                       {step.label}
                     </span>

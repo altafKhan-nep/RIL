@@ -1,7 +1,7 @@
 {
   "name": "novacart",
   "version": "1.0.0",
-  "description": "NovaCart - A vibrant full-stack MERN e-commerce app built with the 'Vibrant Joy' design system",
+  "description": "Life In Pieces - A full-stack MERN e-commerce app built with the 'Life In Pieces' dark gold design system",
   "private": true,
   "scripts": {
     "install-all": "npm --prefix server install && npm --prefix client install",

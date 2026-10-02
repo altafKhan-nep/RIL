@@ -247,7 +247,7 @@ const BannerFormModal = ({ open, banner, onSave, onClose }) => {
                     </p>
                   )}
                   {form.ctaText && (
-                    <span className="inline-block mt-3 px-4 py-1.5 bg-white text-gray-900 text-xs font-bold rounded-lg">
+                    <span className="inline-block mt-3 px-4 py-1.5 bg-primary text-on-primary text-xs font-bold rounded-lg">
                       {form.ctaText}
                     </span>
                   )}
@@ -324,7 +324,7 @@ const BannerFormModal = ({ open, banner, onSave, onClose }) => {
                   onClick={() => setImageTab(tab)}
                   className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-md text-xs font-semibold transition-all ${
                     imageTab === tab
-                      ? 'bg-white text-on-surface shadow-sm'
+                      ? 'bg-surface-container-high text-primary shadow-sm'
                       : 'text-on-surface-variant hover:text-on-surface'
                   }`}
                 >
@@ -551,7 +551,7 @@ const BannerFormModal = ({ open, banner, onSave, onClose }) => {
                   placeholder="#ffffff"
                 />
                 <div className="flex gap-1.5">
-                  {['#ffffff', '#fbf9f5', '#f0fffe', '#fff5f0', '#1b1c1a'].map((color) => (
+                  {['#ffffff', '#FBF8F4', '#F1EAE2', '#F6ECE5', '#a17c6b', '#4A3B32', '#C5A059', '#2C1E12', '#1F305E', '#1F1A16', '#E3DAD0'].map((color) => (
                     <button
                       key={color}
                       type="button"
@@ -847,7 +847,7 @@ const AdminBanners = () => {
 
   const STATUS_STYLES = {
     active: 'bg-emerald-100 text-emerald-800',
-    disabled: 'bg-gray-100 text-gray-700',
+    disabled: 'bg-surface-container-high text-on-surface',
     scheduled: 'bg-blue-100 text-blue-800',
     expired: 'bg-amber-100 text-amber-800',
   };

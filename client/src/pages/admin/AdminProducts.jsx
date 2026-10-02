@@ -25,7 +25,7 @@ const INITIAL_FORM = {
 
 const STATUS_STYLES = {
   active: 'bg-emerald-100 text-emerald-800',
-  draft: 'bg-gray-100 text-gray-700',
+  draft: 'bg-surface-container-high text-on-surface',
   'out of stock': 'bg-red-100 text-red-800',
 };
 
@@ -35,9 +35,9 @@ const getStatus = (product) => {
 };
 
 const getStockColor = (stock) => {
-  if (stock === 0) return 'text-red-600';
-  if (stock < 5) return 'text-amber-600';
-  return 'text-emerald-600';
+  if (stock === 0) return 'text-red-700';
+  if (stock < 5) return 'text-amber-700';
+  return 'text-emerald-700';
 };
 
 const slugify = (text) =>
@@ -1145,7 +1145,7 @@ const AdminProducts = () => {
                           <td className="py-3 px-3">
                             <span
                               className={`inline-block text-xs font-bold px-2.5 py-1 rounded-full capitalize ${
-                                STATUS_STYLES[status] || 'bg-gray-100 text-gray-700'
+                                STATUS_STYLES[status] || 'bg-surface-container-high text-on-surface'
                               }`}
                             >
                               {status}

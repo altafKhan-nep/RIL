@@ -278,7 +278,7 @@ const OffersSection = () => {
 const SellerInfo = () => (
   <div className="p-4 bg-surface-container-low rounded-xl border border-outline-variant/30">
     <SectionLabel icon="store">Seller</SectionLabel>
-    <Link to="#" className="text-sm text-primary font-semibold hover:underline">NovaCart Official</Link>
+    <Link to="#" className="text-sm text-primary font-semibold hover:underline">Life In Pieces Official</Link>
     <div className="flex items-center gap-4 mt-2 text-xs text-on-surface-variant">
       <span className="flex items-center gap-1">
         <span className="material-symbols-outlined text-[13px] text-tertiary" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
@@ -317,7 +317,7 @@ const Highlights = ({ features, stock }) => {
 
 const SpecTable = ({ product }) => {
   const specs = [
-    { label: 'Brand', value: 'NovaCart' },
+    { label: 'Brand', value: 'Life In Pieces' },
     { label: 'Category', value: product.category },
     { label: 'SKU', value: product.sku || 'N/A' },
     ...(product.colors?.length ? [{ label: 'Colors', value: `${product.colors.length} option${product.colors.length > 1 ? 's' : ''}` }] : []),
@@ -548,7 +548,7 @@ const ProductDetailPage = () => {
             {/* Right: Product Info */}
             <div className="flex flex-col">
               {/* Brand */}
-              <p className="text-[11px] text-on-surface-variant/40 uppercase tracking-[0.15em] font-semibold mb-1.5">NovaCart</p>
+              <p className="text-[11px] text-on-surface-variant/40 uppercase tracking-[0.15em] font-semibold mb-1.5">Life In Pieces</p>
 
               {/* Title */}
               <h1 className="text-2xl md:text-[26px] font-bold text-on-surface leading-snug mb-3">{product.name}</h1>

@@ -1,4 +1,4 @@
-# NovaCart
+# Life In Pieces
 
 > A production-ready, full-stack MERN e-commerce platform with CRM/Admin Dashboard.
 
@@ -118,7 +118,7 @@ npm run dev
 ## Project Structure
 
 ```
-NovaCart/
+Life In Pieces/
 ├── client/                  # React frontend
 │   ├── src/
 │   │   ├── api/            # API client

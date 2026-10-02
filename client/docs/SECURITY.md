@@ -2,7 +2,7 @@
 
 ## Overview
 
-NovaCart implements multiple layers of security to protect against common web vulnerabilities.
+Life In Pieces implements multiple layers of security to protect against common web vulnerabilities.
 
 ---
 

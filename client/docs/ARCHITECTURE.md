@@ -2,7 +2,7 @@
 
 ## Overview
 
-NovaCart is a full-stack MERN (MongoDB, Express, React, Node.js) e-commerce application with a CRM/Admin dashboard. The frontend is a single-page application (SPA) served by Vite, and the backend is a RESTful API server built with Express.
+Life In Pieces is a full-stack MERN (MongoDB, Express, React, Node.js) e-commerce application with a CRM/Admin dashboard. The frontend is a single-page application (SPA) served by Vite, and the backend is a RESTful API server built with Express.
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -26,7 +26,7 @@ NovaCart is a full-stack MERN (MongoDB, Express, React, Node.js) e-commerce appl
 ## Project Structure
 
 ```
-NovaCart/
+Life In Pieces/
 ├── client/                          # Frontend React app
 │   ├── public/                      # Static assets
 │   ├── src/

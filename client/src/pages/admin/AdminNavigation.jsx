@@ -335,7 +335,7 @@ const POSITION_COLORS = {
 
 const STATUS_COLORS = {
   active: 'bg-emerald-100 text-emerald-800',
-  inactive: 'bg-gray-100 text-gray-700',
+  inactive: 'bg-surface-container-high text-on-surface',
 };
 
 const AdminNavigation = () => {

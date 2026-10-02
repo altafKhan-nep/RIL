@@ -81,7 +81,7 @@ const HeroSection = () => {
   return (
     <section
       className="relative rounded-3xl overflow-hidden bg-surface-container-lowest min-h-[340px] md:min-h-[420px]"
-      style={{ boxShadow: '0 25px 60px -12px rgba(164, 60, 18, 0.15), 0 8px 20px -4px rgba(0, 0, 0, 0.05)' }}
+      style={{ boxShadow: '0 25px 60px -12px rgba(212, 175, 55, 0.15), 0 8px 20px -4px rgba(0, 0, 0, 0.05)' }}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
@@ -197,7 +197,7 @@ const PremiumSlide = ({ slide, isActive, index, activeIdx }) => {
             }`}>
               <Link
                 to={slide.link || '/shop'}
-                className="group relative inline-flex items-center gap-2.5 bg-primary text-on-primary text-sm font-bold px-7 py-3.5 rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-[0_12px_30px_-5px_rgba(164,60,18,0.5)] hover:scale-[1.03] active:scale-[0.97]"
+                className="group relative inline-flex items-center gap-2.5 bg-primary text-on-primary text-sm font-bold px-7 py-3.5 rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-[0_12px_30px_-5px_rgba(212, 175, 55, 0.5)] hover:scale-[1.03] active:scale-[0.97]"
               >
                 <span className="absolute inset-0 bg-gradient-to-r from-primary-container/0 via-white/10 to-primary-container/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
                 <span className="relative z-10">{t('hero.shopNow')}</span>
@@ -247,7 +247,7 @@ const PremiumFallback = () => {
   return (
     <section
       className="relative rounded-3xl overflow-hidden min-h-[340px] md:min-h-[420px]"
-      style={{ boxShadow: '0 25px 60px -12px rgba(164, 60, 18, 0.15), 0 8px 20px -4px rgba(0, 0, 0, 0.05)' }}
+      style={{ boxShadow: '0 25px 60px -12px rgba(212, 175, 55, 0.15), 0 8px 20px -4px rgba(0, 0, 0, 0.05)' }}
     >
     {/* Top shine */}
     <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-primary-container/40 to-transparent z-30" />
@@ -291,7 +291,7 @@ const PremiumFallback = () => {
 
           {/* CTAs */}
           <div className="flex items-center gap-3 animate-fade-up" style={{ animationDelay: '300ms' }}>
-            <Link to="/shop" className="group relative inline-flex items-center gap-2.5 bg-primary text-on-primary text-sm font-bold px-7 py-3.5 rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-[0_12px_30px_-5px_rgba(164,60,18,0.5)] hover:scale-[1.03] active:scale-[0.97]">
+            <Link to="/shop" className="group relative inline-flex items-center gap-2.5 bg-primary text-on-primary text-sm font-bold px-7 py-3.5 rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-[0_12px_30px_-5px_rgba(212, 175, 55, 0.5)] hover:scale-[1.03] active:scale-[0.97]">
               <span className="absolute inset-0 bg-gradient-to-r from-primary-container/0 via-white/10 to-primary-container/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
               <span className="relative z-10">{t('hero.shopNow')}</span>
               <span className="material-symbols-outlined text-lg relative z-10 group-hover:translate-x-0.5 transition-transform duration-300">arrow_forward</span>

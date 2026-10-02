@@ -1,7 +1,7 @@
 const sections = [
   {
     title: 'Acceptance of Terms',
-    content: `By accessing or using NovaCart ("the Site"), you agree to be bound by these Terms of Service. If you do not agree to all of these terms, you may not use our services. We reserve the right to modify these terms at any time, and continued use of the Site constitutes acceptance of any changes.`,
+    content: `By accessing or using Life In Pieces ("the Site"), you agree to be bound by these Terms of Service. If you do not agree to all of these terms, you may not use our services. We reserve the right to modify these terms at any time, and continued use of the Site constitutes acceptance of any changes.`,
   },
   {
     title: 'Account Registration',
@@ -41,7 +41,7 @@ You must be at least 13 years old to create an account. One account per person; 
 
 **Delivery Times:** Estimated delivery times are provided at checkout and are not guaranteed. Delays may occur due to carrier issues, weather, or other circumstances beyond our control.
 
-**Risk of Loss:** All items purchased from NovaCart are shipped pursuant to a shipment contract. The risk of loss and title for items pass to you upon delivery to the carrier.
+**Risk of Loss:** All items purchased from Life In Pieces are shipped pursuant to a shipment contract. The risk of loss and title for items pass to you upon delivery to the carrier.
 
 **Shipping Address:** You are responsible for providing an accurate shipping address. We are not responsible for orders delivered to incorrect addresses provided by the customer.`,
   },
@@ -59,7 +59,7 @@ You must be at least 13 years old to create an account. One account per person; 
   },
   {
     title: 'Intellectual Property',
-    content: `All content on NovaCart — including text, graphics, logos, images, software, and design — is the property of NovaCart or its licensors and is protected by United States and international copyright, trademark, and intellectual property laws.
+    content: `All content on Life In Pieces — including text, graphics, logos, images, software, and design — is the property of Life In Pieces or its licensors and is protected by United States and international copyright, trademark, and intellectual property laws.
 
 You may not:
 - Reproduce, distribute, or create derivative works from our content
@@ -88,7 +88,7 @@ We reserve the right to suspend or terminate accounts that violate these terms.`
     title: 'Limitation of Liability',
     content: `To the maximum extent permitted by law:
 
-- NovaCart shall not be liable for any indirect, incidental, special, consequential, or punitive damages arising from your use of the Site or products
+- Life In Pieces shall not be liable for any indirect, incidental, special, consequential, or punitive damages arising from your use of the Site or products
 - Our total liability shall not exceed the amount you paid for the specific product or service giving rise to the claim
 - We are not liable for damages caused by third-party services, shipping carriers, or events beyond our reasonable control
 - We do not warrant that the Site will be uninterrupted, error-free, or secure
@@ -97,7 +97,7 @@ Some jurisdictions do not allow limitation of liability, so the above limitation
   },
   {
     title: 'Indemnification',
-    content: `You agree to indemnify, defend, and hold harmless NovaCart, its officers, directors, employees, agents, and affiliates from and against any claims, liabilities, damages, losses, costs, or expenses (including reasonable attorneys' fees) arising from:
+    content: `You agree to indemnify, defend, and hold harmless Life In Pieces, its officers, directors, employees, agents, and affiliates from and against any claims, liabilities, damages, losses, costs, or expenses (including reasonable attorneys' fees) arising from:
 
 - Your use of the Site or services
 - Your violation of these Terms of Service
@@ -112,11 +112,11 @@ Any disputes arising from these terms or your use of the Site shall be resolved 
   },
   {
     title: 'Dispute Resolution',
-    content: `**Informal Resolution:** Before filing a formal claim, you agree to contact us at legal@novacart.com and attempt to resolve the dispute informally for at least 30 days.
+    content: `**Informal Resolution:** Before filing a formal claim, you agree to contact us at legal@lifeinpieces.com and attempt to resolve the dispute informally for at least 30 days.
 
 **Arbitration:** Any dispute not resolved informally shall be resolved through binding arbitration administered by the American Arbitration Association (AAA) under its Commercial Arbitration Rules.
 
-**Class Action Waiver:** You agree to resolve disputes with NovaCart on an individual basis and waive any right to participate in class actions, class arbitrations, or representative proceedings.`,
+**Class Action Waiver:** You agree to resolve disputes with Life In Pieces on an individual basis and waive any right to participate in class actions, class arbitrations, or representative proceedings.`,
   },
   {
     title: 'Severability',
@@ -124,7 +124,7 @@ Any disputes arising from these terms or your use of the Site shall be resolved 
   },
   {
     title: 'Entire Agreement',
-    content: `These Terms of Service, together with our Privacy Policy and any other legal notices published on the Site, constitute the entire agreement between you and NovaCart regarding your use of the Site and services.
+    content: `These Terms of Service, together with our Privacy Policy and any other legal notices published on the Site, constitute the entire agreement between you and Life In Pieces regarding your use of the Site and services.
 
 Our failure to enforce any provision of these terms does not constitute a waiver of that provision or any other provision.`,
   },
@@ -132,9 +132,9 @@ Our failure to enforce any provision of these terms does not constitute a waiver
     title: 'Contact Information',
     content: `For questions about these Terms of Service, please contact us:
 
-**Email:** legal@novacart.com
-**Mail:** NovaCart Legal Department, 250 Brannan Street, Suite 500, San Francisco, CA 94107
-**Phone:** 1-800-NOVA-CART (1-800-668-2278)`,
+**Email:** legal@lifeinpieces.com
+**Mail:** Life In Pieces Legal Department, 250 Brannan Street, Suite 500, San Francisco, CA 94107
+**Phone:** 1-800-LIP-CART (1-800-668-2278)`,
   },
 ];
 
@@ -149,7 +149,7 @@ const TermsPage = () => {
           Last Updated: September 8, 2026
         </p>
         <p className="text-on-surface-variant max-w-2xl mx-auto leading-relaxed mt-4">
-          These Terms of Service govern your use of NovaCart's website and services. Please read them carefully before using our platform.
+          These Terms of Service govern your use of Life In Pieces' website and services. Please read them carefully before using our platform.
         </p>
       </div>
 
@@ -191,7 +191,7 @@ const TermsPage = () => {
       {/* Footer Note */}
       <div className="mt-12 bg-surface-container-lowest rounded-xl border border-surface-container/60 p-6 text-center">
         <p className="text-sm text-on-surface-variant">
-          By using NovaCart, you acknowledge that you have read, understood, and agree to be bound by these Terms of Service.
+          By using Life In Pieces, you acknowledge that you have read, understood, and agree to be bound by these Terms of Service.
         </p>
       </div>
     </main>

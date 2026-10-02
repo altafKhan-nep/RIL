@@ -3,11 +3,11 @@ const mongoose = require('mongoose');
 const settingsSchema = mongoose.Schema(
   {
     store: {
-      name: { type: String, default: 'NovaCart' },
-      tagline: { type: String, default: 'Discover Joy in Every Box' },
+      name: { type: String, default: 'Life In Pieces' },
+      tagline: { type: String, default: 'Thoughtfully Crafted, Piece by Piece' },
       logo: { type: String, default: '' },
       favicon: { type: String, default: '' },
-      contactEmail: { type: String, default: 'support@novacart.com' },
+      contactEmail: { type: String, default: 'support@lifeinpieces.com' },
       phone: { type: String, default: '' },
       address: { type: String, default: '' },
     },
@@ -43,8 +43,8 @@ const settingsSchema = mongoose.Schema(
       maxLoginAttempts: { type: Number, default: 5 },
     },
     seo: {
-      metaTitle: { type: String, default: 'NovaCart - Discover Joy in Every Box' },
-      metaDescription: { type: String, default: 'Shop vibrant fashion, quirky electronics, and home delights.' },
+      metaTitle: { type: String, default: 'Life In Pieces - Thoughtfully Crafted Furniture & Home Essentials' },
+      metaDescription: { type: String, default: 'Discover thoughtfully crafted furniture and home pieces from Life In Pieces - designed to bring warmth, quality and character to every room.' },
       ogImage: { type: String, default: '' },
     },
   },

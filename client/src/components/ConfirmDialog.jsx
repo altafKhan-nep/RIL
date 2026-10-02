@@ -26,7 +26,7 @@ const ConfirmDialog = ({
       onCancel={onCancel}
       className="backdrop:bg-black/40 bg-transparent rounded-xl p-0 max-w-sm w-full"
     >
-      <div className="bg-surface-container-lowest rounded-xl p-6 shadow-[0_8px_30px_rgba(164,60,18,0.12)] border border-surface-container/60">
+      <div className="bg-surface-container-lowest rounded-xl p-6 shadow-[0_8px_30px_rgba(212, 175, 55, 0.12)] border border-surface-container/60">
         <div className="flex items-start gap-4 mb-5">
           <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${danger ? 'bg-error-container' : 'bg-primary-container/20'}`}>
             <span className={`material-symbols-outlined text-xl ${danger ? 'text-on-error-container' : 'text-primary'}`} style={{ fontVariationSettings: "'FILL' 1" }}>

@@ -4,15 +4,15 @@
 
 @layer base {
   body {
-    font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
-    background-color: #fbf9f5;
-    color: #1b1c1a;
+    font-family: 'Poppins', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    background-color: #FCFAF7;
+    color: #26201B;
     overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    font-family: 'Playfair Display', Georgia, serif;
   }
 }
 
@@ -36,21 +36,21 @@
 @layer components {
   /* Ambient shadows */
   .ambient-shadow-primary {
-    box-shadow: 0 10px 25px -5px rgba(255, 127, 80, 0.4);
+    box-shadow: 0 10px 25px -5px rgba(161, 124, 107, 0.30);
   }
   .ambient-shadow-surface {
-    box-shadow: 0 4px 20px rgba(164, 60, 18, 0.05);
+    box-shadow: 0 4px 20px rgba(60, 40, 30, 0.06);
   }
 
   /* Primary button */
   .btn-primary {
-    background: linear-gradient(135deg, #ff7f50, #ffb59c);
-    color: #6c2000;
+    background: #D4AF37;
+    color: #000000;
     transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   }
   .btn-primary:hover {
     transform: scale(1.05);
-    box-shadow: 0 10px 25px -5px rgba(255, 127, 80, 0.5);
+    box-shadow: 0 10px 25px -5px rgba(212, 175, 55, 0.4);
   }
   .btn-primary:active {
     transform: scale(0.95);
@@ -58,24 +58,24 @@
 
   /* Secondary button */
   .btn-secondary {
-    background: linear-gradient(135deg, #40e0d0, #5ef6e6);
-    color: #005049;
+    background: linear-gradient(135deg, #F8F0DE, #EAD9B8);
+    color: #4A380F;
     transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   }
   .btn-secondary:hover {
     transform: scale(1.05);
-    box-shadow: 0 10px 25px -5px rgba(64, 224, 208, 0.4);
+    box-shadow: 0 10px 25px -5px rgba(197, 160, 89, 0.45);
   }
 
   /* Ghost button */
   .btn-ghost {
     background: transparent;
-    border: 2px solid #ff7f50;
-    color: #a43c12;
+    border: 2px solid #a17c6b;
+    color: #a17c6b;
     transition: all 0.3s ease;
   }
   .btn-ghost:hover {
-    background: #ffdbcf;
+    background: rgba(161, 124, 107, 0.08);
   }
 
   /* Product card hover lift */
@@ -84,7 +84,7 @@
   }
   .product-card:hover {
     transform: translateY(-8px) scale(1.02);
-    box-shadow: 0 12px 30px rgba(164, 60, 18, 0.1);
+    box-shadow: 0 12px 30px rgba(60, 40, 30, 0.10);
   }
 
   .lift-bounce {
@@ -92,7 +92,7 @@
   }
   .lift-bounce:hover {
     transform: translateY(-8px) scale(1.02);
-    box-shadow: 0 12px 30px rgba(164, 60, 18, 0.1);
+    box-shadow: 0 12px 30px rgba(60, 40, 30, 0.10);
   }
 }
 
@@ -180,9 +180,9 @@
 }
 
 @keyframes pulseSubtle {
-  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 127, 80, 0.4); }
-  70% { transform: scale(1.02); box-shadow: 0 0 0 4px rgba(255, 127, 80, 0); }
-  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 127, 80, 0); }
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(161, 124, 107, 0.4); }
+  70% { transform: scale(1.02); box-shadow: 0 0 0 4px rgba(161, 124, 107, 0); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(161, 124, 107, 0); }
 }
 .pulse-tag {
   animation: pulseSubtle 2s infinite;
@@ -198,5 +198,5 @@
 }
 .card-lift:hover {
   transform: translateY(-4px) scale(1.01);
-  box-shadow: 0 12px 30px rgba(164, 60, 18, 0.08);
+  box-shadow: 0 12px 30px rgba(60, 40, 30, 0.10);
 }

@@ -89,7 +89,7 @@ async function test(name, fn) {
 
 async function setup() {
   console.log('\n\x1b[1m\x1b[36m╔══════════════════════════════════════════════════╗\x1b[0m');
-  console.log('\x1b[1m\x1b[36m║      NovaCart API Test Suite                     ║\x1b[0m');
+  console.log('\x1b[1m\x1b[36m║      Life In Pieces API Test Suite                     ║\x1b[0m');
   console.log('\x1b[1m\x1b[36m╚══════════════════════════════════════════════════╝\x1b[0m\n');
 
   console.log('\x1b[1m\x1b[33m── Setting up authentication ──\x1b[0m');
@@ -645,10 +645,10 @@ async function runTests() {
   await test('PUT /api/settings/store — admin can update store settings', async () => {
     const res = await request('PUT', '/api/settings/store', {
       token: adminToken,
-      body: { name: 'NovaCart Updated', tagline: 'Updated tagline for testing' },
+      body: { name: 'Life In Pieces Updated', tagline: 'Updated tagline for testing' },
     });
     assert.strictEqual(res.status, 200);
-    assert.strictEqual(res.body.store.name, 'NovaCart Updated');
+    assert.strictEqual(res.body.store.name, 'Life In Pieces Updated');
   });
 
   // ══════════════════════════════════════════════════════════════════════════

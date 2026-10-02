@@ -717,7 +717,7 @@ GET /api/settings
 
 ```json
 {
-  "store": { "name": "NovaCart", "tagline": "..." },
+  "store": { "name": "Life In Pieces", "tagline": "..." },
   "payment": { "currency": "USD", "acceptCreditCards": true },
   "shipping": { "freeShippingThreshold": 50, "standardRate": 5.99 },
   "tax": { "enabled": true, "rate": 8 },

@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 const faqs = [
   { q: 'How do I track my order?', a: 'Go to My Account > Orders to view real-time tracking for all your orders. You\'ll also receive email and SMS updates at each stage.' },
   { q: 'What is your return policy?', a: 'We offer a 30-day return policy on most items. Products must be unused, in original packaging, with tags attached.' },
-  { q: 'How do I contact support?', a: 'You can reach us via live chat, email at support@novacart.com, or call 1-800-NOVA-CART (1-800-668-2278).' },
+  { q: 'How do I contact support?', a: 'You can reach us via live chat, email at support@lifeinpieces.com, or call 1-800-LIP-CART (1-800-668-2278).' },
   { q: 'Do you offer free shipping?', a: 'Yes! Free standard shipping on all orders over $50 within the continental United States.' },
   { q: 'How do I reset my password?', a: 'Click "Forgot Password" on the login page, enter your email, and follow the secure link sent to your inbox.' },
   { q: 'Can I cancel my order?', a: 'You can cancel within 1 hour of placing your order. After that, contact support for assistance.' },
@@ -34,8 +34,8 @@ const SupportPage = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-12">
         {[
           { icon: 'chat', title: 'Live Chat', desc: 'Chat with our support team in real-time', detail: 'Mon-Fri 9AM-6PM EST', action: 'Start Chat' },
-          { icon: 'mail', title: 'Email', desc: 'Send us a detailed message', detail: 'support@novacart.com', action: 'Send Email' },
-          { icon: 'call', title: 'Phone', desc: 'Speak directly with our team', detail: '1-800-NOVA-CART', action: 'Call Now' },
+          { icon: 'mail', title: 'Email', desc: 'Send us a detailed message', detail: 'support@lifeinpieces.com', action: 'Send Email' },
+          { icon: 'call', title: 'Phone', desc: 'Speak directly with our team', detail: '1-800-LIP-CART', action: 'Call Now' },
         ].map((option) => (
           <div key={option.title} className="bg-surface-container-lowest rounded-xl border border-surface-container/60 p-6 text-center hover:border-primary/40 hover:shadow-sm transition-all">
             <span className="material-symbols-outlined text-3xl text-primary mb-3 block">{option.icon}</span>
@@ -43,7 +43,7 @@ const SupportPage = () => {
             <p className="text-sm text-on-surface-variant mb-2">{option.desc}</p>
             <p className="text-sm font-medium text-primary mb-4">{option.detail}</p>
             {option.title === 'Email' ? (
-              <a href="mailto:support@novacart.com" className="inline-block px-5 py-2 rounded-lg text-sm font-medium border border-surface-container text-on-surface hover:bg-surface-container/40 transition-colors">
+              <a href="mailto:support@lifeinpieces.com" className="inline-block px-5 py-2 rounded-lg text-sm font-medium border border-surface-container text-on-surface hover:bg-surface-container/40 transition-colors">
                 {option.action}
               </a>
             ) : option.title === 'Phone' ? (

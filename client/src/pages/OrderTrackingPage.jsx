@@ -160,7 +160,7 @@ const OrderTrackingPage = () => {
                         </span>
                       </div>
                       <span className={`text-[11px] font-semibold mt-2 text-center ${
-                        isCurrent ? 'text-primary' : isActive ? 'text-green-600' : 'text-on-surface-variant/40'
+                        isCurrent ? 'text-primary' : isActive ? 'text-green-700' : 'text-on-surface-variant/40'
                       }`}>
                         {step.label}
                       </span>
@@ -199,7 +199,7 @@ const OrderTrackingPage = () => {
               <span className="material-symbols-outlined text-3xl text-red-500">cancel</span>
               <div>
                 <h3 className="text-base font-bold text-red-800">Order Cancelled</h3>
-                <p className="text-sm text-red-600 mt-0.5">{order.cancelReason || 'This order has been cancelled.'}</p>
+                <p className="text-sm text-red-700 mt-0.5">{order.cancelReason || 'This order has been cancelled.'}</p>
               </div>
             </div>
           </div>
@@ -248,7 +248,7 @@ const OrderTrackingPage = () => {
                 {/* Destination */}
                 <div className="flex flex-col items-center z-10">
                   <div className="w-12 h-12 rounded-full bg-green-50 flex items-center justify-center mb-2">
-                    <span className="material-symbols-outlined text-green-600">home</span>
+                    <span className="material-symbols-outlined text-green-700">home</span>
                   </div>
                   <span className="text-xs font-bold text-on-surface">{order.shippingDestination.city}</span>
                   <span className="text-[10px] text-on-surface-variant/50">{order.shippingDestination.state}</span>
@@ -369,7 +369,7 @@ const OrderTrackingPage = () => {
                   <span className={`material-symbols-outlined text-[16px] ${order.isPaid ? 'text-green-500' : 'text-amber-500'}`}>
                     {order.isPaid ? 'check_circle' : 'schedule'}
                   </span>
-                  <span className={order.isPaid ? 'text-green-600 font-semibold' : 'text-amber-600 font-semibold'}>
+                  <span className={order.isPaid ? 'text-green-700 font-semibold' : 'text-amber-700 font-semibold'}>
                     {order.isPaid ? 'Paid' : 'Pending'}
                   </span>
                   {order.paidAt && <span className="text-xs text-on-surface-variant/50">{formatDate(order.paidAt)}</span>}

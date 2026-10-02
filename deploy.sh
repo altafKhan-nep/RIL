@@ -1,6 +1,6 @@
 #!/bin/bash
 # =============================================
-# NovaCart VPS Deployment Script (Interserver)
+# Life In Pieces VPS Deployment Script (Interserver)
 # =============================================
 # Run this on your VPS after cloning the repo
 # Usage: bash deploy.sh
@@ -10,7 +10,7 @@ set -e
 APP_DIR="/var/www/novacart"
 NODE_VERSION="20"
 
-echo "🚀 NovaCart Deployment Starting..."
+echo "🚀 Life In Pieces Deployment Starting..."
 echo "=================================="
 
 # --- System update ---

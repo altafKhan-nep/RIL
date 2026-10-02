@@ -56,7 +56,7 @@ const CheckoutForm = ({ amount, onSuccess }) => {
         type="submit"
         disabled={!stripe || processing}
         className="w-full mt-5 py-3.5 rounded-xl font-bold text-white text-sm transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-        style={{ background: 'linear-gradient(135deg, #ff7f50, #e85d30)' }}
+        style={{ background: 'linear-gradient(135deg, #B08570, #a17c6b)' }}
       >
         {processing ? (
           <>
@@ -184,7 +184,7 @@ const CheckoutPage = () => {
         <button
           onClick={() => navigate('/shop')}
           className="px-8 py-3 rounded-xl font-bold text-white text-sm transition-all duration-300 hover:shadow-lg hover:scale-105"
-          style={{ background: 'linear-gradient(135deg, #ff7f50, #e85d30)' }}
+          style={{ background: 'linear-gradient(135deg, #B08570, #a17c6b)' }}
         >
           Continue Shopping
         </button>
@@ -227,7 +227,7 @@ const CheckoutPage = () => {
           {/* Left Column */}
           <div className="flex-1 min-w-0">
             {step === 1 && (
-              <div className="bg-white rounded-2xl shadow-sm border border-surface-container-high/50 overflow-hidden">
+              <div className="bg-surface-container rounded-2xl shadow-sm border border-surface-container-high/50 overflow-hidden">
                 <div className="px-6 py-5 border-b border-surface-container-high/50 bg-gradient-to-r from-surface to-surface-container-low">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
@@ -296,7 +296,7 @@ const CheckoutPage = () => {
                   )}
                   <button type="submit"
                     className="w-full mt-6 py-4 rounded-xl font-bold text-white text-sm tracking-wide transition-all duration-300 hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
-                    style={{ background: 'linear-gradient(135deg, #ff7f50, #e85d30)' }}>
+                    style={{ background: 'linear-gradient(135deg, #B08570, #a17c6b)' }}>
                     Continue to Payment
                     <span className="material-symbols-outlined text-xl">arrow_forward</span>
                   </button>
@@ -305,7 +305,7 @@ const CheckoutPage = () => {
             )}
 
             {step === 2 && (
-              <div className="bg-white rounded-2xl shadow-sm border border-surface-container-high/50 overflow-hidden">
+              <div className="bg-surface-container rounded-2xl shadow-sm border border-surface-container-high/50 overflow-hidden">
                 <div className="px-6 py-5 border-b border-surface-container-high/50 bg-gradient-to-r from-surface to-surface-container-low">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
@@ -376,7 +376,7 @@ const CheckoutPage = () => {
                       onClick={createPaymentIntent}
                       disabled={loadingIntent}
                       className="w-full py-4 rounded-xl font-bold text-white text-sm tracking-wide transition-all duration-300 hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mb-2"
-                      style={{ background: 'linear-gradient(135deg, #ff7f50, #e85d30)' }}>
+                      style={{ background: 'linear-gradient(135deg, #B08570, #a17c6b)' }}>
                       {loadingIntent ? (
                         <>
                           <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24" fill="none">
@@ -408,11 +408,11 @@ const CheckoutPage = () => {
                           appearance: {
                             theme: 'stripe',
                             variables: {
-                              colorPrimary: '#a43c12',
-                              colorBackground: '#ffffff',
-                              colorText: '#1b1c1a',
+                              colorPrimary: '#a17c6b',
+                              colorBackground: '#FFFFFF',
+                              colorText: '#1F1A16',
                               colorDanger: '#dc2626',
-                              fontFamily: 'Inter, system-ui, sans-serif',
+                              fontFamily: 'Poppins, system-ui, sans-serif',
                               borderRadius: '12px',
                             },
                           },
@@ -442,7 +442,7 @@ const CheckoutPage = () => {
                         onClick={handlePaymentSubmit}
                         disabled={placing}
                         className="flex-1 py-4 rounded-xl font-bold text-white text-sm tracking-wide transition-all duration-300 hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2"
-                        style={{ background: 'linear-gradient(135deg, #006a62, #00897b)' }}>
+                        style={{ background: 'linear-gradient(135deg, #B08570, #a17c6b)' }}>
                         {placing ? (
                           <>
                             <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24" fill="none">
@@ -467,7 +467,7 @@ const CheckoutPage = () => {
 
           {/* Order Summary */}
           <div className="w-full lg:w-[380px] shrink-0">
-            <div className="bg-white rounded-2xl shadow-sm border border-surface-container-high/50 overflow-hidden sticky top-24">
+            <div className="bg-surface-container rounded-2xl shadow-sm border border-surface-container-high/50 overflow-hidden sticky top-24">
               <div className="px-6 py-5 border-b border-surface-container-high/50 bg-gradient-to-r from-surface to-surface-container-low">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">

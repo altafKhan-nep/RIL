@@ -37,7 +37,7 @@ const helpTopics = [
   {
     icon: 'person',
     title: 'Account & Profile',
-    desc: 'Managing your NovaCart account.',
+    desc: 'Managing your Life In Pieces account.',
     links: [
       { label: 'How do I create an account?', text: 'Click "Sign Up" in the top right corner. Enter your email, create a password, and you\'re ready to start shopping. You can also check out as a guest.' },
       { label: 'How do I reset my password?', text: 'Click "Forgot Password" on the login page, enter your email, and follow the secure link sent to your inbox. The link expires after 24 hours.' },
@@ -59,11 +59,11 @@ const helpTopics = [
   {
     icon: 'help',
     title: 'General FAQ',
-    desc: 'Common questions about NovaCart.',
+    desc: 'Common questions about Life In Pieces.',
     links: [
-      { label: 'How do I contact customer support?', text: 'Reach us via live chat (bottom right corner), email at support@novacart.com, or call 1-800-NOVA-CART (1-800-668-2278). Our team is available Mon-Fri 9AM-6PM EST.' },
+      { label: 'How do I contact customer support?', text: 'Reach us via live chat (bottom right corner), email at support@lifeinpieces.com, or call 1-800-LIP-CART (1-800-668-2278). Our team is available Mon-Fri 9AM-6PM EST.' },
       { label: 'Do you have a size guide?', text: 'Yes! Each product page includes a detailed size guide. For clothing, we provide measurements in both inches and centimeters. Our fit recommendation tool helps you find your perfect size.' },
-      { label: 'Is NovaCart eco-friendly?', text: 'We\'re committed to sustainability. We use recycled packaging, offset 100% of shipping carbon emissions, and partner with eco-conscious brands. Our goal is zero-waste operations by 2030.' },
+      { label: 'Is Life In Pieces eco-friendly?', text: 'We\'re committed to sustainability. We use recycled packaging, offset 100% of shipping carbon emissions, and partner with eco-conscious brands. Our goal is zero-waste operations by 2030.' },
       { label: 'How do I unsubscribe from emails?', text: 'Click "Unsubscribe" at the bottom of any marketing email. Transactional emails (order confirmations, shipping updates) will still be sent as they\'re essential to your orders.' },
     ],
   },
@@ -137,11 +137,11 @@ const HelpPage = () => {
           <Link to="/support" className="btn-primary px-6 py-2.5 rounded-lg text-sm font-medium">
             Live Chat
           </Link>
-          <a href="mailto:support@novacart.com" className="px-6 py-2.5 rounded-lg text-sm font-medium border border-surface-container text-on-surface hover:bg-surface-container/40 transition-colors">
+          <a href="mailto:support@lifeinpieces.com" className="px-6 py-2.5 rounded-lg text-sm font-medium border border-surface-container text-on-surface hover:bg-surface-container/40 transition-colors">
             Email Us
           </a>
           <a href="tel:18006682278" className="px-6 py-2.5 rounded-lg text-sm font-medium border border-surface-container text-on-surface hover:bg-surface-container/40 transition-colors">
-            1-800-NOVA-CART
+            1-800-LIP-CART
           </a>
         </div>
       </div>

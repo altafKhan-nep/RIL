@@ -1,4 +1,4 @@
-# NovaCart Documentation
+# Life In Pieces Documentation
 
 > A production-ready, full-stack MERN e-commerce platform with CRM/Admin Dashboard.
 

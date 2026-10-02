@@ -1,7 +1,7 @@
 {
   "name": "novacart-server",
   "version": "1.0.0",
-  "description": "NovaCart backend API (Express + MongoDB)",
+  "description": "Life In Pieces backend API (Express + MongoDB)",
   "main": "server.js",
   "type": "commonjs",
   "scripts": {

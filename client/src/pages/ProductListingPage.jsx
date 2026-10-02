@@ -21,7 +21,7 @@ const SidebarBanners = () => {
           key={banner._id}
           href={banner.link || '/shop'}
           className="group rounded-2xl overflow-hidden border border-surface-container/50 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 hover:-translate-y-1"
-          style={{ background: banner.bgColor || '#fbf9f5' }}
+          style={{ background: banner.bgColor || '#F1EAE2' }}
         >
           {banner.image && (
             <div className="aspect-[4/3] overflow-hidden">
@@ -31,7 +31,7 @@ const SidebarBanners = () => {
           <div className="p-3">
             <h3 className="text-xs font-bold text-on-surface mb-0.5">{banner.title}</h3>
             {banner.subtitle && <p className="text-[11px] text-on-surface-variant">{banner.subtitle}</p>}
-            <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary mt-1.5 group-hover:gap-1.5 transition-all">
+            <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-on-surface mt-1.5 group-hover:gap-1.5 transition-all">
               {banner.ctaText || 'Shop Now'}
               <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />

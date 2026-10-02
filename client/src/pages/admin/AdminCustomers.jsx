@@ -7,7 +7,7 @@ const ROLE_STYLES = {
   admin: 'bg-blue-100 text-blue-800',
   content_manager: 'bg-teal-100 text-teal-800',
   order_manager: 'bg-amber-100 text-amber-800',
-  customer: 'bg-gray-100 text-gray-700',
+  customer: 'bg-surface-container-high text-on-surface',
 };
 
 const ROLE_LABELS = {
@@ -176,7 +176,7 @@ const CustomerProfilePanel = ({ customer, onClose, recentOrders, totalSpent }) =
               )}
               <span
                 className={`inline-block mt-1 text-xs font-bold px-2.5 py-1 rounded-full capitalize ${
-                  ROLE_STYLES[role] || 'bg-gray-100 text-gray-700'
+                  ROLE_STYLES[role] || 'bg-surface-container-high text-on-surface'
                 }`}
               >
                 {ROLE_LABELS[role] || role}
@@ -850,7 +850,7 @@ const AdminCustomers = () => {
                           <td className="py-3.5 px-3">
                             <span
                               className={`inline-block text-xs font-bold px-2.5 py-1 rounded-full capitalize ${
-                                ROLE_STYLES[role] || 'bg-gray-100 text-gray-700'
+                                ROLE_STYLES[role] || 'bg-surface-container-high text-on-surface'
                               }`}
                             >
                               {ROLE_LABELS[role] || role}

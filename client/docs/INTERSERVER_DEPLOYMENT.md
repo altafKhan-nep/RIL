@@ -1,6 +1,6 @@
-# NovaCart — Interserver VPS Deployment Guide
+# Life In Pieces — Interserver VPS Deployment Guide
 
-Step-by-step guide to deploy NovaCart on an Interserver VPS.
+Step-by-step guide to deploy Life In Pieces on an Interserver VPS.
 
 ---
 
@@ -225,7 +225,7 @@ Open your browser and go to:
 http://YOUR_VPS_IP
 ```
 
-You should see the NovaCart homepage.
+You should see the Life In Pieces homepage.
 
 ### Verify these work:
 

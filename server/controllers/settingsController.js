@@ -3,11 +3,11 @@ const asyncHandler = require('../utils/asyncHandler');
 
 const DEFAULT_SETTINGS = {
   store: {
-    name: 'NovaCart',
-    tagline: 'Discover Joy in Every Box',
+    name: 'Life In Pieces',
+    tagline: 'Thoughtfully Crafted, Piece by Piece',
     logo: '',
     favicon: '',
-    contactEmail: 'support@novacart.com',
+    contactEmail: 'support@lifeinpieces.com',
     phone: '',
     address: '',
   },
@@ -44,8 +44,8 @@ const DEFAULT_SETTINGS = {
     maxLoginAttempts: 5,
   },
   seo: {
-    metaTitle: 'NovaCart - Discover Joy in Every Box',
-    metaDescription: 'Shop vibrant fashion, quirky electronics, and home delights.',
+    metaTitle: 'Life In Pieces - Thoughtfully Crafted Furniture & Home Essentials',
+    metaDescription: 'Discover thoughtfully crafted furniture and home pieces from Life In Pieces - designed to bring warmth, quality and character to every room.',
     ogImage: '',
   },
 };

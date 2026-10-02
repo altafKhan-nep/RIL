@@ -83,12 +83,12 @@ const CategoryDrawer = ({ open, onClose }) => {
       {/* Panel */}
       <div
         ref={panelRef}
-        className={`fixed top-0 left-0 z-[70] h-full w-[320px] max-w-[85vw] bg-white shadow-[2px_0_24px_rgba(0,0,0,0.12)] transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] flex flex-col ${
+        className={`fixed top-0 left-0 z-[70] h-full w-[320px] max-w-[85vw] bg-surface shadow-[2px_0_24px_rgba(0,0,0,0.6)] transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] flex flex-col ${
           open ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
         {/* ─── Header ─── */}
-        <div className="relative bg-gradient-to-br from-primary via-primary to-primary/90 px-5 pt-5 pb-5 shrink-0">
+        <div className="relative bg-gradient-to-br from-[#422815] via-[#331E0F] to-[#331E0F] px-5 pt-5 pb-5 shrink-0">
           {/* Decorative circles */}
           <div className="absolute -top-8 -right-8 w-24 h-24 rounded-full bg-white/[0.06] pointer-events-none" />
           <div className="absolute -bottom-12 -left-6 w-20 h-20 rounded-full bg-white/[0.04] pointer-events-none" />
@@ -103,7 +103,7 @@ const CategoryDrawer = ({ open, onClose }) => {
                 </svg>
               </div>
               <div>
-                <span className="text-[15px] font-bold text-white block leading-tight tracking-tight">NovaCart</span>
+                <span className="text-[15px] font-bold text-white block leading-tight tracking-tight">Life In Pieces</span>
                 <span className="text-[10px] text-white/50 font-medium tracking-wide">Joyful Shopping</span>
               </div>
             </div>

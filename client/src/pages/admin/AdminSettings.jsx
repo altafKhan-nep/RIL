@@ -132,7 +132,7 @@ const AdminSettings = () => {
       <div className="space-y-5">
         <div>
           <label className="block text-sm font-semibold text-on-surface mb-1.5">Store Name *</label>
-          <input type="text" value={s.name || ''} onChange={(e) => set('store', 'name', e.target.value)} className={inputClass} placeholder="NovaCart" />
+          <input type="text" value={s.name || ''} onChange={(e) => set('store', 'name', e.target.value)} className={inputClass} placeholder="Life In Pieces" />
           {err('store.name')}
         </div>
         <div>
@@ -152,7 +152,7 @@ const AdminSettings = () => {
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-semibold text-on-surface mb-1.5">Contact Email</label>
-            <input type="email" value={s.contactEmail || ''} onChange={(e) => set('store', 'contactEmail', e.target.value)} className={inputClass} placeholder="support@novacart.com" />
+            <input type="email" value={s.contactEmail || ''} onChange={(e) => set('store', 'contactEmail', e.target.value)} className={inputClass} placeholder="support@lifeinpieces.com" />
             {err('store.contactEmail')}
           </div>
           <div>
@@ -293,12 +293,12 @@ const AdminSettings = () => {
       <div className="space-y-5">
         <div>
           <label className="block text-sm font-semibold text-on-surface mb-1.5">Meta Title</label>
-          <input type="text" value={s.metaTitle || ''} onChange={(e) => set('seo', 'metaTitle', e.target.value)} className={inputClass} placeholder="NovaCart - Shop the Best" />
+          <input type="text" value={s.metaTitle || ''} onChange={(e) => set('seo', 'metaTitle', e.target.value)} className={inputClass} placeholder="Life In Pieces - Shop the Best" />
           <p className="text-xs text-on-surface-variant mt-1">Recommended: 50-60 characters.</p>
         </div>
         <div>
           <label className="block text-sm font-semibold text-on-surface mb-1.5">Meta Description</label>
-          <textarea value={s.metaDescription || ''} onChange={(e) => set('seo', 'metaDescription', e.target.value)} rows={3} className={inputClass} placeholder="Shop the best products at NovaCart..." />
+          <textarea value={s.metaDescription || ''} onChange={(e) => set('seo', 'metaDescription', e.target.value)} rows={3} className={inputClass} placeholder="Shop the best products at Life In Pieces..." />
           <p className="text-xs text-on-surface-variant mt-1">Recommended: 150-160 characters.</p>
         </div>
         <div>

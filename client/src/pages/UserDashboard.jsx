@@ -101,10 +101,10 @@ const UserDashboard = () => {
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: 'Total Orders', value: orders.length, icon: 'shopping_bag', color: 'bg-blue-50 text-blue-600' },
-          { label: 'Total Spent', value: `$${totalSpent.toFixed(2)}`, icon: 'payments', color: 'bg-green-50 text-green-600' },
-          { label: 'Joy Points', value: user?.loyaltyPoints || 0, icon: 'emoji_events', color: 'bg-amber-50 text-amber-600' },
-          { label: 'Wishlist Items', value: wishlist.length, icon: 'favorite', color: 'bg-pink-50 text-pink-600' },
+          { label: 'Total Orders', value: orders.length, icon: 'shopping_bag', color: 'bg-blue-50 text-blue-700' },
+          { label: 'Total Spent', value: `$${totalSpent.toFixed(2)}`, icon: 'payments', color: 'bg-green-50 text-green-700' },
+          { label: 'Joy Points', value: user?.loyaltyPoints || 0, icon: 'emoji_events', color: 'bg-amber-50 text-amber-700' },
+          { label: 'Wishlist Items', value: wishlist.length, icon: 'favorite', color: 'bg-pink-50 text-pink-700' },
         ].map((stat) => (
           <div key={stat.label} className="bg-surface-container-low rounded-xl p-4 border border-surface-container/60">
             <div className={`w-10 h-10 rounded-lg ${stat.color} flex items-center justify-center mb-3`}>
@@ -175,7 +175,7 @@ const UserDashboard = () => {
                   <p className="text-xs text-on-surface-variant">{new Date(order.createdAt).toLocaleDateString()} • {order.orderItems?.length} item(s)</p>
                 </div>
                 <p className="text-sm font-bold text-on-surface">${order.totalPrice.toFixed(2)}</p>
-                <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${STATUS_COLORS[order.status] || 'bg-gray-100 text-gray-800'}`}>
+                <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${STATUS_COLORS[order.status] || 'bg-surface-container-high text-on-surface'}`}>
                   {order.status}
                 </span>
               </div>
@@ -214,7 +214,7 @@ const UserDashboard = () => {
                 <h3 className="text-lg font-bold text-on-surface">Order #{selectedOrder._id.toString().slice(-6).toUpperCase()}</h3>
                 <p className="text-sm text-on-surface-variant mt-1">Placed on {new Date(selectedOrder.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
               </div>
-              <span className={`text-sm font-semibold px-3 py-1.5 rounded-full ${STATUS_COLORS[selectedOrder.status] || 'bg-gray-100 text-gray-800'}`}>
+              <span className={`text-sm font-semibold px-3 py-1.5 rounded-full ${STATUS_COLORS[selectedOrder.status] || 'bg-surface-container-high text-on-surface'}`}>
                 {selectedOrder.status}
               </span>
             </div>
@@ -295,7 +295,7 @@ const UserDashboard = () => {
                     <p className="text-xs text-on-surface-variant">{order.orderItems?.length} item(s) • {new Date(order.createdAt).toLocaleDateString()}</p>
                   </div>
                   <p className="text-base font-bold text-on-surface">${order.totalPrice.toFixed(2)}</p>
-                  <span className={`text-xs font-semibold px-3 py-1.5 rounded-full ${STATUS_COLORS[order.status] || 'bg-gray-100 text-gray-800'}`}>
+                  <span className={`text-xs font-semibold px-3 py-1.5 rounded-full ${STATUS_COLORS[order.status] || 'bg-surface-container-high text-on-surface'}`}>
                     {order.status}
                   </span>
                 </div>

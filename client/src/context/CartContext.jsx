@@ -55,7 +55,7 @@ const cartReducer = (state, action) => {
 const DEFAULT_SETTINGS = {
   shipping: { freeShippingThreshold: 50, standardRate: 5.99, expressRate: 12.99, enableLocalDelivery: true, localDeliveryRate: 3.99 },
   tax: { enabled: true, rate: 8, includeInPrice: false },
-  store: { storeName: 'NovaCart', currency: 'USD', currencySymbol: '$' },
+  store: { storeName: 'Life In Pieces', currency: 'USD', currencySymbol: '$' },
 };
 
 export const CartProvider = ({ children }) => {

@@ -77,11 +77,11 @@ export const getStatusColor = (status) => {
     shipped: 'bg-purple-100 text-purple-700',
     delivered: 'bg-green-100 text-green-700',
     cancelled: 'bg-red-100 text-red-700',
-    refunded: 'bg-gray-100 text-gray-700',
+    refunded: 'bg-surface-container-high text-on-surface',
     paid: 'bg-green-100 text-green-700',
     unpaid: 'bg-red-100 text-red-700',
   };
-  return map[status?.toLowerCase()] || 'bg-gray-100 text-gray-700';
+  return map[status?.toLowerCase()] || 'bg-surface-container-high text-on-surface';
 };
 
 export const timeAgo = (date) => {

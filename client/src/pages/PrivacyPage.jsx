@@ -1,7 +1,7 @@
 const sections = [
   {
     title: 'Information We Collect',
-    content: `When you visit NovaCart, we collect certain information about your device, your interaction with our site, and information necessary to process your purchases. We may also collect additional information if you contact us for customer support.
+    content: `When you visit Life In Pieces, we collect certain information about your device, your interaction with our site, and information necessary to process your purchases. We may also collect additional information if you contact us for customer support.
 
 **Personal Information We Collect:**
 - Name, email address, phone number, and shipping/billing address
@@ -76,7 +76,7 @@ While we take every reasonable precaution, no method of transmission or storage 
 - **Restrict** processing of your personal data
 - **Data portability:** Receive your data in a structured, machine-readable format
 
-To exercise any of these rights, contact us at privacy@novacart.com. We will respond to your request within 30 days.`,
+To exercise any of these rights, contact us at privacy@lifeinpieces.com. We will respond to your request within 30 days.`,
   },
   {
     title: 'Data Retention',
@@ -89,13 +89,13 @@ To exercise any of these rights, contact us at privacy@novacart.com. We will res
   },
   {
     title: 'Children\'s Privacy',
-    content: `NovaCart is not intended for individuals under the age of 13. We do not knowingly collect personal information from children. If we become aware that we have collected data from a child under 13, we will take steps to delete it promptly.
+    content: `Life In Pieces is not intended for individuals under the age of 13. We do not knowingly collect personal information from children. If we become aware that we have collected data from a child under 13, we will take steps to delete it promptly.
 
-If you are a parent or guardian and believe your child has provided us with personal information, please contact us at privacy@novacart.com.`,
+If you are a parent or guardian and believe your child has provided us with personal information, please contact us at privacy@lifeinpieces.com.`,
   },
   {
     title: 'International Users',
-    content: `NovaCart is operated from the United States. If you are accessing our services from outside the US, please be aware that your information may be transferred to, stored, and processed in the US where our servers are located.
+    content: `Life In Pieces is operated from the United States. If you are accessing our services from outside the US, please be aware that your information may be transferred to, stored, and processed in the US where our servers are located.
 
 By using our services, you consent to the transfer of your information to the US and the application of US law governing the use and disclosure of your information.`,
   },
@@ -109,9 +109,9 @@ We encourage you to review this policy periodically. Continued use of our servic
     title: 'Contact Us',
     content: `If you have any questions about this Privacy Policy or our data practices, please contact us:
 
-**Email:** privacy@novacart.com
-**Mail:** NovaCart Privacy Team, 250 Brannan Street, Suite 500, San Francisco, CA 94107
-**Phone:** 1-800-NOVA-CART (1-800-668-2278)`,
+**Email:** privacy@lifeinpieces.com
+**Mail:** Life In Pieces Privacy Team, 250 Brannan Street, Suite 500, San Francisco, CA 94107
+**Phone:** 1-800-LIP-CART (1-800-668-2278)`,
   },
 ];
 
@@ -126,7 +126,7 @@ const PrivacyPage = () => {
           Last Updated: September 8, 2026
         </p>
         <p className="text-on-surface-variant max-w-2xl mx-auto leading-relaxed mt-4">
-          At NovaCart, your privacy is fundamental to us. This policy explains how we collect, use, and protect your personal information when you use our website and services.
+          At Life In Pieces, your privacy is fundamental to us. This policy explains how we collect, use, and protect your personal information when you use our website and services.
         </p>
       </div>
 
@@ -178,7 +178,7 @@ const PrivacyPage = () => {
       <div className="mt-12 bg-surface-container-lowest rounded-xl border border-surface-container/60 p-6 text-center">
         <p className="text-sm text-on-surface-variant">
           If you have any questions about this policy, please{' '}
-          <a href="mailto:privacy@novacart.com" className="text-primary hover:underline">contact our privacy team</a>.
+          <a href="mailto:privacy@lifeinpieces.com" className="text-primary hover:underline">contact our privacy team</a>.
         </p>
       </div>
     </main>

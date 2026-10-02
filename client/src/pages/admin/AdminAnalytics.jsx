@@ -94,7 +94,7 @@ const TrendBadge = ({ value, label }) => {
   const isPositive = value > 0;
   const isZero = value === 0;
   return (
-    <span className={`inline-flex items-center gap-0.5 text-xs font-semibold px-1.5 py-0.5 rounded-full ${isZero ? 'bg-gray-100 text-gray-500' : isPositive ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'}`}>
+    <span className={`inline-flex items-center gap-0.5 text-xs font-semibold px-1.5 py-0.5 rounded-full ${isZero ? 'bg-surface-container-high text-on-surface-variant' : isPositive ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'}`}>
       <span className="material-symbols-outlined text-[14px]" style={{ fontVariationSettings: "'FILL' 1" }}>
         {isZero ? 'remove' : isPositive ? 'trending_up' : 'trending_down'}
       </span>
@@ -103,7 +103,7 @@ const TrendBadge = ({ value, label }) => {
   );
 };
 
-const AreaChart = ({ data, valueKey, labelKey, height = 280, color = '#a43c12', secondaryData, secondaryColor, secondaryLabel }) => {
+const AreaChart = ({ data, valueKey, labelKey, height = 280, color = '#a17c6b', secondaryData, secondaryColor, secondaryLabel }) => {
   const [hoveredIdx, setHoveredIdx] = useState(null);
   if (!data || data.length === 0) {
     return (
@@ -428,7 +428,7 @@ const AdminAnalytics = () => {
           <div className="bg-surface-container-lowest rounded-2xl p-4 shadow-sm border border-surface-container hover:shadow-md transition-shadow">
             <div className="flex items-center gap-2 mb-2">
               <div className="w-8 h-8 rounded-xl bg-blue-50 flex items-center justify-center">
-                <span className="material-symbols-outlined text-blue-600 text-lg">shopping_cart</span>
+                <span className="material-symbols-outlined text-blue-700 text-lg">shopping_cart</span>
               </div>
               <span className="text-xs text-on-surface-variant font-medium">Orders</span>
             </div>
@@ -438,7 +438,7 @@ const AdminAnalytics = () => {
           <div className="bg-surface-container-lowest rounded-2xl p-4 shadow-sm border border-surface-container hover:shadow-md transition-shadow">
             <div className="flex items-center gap-2 mb-2">
               <div className="w-8 h-8 rounded-xl bg-emerald-50 flex items-center justify-center">
-                <span className="material-symbols-outlined text-emerald-600 text-lg">people</span>
+                <span className="material-symbols-outlined text-emerald-700 text-lg">people</span>
               </div>
               <span className="text-xs text-on-surface-variant font-medium">Customers</span>
             </div>
@@ -448,7 +448,7 @@ const AdminAnalytics = () => {
           <div className="bg-surface-container-lowest rounded-2xl p-4 shadow-sm border border-surface-container hover:shadow-md transition-shadow">
             <div className="flex items-center gap-2 mb-2">
               <div className="w-8 h-8 rounded-xl bg-amber-50 flex items-center justify-center">
-                <span className="material-symbols-outlined text-amber-600 text-lg">receipt_long</span>
+                <span className="material-symbols-outlined text-amber-700 text-lg">receipt_long</span>
               </div>
               <span className="text-xs text-on-surface-variant font-medium">Avg Order</span>
             </div>
@@ -458,7 +458,7 @@ const AdminAnalytics = () => {
           <div className="bg-surface-container-lowest rounded-2xl p-4 shadow-sm border border-surface-container hover:shadow-md transition-shadow">
             <div className="flex items-center gap-2 mb-2">
               <div className="w-8 h-8 rounded-xl bg-red-50 flex items-center justify-center">
-                <span className="material-symbols-outlined text-red-600 text-lg">inventory_2</span>
+                <span className="material-symbols-outlined text-red-700 text-lg">inventory_2</span>
               </div>
               <span className="text-xs text-on-surface-variant font-medium">Low Stock</span>
             </div>
@@ -473,9 +473,9 @@ const AdminAnalytics = () => {
           valueKey="total"
           labelKey="month"
           height={280}
-          color="#a43c12"
+          color="#a17c6b"
           secondaryData={chartCustomerData.length > 0 ? chartCustomerData : null}
-          secondaryColor="#006a62"
+          secondaryColor="#6B8FD4"
           secondaryLabel="New Customers"
         />
 
@@ -491,7 +491,7 @@ const AdminAnalytics = () => {
                   const revenue = cat.revenue || 0;
                   const units = cat.unitsSold || 0;
                   const width = Math.max((revenue / topCategoriesMaxRevenue) * 100, 5);
-                  const colors = ['#a43c12', '#006a62', '#ffe16d', '#f59e0b', '#10b981', '#8b5cf6'];
+                  const colors = ['#a17c6b', '#6B8FD4', '#E8CE7A', '#C08A4A', '#10b981', '#8b5cf6'];
                   return (
                     <div key={cat._id || i}>
                       <div className="flex items-center gap-3 mb-1.5">
@@ -594,7 +594,7 @@ const AdminAnalytics = () => {
                   </div>
                   <div className="text-right shrink-0">
                     <p className="text-sm font-bold text-on-surface">${(order.totalPrice || 0).toFixed(2)}</p>
-                    <span className={`inline-block text-[9px] font-bold px-1.5 py-0.5 rounded-full ${STATUS_BG[order.status] || 'bg-gray-100 text-gray-600'}`}>
+                    <span className={`inline-block text-[9px] font-bold px-1.5 py-0.5 rounded-full ${STATUS_BG[order.status] || 'bg-surface-container-high text-on-surface-variant'}`}>
                       {order.status}
                     </span>
                   </div>
