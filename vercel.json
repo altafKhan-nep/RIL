@@ -1,21 +1,16 @@
 {
   "rewrites": [
     {
+      "source": "/uploads/:path*",
+      "destination": "https://ril-q344.onrender.com/uploads/:path*"
+    },
+    {
       "source": "/api/:path*",
-      "destination": "https://novacart-api-j9um.onrender.com/api/:path*"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/api/:path*",
-      "dest": "https://novacart-api-j9um.onrender.com/api/:path*"
+      "destination": "https://ril-q344.onrender.com/api/:path*"
     },
     {
-      "handle": "filesystem"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
+      "source": "/((?!assets/|_next/|favicon\\.ico|vite\\.svg).*)",
+      "destination": "/index.html"
     }
   ]
 }

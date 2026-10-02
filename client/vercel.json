@@ -1,8 +1,12 @@
 {
   "rewrites": [
     {
+      "source": "/uploads/:path*",
+      "destination": "https://ril-q344.onrender.com/uploads/:path*"
+    },
+    {
       "source": "/api/:path*",
-      "destination": "https://novacart-api-j9um.onrender.com/api/:path*"
+      "destination": "https://ril-q344.onrender.com/api/:path*"
     },
     {
       "source": "/((?!assets/|_next/|favicon\\.ico|vite\\.svg).*)",
