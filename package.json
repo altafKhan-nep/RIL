@@ -1,0 +1,20 @@
+{
+  "name": "novacart",
+  "version": "1.0.0",
+  "description": "NovaCart - A vibrant full-stack MERN e-commerce app built with the 'Vibrant Joy' design system",
+  "private": true,
+  "scripts": {
+    "install-all": "npm --prefix server install && npm --prefix client install",
+    "dev": "concurrently \"npm --prefix server run dev\" \"npm --prefix client run dev\"",
+    "server": "npm --prefix server run dev",
+    "client": "npm --prefix client run dev",
+    "seed": "npm --prefix server run seed",
+    "build": "npm --prefix client run build",
+    "build:prod": "NODE_ENV=production npm --prefix client run build",
+    "start": "NODE_ENV=production node server/server.js",
+    "prod": "npm run build:prod && npm start"
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.0"
+  }
+}

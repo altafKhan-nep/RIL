@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://novacart-api-j9um.onrender.com/api/:path*"
+    },
+    {
+      "source": "/((?!assets/|_next/|favicon\\.ico|vite\\.svg).*)",
+      "destination": "/index.html"
+    }
+  ]
+}
