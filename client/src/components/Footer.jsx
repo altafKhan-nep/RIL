@@ -73,13 +73,13 @@ const Footer = () => {
             {/* Brand */}
             <div className="md:col-span-1">
               <Link to="/" className="flex items-center gap-2.5 mb-3">
-                <span className="bg-[#F9F4ED] rounded-xl p-1 shrink-0">
+                <span className="bg-[#F9F4ED] rounded-xl p-0.5 shrink-0">
                   <img
                     src="/logo_lip.png"
                     alt="Life In Pieces"
                     width={500}
                     height={500}
-                    className="h-10 w-auto object-contain block"
+                    className="h-14 w-auto object-contain block"
                   />
                 </span>
                 <span className="font-serif text-xl font-semibold text-white">Life In Pieces</span>
