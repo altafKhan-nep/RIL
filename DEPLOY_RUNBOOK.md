@@ -74,6 +74,45 @@ going live, or use `resetAdmin.js` instead.
 
 ---
 
+## Step 1c — Populate the catalog (the CRM is empty until you do)
+
+Production has **0 products and 0 categories**, so the storefront and the admin
+dashboard show nothing. That is empty data, not a bug.
+
+> **Do not run `npm run seed` against production.** `server/seed/seed.js` calls
+> `deleteMany()` on users, orders and settings — it would delete your admin
+> accounts and branding — and then inserts 112 unrelated electronics/fashion
+> demo products.
+
+Instead, import only the catalog. This never touches users, orders or settings,
+and upserts by slug so it is safe to re-run:
+
+```bash
+cd server
+# 1. Preview (writes nothing)
+MONGO_URI="mongodb+srv://…" node scripts/importCatalog.js \
+  --file catalog-export.json --dry-run
+
+# 2. Import
+MONGO_URI="mongodb+srv://…" node scripts/importCatalog.js --file catalog-export.json
+```
+
+`catalog-export.json` holds your 9 real Life In Pieces products and 9 categories
+with pricing, descriptions and the `/uploads/*.avif` image paths. Add
+`--replace` to overwrite existing documents.
+
+**Verify:**
+```bash
+curl -s "https://ril-q344.onrender.com/api/products?pageSize=100" | head -c 200
+curl -s "https://ril-q344.onrender.com/api/categories/public"  | head -c 200
+```
+
+Product images are served from the deployed client, so make sure the `.avif`
+files are committed under `client/public/uploads/` (they are) and that the
+frontend has been redeployed.
+
+---
+
 ## Step 2 — Update the Atlas settings document (blocks the rebrand)
 
 **Why:** The database still holds the old brand. The frontend says

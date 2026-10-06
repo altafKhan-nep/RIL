@@ -1,0 +1,344 @@
+{
+  "_comment": "Life In Pieces catalog export. Import with scripts/importCatalog.js. Safe to re-run (upserts by slug).",
+  "generatedAt": "2026-10-06T17:02:04.017Z",
+  "categories": [
+    {
+      "name": "Estate Dining Table",
+      "slug": "estate-dining-table",
+      "description": "Hand-built dining table with mortise-and-tenon joinery, refined edge profiles, and a durable multi-stage finish. Choose length, wood species, and stain to match your dining room.",
+      "image": "/uploads/estate-dining-table.avif",
+      "icon": "category",
+      "order": 0,
+      "isActive": true
+    },
+    {
+      "name": "Reach-In Closet System",
+      "slug": "reach-in-closet-system",
+      "description": "A full-height reach-in closet system with adjustable shelving, hanging rods, and pull-out storage. Built to the opening for a flush, built-in appearance.",
+      "image": "/uploads/reach-in-closet-system.avif",
+      "icon": "category",
+      "order": 0,
+      "isActive": true
+    },
+    {
+      "name": "Live-Edge Dining Table",
+      "slug": "live-edge-dining-table",
+      "description": "A sculptural live-edge slab table balanced with engineered steel or hardwood bases. Each slab is hand-selected for grain, moisture content, and unique edge personality.",
+      "image": "/uploads/live-edge-dining-table.avif",
+      "icon": "category",
+      "order": 1,
+      "isActive": true
+    },
+    {
+      "name": "Heirloom Kitchen Cabinets",
+      "slug": "heirloom-kitchen-cabinets",
+      "description": "Architectural kitchen cabinets engineered for Maryland homes — inset or overlay doors, premium hardwoods, and a signature multi-layer finish built for daily use.",
+      "image": "/uploads/heirloom-kitchen-cabinets.avif",
+      "icon": "category",
+      "order": 2,
+      "isActive": true
+    },
+    {
+      "name": "Signature Kitchen Island",
+      "slug": "signature-kitchen-island",
+      "description": "A centerpiece island with integrated storage, optional seating overhang, and hardware selections that complement your cabinetry suite.",
+      "image": "/uploads/signature-kitchen-island.avif",
+      "icon": "category",
+      "order": 3,
+      "isActive": true
+    },
+    {
+      "name": "Custom Dining Bench",
+      "slug": "custom-dining-bench",
+      "description": "A companion dining bench with the same species, finish, and detailing as your table for a cohesive dining set.",
+      "image": "/uploads/custom-dining-bench.avif",
+      "icon": "category",
+      "order": 4,
+      "isActive": true
+    },
+    {
+      "name": "Commercial Reception Desk",
+      "slug": "commercial-reception-desk",
+      "description": "A commercial-grade reception desk with ADA-conscious transaction tops, cable management, and finish options aligned to your brand environment.",
+      "image": "/uploads/commercial-reception-desk.avif",
+      "icon": "category",
+      "order": 5,
+      "isActive": true
+    },
+    {
+      "name": "Boutique Walk-In Closet",
+      "slug": "boutique-walk-in-closet",
+      "description": "Floor-to-ceiling closet millwork designed around your wardrobe. Soft-close hardware, adjustable shelving, and optional LED lighting for a boutique dressing experience.",
+      "image": "/uploads/boutique-walk-in-closet.avif",
+      "icon": "category",
+      "order": 6,
+      "isActive": true
+    },
+    {
+      "name": "Architectural Fireplace Mantel",
+      "slug": "architectural-fireplace-mantel",
+      "description": "A fireplace mantel crafted to your proportions — from clean contemporary shelves to layered traditional surrounds with matching overmantel options.",
+      "image": "/uploads/architectural-fireplace-mantel.avif",
+      "icon": "category",
+      "order": 7,
+      "isActive": true
+    }
+  ],
+  "products": [
+    {
+      "name": "Architectural Fireplace Mantel",
+      "slug": "architectural-fireplace-mantel",
+      "description": "A fireplace mantel crafted to your proportions — from clean contemporary shelves to layered traditional surrounds with matching overmantel options.",
+      "price": 2100,
+      "originalPrice": 0,
+      "category": "Architectural Fireplace Mantel",
+      "images": [
+        "/uploads/architectural-fireplace-mantel-product.avif"
+      ],
+      "countInStock": 0,
+      "status": "active",
+      "features": [
+        "Walnut · White Oak · Cherry",
+        "Site measured to firebox",
+        "Natural · Paint grade",
+        "6–10 weeks"
+      ],
+      "colors": [],
+      "badge": "",
+      "isFeatured": false,
+      "isBestseller": false,
+      "isFlashDeal": false,
+      "isNewArrival": true,
+      "rating": 0,
+      "numReviews": 0
+    },
+    {
+      "name": "Boutique Walk-In Closet",
+      "slug": "boutique-walk-in-closet",
+      "description": "Floor-to-ceiling closet millwork designed around your wardrobe. Soft-close hardware, adjustable shelving, and optional LED lighting for a boutique dressing experience.",
+      "price": 8900,
+      "originalPrice": 0,
+      "category": "Boutique Walk-In Closet",
+      "images": [
+        "/uploads/boutique-walk-in-closet.avif"
+      ],
+      "countInStock": 1,
+      "status": "active",
+      "features": [
+        "White Oak · Maple",
+        "Built to room — site measured",
+        "Clear satin · Custom stain match",
+        "12–18 weeks"
+      ],
+      "colors": [],
+      "badge": "",
+      "isFeatured": false,
+      "isBestseller": false,
+      "isFlashDeal": false,
+      "isNewArrival": true,
+      "rating": 0,
+      "numReviews": 0
+    },
+    {
+      "name": "Commercial Reception Desk",
+      "slug": "commercial-reception-desk",
+      "description": "A commercial-grade reception desk with ADA-conscious transaction tops, cable management, and finish options aligned to your brand environment.",
+      "price": 7800.11,
+      "originalPrice": 0,
+      "category": "Commercial Reception Desk",
+      "images": [
+        "/uploads/commercial-reception-desk-product.avif"
+      ],
+      "countInStock": 1,
+      "status": "active",
+      "features": [
+        "Walnut · White Oak · Laminate accents",
+        "Custom footprint for lobby flow",
+        "Architectural lacquer · Brand color match",
+        "12–18 weeks"
+      ],
+      "colors": [],
+      "badge": "",
+      "isFeatured": false,
+      "isBestseller": false,
+      "isFlashDeal": false,
+      "isNewArrival": true,
+      "rating": 0,
+      "numReviews": 0
+    },
+    {
+      "name": "Custom Dining Bench",
+      "slug": "custom-dining-bench",
+      "description": "A companion dining bench with the same species, finish, and detailing as your table for a cohesive dining set.",
+      "price": 1600,
+      "originalPrice": 0,
+      "category": "Custom Dining Bench",
+      "images": [
+        "/uploads/custom-dining-bench-product.avif"
+      ],
+      "countInStock": 1,
+      "status": "active",
+      "features": [
+        "Black Walnut · White Oak",
+        "Matched to table length",
+        "Matched to table",
+        "6–10 weeks"
+      ],
+      "colors": [],
+      "badge": "",
+      "isFeatured": false,
+      "isBestseller": false,
+      "isFlashDeal": false,
+      "isNewArrival": false,
+      "rating": 0,
+      "numReviews": 0
+    },
+    {
+      "name": "Estate Dining Table",
+      "slug": "estate-dining-table",
+      "description": "Hand-built dining table with mortise-and-tenon joinery, refined edge profiles, and a durable multi-stage finish. Choose length, wood species, and stain to match your dining room.",
+      "price": 4200,
+      "originalPrice": 0,
+      "category": "Estate Dining Table",
+      "images": [
+        "/uploads/estate-dining-table-product.avif"
+      ],
+      "countInStock": 1,
+      "status": "active",
+      "features": [
+        "Black Walnut · White Oak",
+        "Custom — typically 84–120&quot; L × 40–48&quot; W",
+        "Hand-rubbed oil · Satin catalyzed lacquer",
+        "10–14 weeks"
+      ],
+      "colors": [
+        "#8B4513"
+      ],
+      "badge": "",
+      "isFeatured": false,
+      "isBestseller": false,
+      "isFlashDeal": false,
+      "isNewArrival": true,
+      "rating": 0,
+      "numReviews": 0
+    },
+    {
+      "name": "Heirloom Kitchen Cabinets",
+      "slug": "heirloom-kitchen-cabinets",
+      "description": "Architectural kitchen cabinets engineered for Maryland homes — inset or overlay doors, premium hardwoods, and a signature multi-layer finish built for daily use.",
+      "price": 18499.82,
+      "originalPrice": 0,
+      "category": "Heirloom Kitchen Cabinets",
+      "images": [
+        "/uploads/heirloom-kitchen-cabinets-product.avif"
+      ],
+      "countInStock": 1,
+      "status": "active",
+      "features": [
+        "White Oak · Walnut · Paint-grade",
+        "Full kitchen — engineered from site drawings",
+        "7-stage hand finish · Custom color match",
+        "16–22 weeks"
+      ],
+      "colors": [
+        "#FFFFFF"
+      ],
+      "badge": "",
+      "isFeatured": false,
+      "isBestseller": false,
+      "isFlashDeal": false,
+      "isNewArrival": true,
+      "rating": 0,
+      "numReviews": 0
+    },
+    {
+      "name": "Live-Edge Dining Table",
+      "slug": "live-edge-dining-table",
+      "description": "A sculptural live-edge slab table balanced with engineered steel or hardwood bases. Each slab is hand-selected for grain, moisture content, and unique edge personality.",
+      "price": 5600,
+      "originalPrice": 0,
+      "category": "Live-Edge Dining Table",
+      "images": [
+        "/uploads/live-edge-dining-table.avif"
+      ],
+      "countInStock": 1,
+      "status": "active",
+      "features": [
+        "Walnut Slab · Steel",
+        "Slab-dependent — typically 8–12 ft length",
+        "Natural oil · Matte conversion varnish",
+        "12–16 weeks"
+      ],
+      "colors": [
+        "#8B4513",
+        "#000000"
+      ],
+      "badge": "",
+      "isFeatured": false,
+      "isBestseller": false,
+      "isFlashDeal": false,
+      "isNewArrival": true,
+      "rating": 0,
+      "numReviews": 0
+    },
+    {
+      "name": "Reach-In Closet System",
+      "slug": "reach-in-closet-system",
+      "description": "A full-height reach-in closet system with adjustable shelving, hanging rods, and pull-out storage. Built to the opening for a flush, built-in appearance.",
+      "price": 7400,
+      "originalPrice": 0,
+      "category": "Reach-In Closet System",
+      "images": [
+        "/uploads/reach-in-closet-system-product.avif"
+      ],
+      "countInStock": 2,
+      "status": "active",
+      "features": [
+        "Adjustable 32mm shelving on 32mm holes",
+        "Double hanging + top shelf",
+        "Soft-close doors, site-tempered",
+        "10-14 weeks"
+      ],
+      "colors": [
+        "#F5F5F4",
+        "#8B4513"
+      ],
+      "badge": "",
+      "isFeatured": false,
+      "isBestseller": false,
+      "isFlashDeal": false,
+      "isNewArrival": true,
+      "rating": 0,
+      "numReviews": 0
+    },
+    {
+      "name": "Signature Kitchen Island",
+      "slug": "signature-kitchen-island",
+      "description": "A centerpiece island with integrated storage, optional seating overhang, and hardware selections that complement your cabinetry suite.",
+      "price": 6800,
+      "originalPrice": 0,
+      "category": "Signature Kitchen Island",
+      "images": [
+        "/uploads/signature-kitchen-island-product.avif"
+      ],
+      "countInStock": 1,
+      "status": "active",
+      "features": [
+        "Walnut · White Oak",
+        "Custom — typically 84–108&quot; L",
+        "Oil · Satin lacquer",
+        "10–14 weeks"
+      ],
+      "colors": [
+        "#FFFFFF"
+      ],
+      "badge": "",
+      "isFeatured": false,
+      "isBestseller": false,
+      "isFlashDeal": false,
+      "isNewArrival": false,
+      "rating": 0,
+      "numReviews": 0
+    }
+  ]
+}
