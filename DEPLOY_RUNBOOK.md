@@ -149,25 +149,7 @@ loads. The app logs a warning on boot when `UPLOAD_DIR` is unset in production.
 
 ---
 
-## Step 5 — Stripe (only if you want real card payments)
-
-Without this, checkout is COD-only.
-
-1. Stripe Dashboard → **Developers → API keys**.
-2. Render environment:
-   - `STRIPE_SECRET_KEY` = `sk_live_…` (or `sk_test_…`)
-   - `STRIPE_WEBHOOK_SECRET` = from the webhook endpoint you create
-3. Create a webhook endpoint pointing at
-   `https://ril-q344.onrender.com/api/payments/webhook` for these events:
-   - `payment_intent.succeeded`
-   - `charge.refunded`
-
-> The webhook endpoint is only reachable over the public URL. Localhost will not
-> receive events; use `stripe listen --forward-to` for local testing.
-
----
-
-## Step 5b — Stripe card payments (optional; COD works without it)
+## Step 5 — Stripe card payments (optional; COD works without it)
 
 Card payments are **entirely configuration-driven**. Paste three values into
 Render and the feature turns on — there is no code change and **no frontend
