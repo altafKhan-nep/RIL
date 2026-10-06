@@ -1,20 +1,20 @@
 {
-  "generatedAt": "2026-10-06T15:29:36.831Z",
-  "commitAudited": "uncommitted working tree (QA remediation on top of 36778a9)",
+  "generatedAt": "2026-10-06T15:47:24.519Z",
+  "commitAudited": "uncommitted working tree (session cookie auth + production readiness, on top of c7d6f76)",
   "target": "Life In Pieces storefront (formerly NovaCart)",
   "environment": {
     "api": "node server (isolated QA run)",
     "database": "mongodb://localhost:27017/novacart_qa",
-    "note": "Never touches production Atlas. Server booted with NODE_ENV=test, dedicated JWT secret and raised rate limits."
+    "note": "Never touches production Atlas. NODE_ENV=test, dedicated JWT secret, raised rate limits."
   },
   "totals": {
-    "suites": 12,
-    "tests": 92,
-    "passed": 92,
+    "suites": 13,
+    "tests": 104,
+    "passed": 104,
     "failed": 0,
     "passRate": 100
   },
-  "determinism": "92/92 on 3 consecutive consecutive runs (this report reflects run N of the final sequence).",
+  "determinism": "104/104 on three consecutive runs; client production build clean.",
   "suites": [
     {
       "name": "Smoke & Baseline",
@@ -47,6 +47,24 @@
         "Deactivated account cannot log in",
         "Protected route without token returns 401",
         "Protected route with garbage token returns 401"
+      ]
+    },
+    {
+      "name": "Cookie Session Auth (httpOnly)",
+      "count": 12,
+      "tests": [
+        "Login sets an httpOnly session cookie",
+        "Protected route accepts the cookie with no Authorization header",
+        "Protected route rejects a request with no cookie and no bearer",
+        "Bearer tokens still work for API clients",
+        "Logout clears the cookie and blocks further cookie auth",
+        "Refresh re-issues a usable cookie without exposing it to JS",
+        "Password change replaces the cookie and revokes the old token",
+        "Registration sets a session cookie too",
+        "Cookie auth honours permissions like bearer auth",
+        "Disabled user with a valid cookie is rejected",
+        "A tampered cookie value is rejected",
+        "No endpoint ever returns the token inside a readable cookie"
       ]
     },
     {
@@ -182,54 +200,51 @@
     }
   ],
   "notExecuted": [
-    "Real Stripe API calls (PaymentIntent create/confirm) and live dashboard refund - no real credentials available",
-    "Full browser-driven UI E2E (no headless browser tooling configured in this environment)",
-    "Production Atlas / Render / Vercel verification (no production credentials, JWT_SECRET missing on Render)",
-    "Durable upload persistence across Render redeploys (object storage not configured)",
+    "Real Stripe API calls (PaymentIntent create/confirm) and live dashboard refunds - no real credentials",
+    "Full browser-driven UI E2E (no headless browser tooling configured)",
+    "Production Atlas / Render / Vercel verification (no production credentials available in this environment)",
+    "Live migration of colliding product/category image paths (script delivered and dry-run tested against a fixture, but not run against Atlas)",
+    "Durable upload persistence on Render (no production host available)",
     "Mobile/responsive visual regression and Lighthouse performance budgets"
   ],
   "knownBlockers": [
     {
       "severity": "BLOCKER",
-      "area": "Production auth",
-      "issue": "Render service has no JWT_SECRET; admin login fails with \"secretOrPrivateKey must have a value\".",
-      "action": "Set JWT_SECRET on the Render service and redeploy."
+      "issue": "Render has no JWT_SECRET; admin login fails with \"secretOrPrivateKey must have a value\".",
+      "action": "Set JWT_SECRET in Render Dashboard > Environment and redeploy. The app now refuses to boot without it instead of failing opaquely."
     },
     {
       "severity": "BLOCKER",
-      "area": "Production branding",
       "issue": "Vercel /api/settings still returns NovaCart because Atlas holds the old settings document.",
-      "action": "Update Atlas settings (requires a Render admin token or the real Atlas URI)."
+      "action": "Update Atlas settings. Requires a Render admin token (once JWT_SECRET exists) or the real Atlas URI."
     },
     {
       "severity": "HIGH",
-      "area": "Product vs category images",
-      "issue": "Product and category image paths collide in production, so updated product images also changed category imagery.",
-      "action": "Repoint category.image to distinct paths in Atlas."
+      "issue": "Product and category image paths collide in production, so updating a product image also changes the category tile.",
+      "action": "Run server/scripts/separateProductImages.js with MONGO_URI set (dry run first, then --apply), then deploy the client."
     },
     {
       "severity": "HIGH",
-      "area": "Upload durability",
-      "issue": "Uploads are written to Render local disk and are lost on redeploy.",
-      "action": "Move uploads to durable object storage."
+      "issue": "Uploads are stored on Render local disk and are lost on redeploy.",
+      "action": "Mount a persistent volume and set UPLOAD_DIR, or move uploads to object storage. The app now warns on boot when UPLOAD_DIR is unset in production."
     },
     {
       "severity": "MEDIUM",
-      "area": "Session security",
-      "issue": "JWT is persisted in localStorage; tokenVersion provides revocation-on-password-change but not on explicit logout or theft.",
-      "action": "Move to httpOnly cookie refresh tokens."
-    },
-    {
-      "severity": "MEDIUM",
-      "area": "Transactionality",
-      "issue": "MongoDB is standalone, so checkout cannot use multi-document transactions; relies on atomic per-doc guards plus compensating rollback.",
+      "issue": "MongoDB is standalone, so checkout cannot use multi-document transactions; it relies on atomic per-document guards plus compensating rollback.",
       "action": "Convert to a replica set for true ACID checkout."
     },
     {
       "severity": "LOW",
-      "area": "Secrets hygiene",
       "issue": "An Atlas password was exposed earlier in this session.",
       "action": "Rotate the Atlas credential."
     }
+  ],
+  "resolvedThisSession": [
+    "JWT no longer stored in localStorage; sessions use an httpOnly, SameSite cookie (12 dedicated tests). Bearer tokens still supported for API clients.",
+    "Startup now fails fast with an actionable message when JWT_SECRET or MONGO_URI is missing in production.",
+    "Added /api/users/logout and /api/users/refresh for cookie lifecycle.",
+    "Password change re-issues the session cookie so the current session survives revocation of older tokens.",
+    "Product image / category image collision addressed with a tested migration script.",
+    "UPLOAD_DIR made configurable so a persistent volume can be mounted."
   ]
 }

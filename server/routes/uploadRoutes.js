@@ -6,8 +6,22 @@ const { protect, requirePermission } = require('../middleware/authMiddleware');
 const asyncHandler = require('../utils/asyncHandler');
 const router = express.Router();
 
-const UPLOADS_DIR = path.join(__dirname, '..', 'uploads');
+// Uploads are written to local disk by default. On ephemeral hosts (Render's
+// free tier, most containers) this directory is wiped on every deploy, so set
+// UPLOAD_DIR to a mounted persistent volume.
+const UPLOADS_DIR = process.env.UPLOAD_DIR
+  ? path.resolve(process.env.UPLOAD_DIR)
+  : path.join(__dirname, '..', 'uploads');
 fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+
+if (process.env.NODE_ENV === 'production' && !process.env.UPLOAD_DIR) {
+  console.warn(
+    '[uploads] WARNING: UPLOAD_DIR is not set. Uploads are stored on the ' +
+      'local filesystem and will be LOST on the next deploy if this host uses ' +
+      'an ephemeral disk. Mount a persistent volume and set UPLOAD_DIR, or move ' +
+      'uploads to object storage.'
+  );
+}
 
 const storage = multer.diskStorage({
   destination(req, file, cb) {

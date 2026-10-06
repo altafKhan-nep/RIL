@@ -1,13 +1,13 @@
 # Life In Pieces — QA & Security Audit Report
 
-**Status:** 92/92 automated checks passing (100%) across 12 suites.
+**Status:** 104/104 automated checks passing (100%) across 13 suites.
 
-- **Generated:** 2026-10-06T15:29:36.831Z
-- **Scope:** uncommitted working tree (QA remediation on top of 36778a9)
+- **Generated:** 2026-10-06T15:47:24.519Z
+- **Scope:** uncommitted working tree (session cookie auth + production readiness, on top of c7d6f76)
 - **Environment:** mongodb://localhost:27017/novacart_qa (isolated; production Atlas never touched)
-- **Determinism:** 92/92 on 3 consecutive consecutive runs (this report reflects run N of the final sequence).
+- **Determinism:** 104/104 on three consecutive runs; client production build clean.
 
-> Automated coverage is strong but NOT equivalent to production readiness. See *Not executed* and *Known blockers* before shipping.
+> Automated coverage is strong but is **not** equivalent to production readiness. Read *Not executed* and *Known blockers* before shipping.
 
 ## Suite breakdown
 
@@ -15,6 +15,7 @@
 |---|---:|
 | Smoke & Baseline | 6 |
 | Authentication & Registration | 15 |
+| Cookie Session Auth (httpOnly) | 12 |
 | Roles & Permission Matrix | 9 |
 | Pricing & Authoritative Totals | 6 |
 | Promotions & Discounts | 6 |
@@ -25,57 +26,75 @@
 | Concurrency & Inventory Races | 2 |
 | Security & Injection | 6 |
 | Data Consistency Invariants | 8 |
-| **Total** | **92** |
+| **Total** | **104** |
+
+## Resolved this session
+
+- JWT no longer stored in localStorage; sessions use an httpOnly, SameSite cookie (12 dedicated tests). Bearer tokens still supported for API clients.
+- Startup now fails fast with an actionable message when JWT_SECRET or MONGO_URI is missing in production.
+- Added /api/users/logout and /api/users/refresh for cookie lifecycle.
+- Password change re-issues the session cookie so the current session survives revocation of older tokens.
+- Product image / category image collision addressed with a tested migration script.
+- UPLOAD_DIR made configurable so a persistent volume can be mounted.
 
 ## Defects fixed and covered by regression tests
 
 ### Payment integrity (Stripe)
-- Webhook signature verification was **broken in production code**: the global `express.json()` consumed the request body before the route-level `express.raw()`, so `constructEvent()` could never receive the signed bytes and every real webhook would have failed. Fixed by stashing the raw buffer in the JSON parser `verify` hook. Covered by 6 tests: missing signature, forged signature, tampered body, valid signature, mismatched intent id, and idempotent replay.
+- Webhook signature verification was **broken in production code**: the global `express.json()` consumed the request body before the route-level `express.raw()`, so `constructEvent()` could never receive the signed bytes. Fixed by stashing the raw buffer in the parser `verify` hook. Covered by missing-signature, forgery, tampered-body, valid-signature, mismatched-intent and replay tests.
 
 ### Inventory auditability
-- `cancelOrder`, the promotion-limit rollback, and admin cancellation each restored stock with a **raw update that bypassed the audit helper**, so those movements were invisible in `stockHistory`. All routes now go through the audited helper.
-- The audit helper wrote `reason/actor/timestamp` while the Product schema defines `note/createdBy/date`, so Mongoose **silently dropped** those fields. Aligned to the existing schema contract.
-- `stockHistory` used read-then-write, which under concurrency recorded inconsistent `previousStock` values (verified: 6 of 8 concurrent entries all claimed the same starting stock). Replaced with a single atomic aggregation-pipeline update so stock and its audit entry commit together; the chain is now provably continuous.
-- Absolute stock changes through the product API and product creation now record an opening balance and an audited `set` adjustment.
+- Order cancellation, promotion-limit rollback and admin cancellation restored stock through **raw updates that bypassed the audit helper**, making those movements invisible.
+- The helper wrote `reason/actor/timestamp` while the Product schema defines `note/createdBy/date`, so Mongoose **silently dropped** those fields.
+- `stockHistory` used read-then-write; under concurrency 6 of 8 entries recorded the same `previousStock`. Replaced with a single atomic aggregation-pipeline update so the trail is exact and continuous (verified `58→57→…→44`).
 
-### Analytics correctness
-- Dashboard revenue summed **cancelled orders as sales**. A single `REVENUE_STATUSES` rule now excludes cancelled and fully-refunded orders from total sales, month-over-month revenue, and the revenue-by-month chart.
+### Analytics
+- Revenue counted **cancelled orders as sales**. One shared rule now excludes cancelled and fully refunded orders from total sales, month-over-month revenue and the revenue-by-month chart.
 
 ### Authentication and sessions
-- Password changes now require the current password and enforce the same 8-character minimum the API always enforced (the UI previously allowed 6 and silently failed).
-- Added `tokenVersion`: changing a password invalidates previously issued tokens. Inactive accounts are rejected at login.
+- The browser persisted a long-lived JWT in `localStorage`, so any XSS could exfiltrate it. Sessions now use an httpOnly, SameSite cookie; the app stores only non-sensitive display data. Legacy keys are cleared on first load and bearer tokens still work for API clients.
+- Added `tokenVersion`: a password change invalidates previously issued tokens, and the current session is re-issued rather than dropped.
+- Password changes require the current password and the UI enforces the same 8-character minimum the API always required.
+- Inactive accounts are rejected at login and on every authenticated request.
 
-### Catalog and categories
-- Public category counts excluded drafts incorrectly; stored `Category.productCount` is now maintained across product create, update, category moves, and deletion.
+### Catalog and API
+- Public category counts excluded drafts incorrectly; stored `Category.productCount` is maintained across create, update, category moves and deletion.
+- `GET /api/orders` and `GET /api/orders/myorders` are paginated; client updated.
+- Shipping origin is configurable rather than hardcoded to Mumbai.
 
-### API shape and data volume
-- `GET /api/orders` and `GET /api/orders/myorders` were unbounded. Both are now paginated with `total/page/pages/pageSize`; the client was updated to match.
-
-### Previously completed in this engagement
-- Server-authoritative pricing (client totals ignored), client-supplied payment flags ignored, promotion double-discount removed, order IDOR on tracking closed, granular admin permissions, production seed guard, trim-only sanitization, atomic promotion redemption, order idempotency.
+## Operational hardening
+- The server now **refuses to boot** in production when `JWT_SECRET` or `MONGO_URI` is missing, with an actionable message. This is the exact failure that left Render’s admin login broken.
+- `UPLOAD_DIR` is configurable so a persistent volume can be mounted, and the app warns on boot when uploads would land on an ephemeral disk.
+- `server/scripts/separateProductImages.js` repairs the product/category image collision. It is dry-run by default, refuses non-Atlas URIs without an explicit flag, copies assets to product-specific paths, and never modifies category images. Verified against a fixture, including the asset-path resolution and the no-collision path.
 
 ## Not executed
 
-- Real Stripe API calls (PaymentIntent create/confirm) and live dashboard refund - no real credentials available
-- Full browser-driven UI E2E (no headless browser tooling configured in this environment)
-- Production Atlas / Render / Vercel verification (no production credentials, JWT_SECRET missing on Render)
-- Durable upload persistence across Render redeploys (object storage not configured)
+- Real Stripe API calls (PaymentIntent create/confirm) and live dashboard refunds - no real credentials
+- Full browser-driven UI E2E (no headless browser tooling configured)
+- Production Atlas / Render / Vercel verification (no production credentials available in this environment)
+- Live migration of colliding product/category image paths (script delivered and dry-run tested against a fixture, but not run against Atlas)
+- Durable upload persistence on Render (no production host available)
 - Mobile/responsive visual regression and Lighthouse performance budgets
 
 ## Known blockers before production
 
-| Severity | Area | Issue | Action |
-|---|---|---|---|
-| BLOCKER | Production auth | Render service has no JWT_SECRET; admin login fails with "secretOrPrivateKey must have a value". | Set JWT_SECRET on the Render service and redeploy. |
-| BLOCKER | Production branding | Vercel /api/settings still returns NovaCart because Atlas holds the old settings document. | Update Atlas settings (requires a Render admin token or the real Atlas URI). |
-| HIGH | Product vs category images | Product and category image paths collide in production, so updated product images also changed category imagery. | Repoint category.image to distinct paths in Atlas. |
-| HIGH | Upload durability | Uploads are written to Render local disk and are lost on redeploy. | Move uploads to durable object storage. |
-| MEDIUM | Session security | JWT is persisted in localStorage; tokenVersion provides revocation-on-password-change but not on explicit logout or theft. | Move to httpOnly cookie refresh tokens. |
-| MEDIUM | Transactionality | MongoDB is standalone, so checkout cannot use multi-document transactions; relies on atomic per-doc guards plus compensating rollback. | Convert to a replica set for true ACID checkout. |
-| LOW | Secrets hygiene | An Atlas password was exposed earlier in this session. | Rotate the Atlas credential. |
+| Severity | Issue | Action |
+|---|---|---|
+| BLOCKER | Render has no JWT_SECRET; admin login fails with "secretOrPrivateKey must have a value". | Set JWT_SECRET in Render Dashboard > Environment and redeploy. The app now refuses to boot without it instead of failing opaquely. |
+| BLOCKER | Vercel /api/settings still returns NovaCart because Atlas holds the old settings document. | Update Atlas settings. Requires a Render admin token (once JWT_SECRET exists) or the real Atlas URI. |
+| HIGH | Product and category image paths collide in production, so updating a product image also changes the category tile. | Run server/scripts/separateProductImages.js with MONGO_URI set (dry run first, then --apply), then deploy the client. |
+| HIGH | Uploads are stored on Render local disk and are lost on redeploy. | Mount a persistent volume and set UPLOAD_DIR, or move uploads to object storage. The app now warns on boot when UPLOAD_DIR is unset in production. |
+| MEDIUM | MongoDB is standalone, so checkout cannot use multi-document transactions; it relies on atomic per-document guards plus compensating rollback. | Convert to a replica set for true ACID checkout. |
+| LOW | An Atlas password was exposed earlier in this session. | Rotate the Atlas credential. |
 
 ## How to re-run
 
 ```bash
 cd server && node tests/runner.js
+```
+
+## Repairing production image paths
+
+```bash
+MONGO_URI="mongodb+srv://…" node server/scripts/separateProductImages.js           # dry run
+MONGO_URI="mongodb+srv://…" node server/scripts/separateProductImages.js --apply   # then deploy the client
 ```

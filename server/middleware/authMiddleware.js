@@ -1,32 +1,35 @@
 const jwt = require('jsonwebtoken');
 const { User } = require('../models/User');
+const { readToken, readBearerToken } = require('../utils/authCookie');
 
 const protect = async (req, res, next) => {
-  let token;
+  // httpOnly cookie (browser) takes precedence; Bearer is still accepted for
+  // API clients and the QA harness.
+  const token = readToken(req) || readBearerToken(req);
 
-  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
-    try {
-      token = req.headers.authorization.split(' ')[1];
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      req.user = await User.findById(decoded.id).select('-password');
-      if (!req.user) {
-        return res.status(401).json({ message: 'User not found' });
-      }
-      if (!req.user.isActive) {
-        return res.status(403).json({ message: 'Account has been disabled' });
-      }
-      // Reject tokens issued before the user's last password change.
-      const tokenVersion = decoded.tv || 0;
-      if (tokenVersion !== (req.user.tokenVersion || 0)) {
-        return res.status(401).json({ message: 'Session invalidated, please sign in again' });
-      }
-      return next();
-    } catch (error) {
-      return res.status(401).json({ message: 'Not authorized, token failed' });
-    }
+  if (!token) {
+    return res.status(401).json({ message: 'Not authorized, no token' });
   }
 
-  return res.status(401).json({ message: 'Not authorized, no token' });
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.id).select('-password');
+    if (!user) {
+      return res.status(401).json({ message: 'User not found' });
+    }
+    if (!user.isActive) {
+      return res.status(403).json({ message: 'Account has been disabled' });
+    }
+    // Reject tokens issued before the user's last password change.
+    const tokenVersion = decoded.tv || 0;
+    if (tokenVersion !== (user.tokenVersion || 0)) {
+      return res.status(401).json({ message: 'Session invalidated, please sign in again' });
+    }
+    req.user = user;
+    return next();
+  } catch (error) {
+    return res.status(401).json({ message: 'Not authorized, token failed' });
+  }
 };
 
 const admin = (req, res, next) => {

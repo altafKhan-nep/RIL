@@ -1,5 +1,5 @@
 {
-  "passed": 92,
+  "passed": 104,
   "failed": 0,
   "results": [
     {
@@ -84,6 +84,54 @@
     },
     {
       "name": "Protected route with garbage token returns 401",
+      "ok": true
+    },
+    {
+      "name": "Login sets an httpOnly session cookie",
+      "ok": true
+    },
+    {
+      "name": "Protected route accepts the cookie with no Authorization header",
+      "ok": true
+    },
+    {
+      "name": "Protected route rejects a request with no cookie and no bearer",
+      "ok": true
+    },
+    {
+      "name": "Bearer tokens still work for API clients",
+      "ok": true
+    },
+    {
+      "name": "Logout clears the cookie and blocks further cookie auth",
+      "ok": true
+    },
+    {
+      "name": "Refresh re-issues a usable cookie without exposing it to JS",
+      "ok": true
+    },
+    {
+      "name": "Password change replaces the cookie and revokes the old token",
+      "ok": true
+    },
+    {
+      "name": "Registration sets a session cookie too",
+      "ok": true
+    },
+    {
+      "name": "Cookie auth honours permissions like bearer auth",
+      "ok": true
+    },
+    {
+      "name": "Disabled user with a valid cookie is rejected",
+      "ok": true
+    },
+    {
+      "name": "A tampered cookie value is rejected",
+      "ok": true
+    },
+    {
+      "name": "No endpoint ever returns the token inside a readable cookie",
       "ok": true
     },
     {

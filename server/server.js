@@ -27,6 +27,28 @@ const { notFound, errorHandler } = require('./middleware/errorMiddleware');
 
 dotenv.config();
 
+// --- Required secrets guard ---
+// A missing JWT_SECRET previously only surfaced later, as a confusing
+// "secretOrPrivateKey must have a value" error on the first login. Fail fast
+// with an actionable message instead of shipping a broken auth service.
+const REQUIRED_SECRETS = [
+  { name: 'JWT_SECRET', prod: true },
+  { name: 'MONGO_URI', prod: true },
+];
+const missing = REQUIRED_SECRETS.filter((s) => !process.env[s.name]).map((s) => s.name);
+if (missing.length && process.env.NODE_ENV === 'production') {
+  // eslint-disable-next-line no-console
+  console.error(
+    `\nFATAL: missing required environment variable(s): ${missing.join(', ')}\n` +
+      `Set these on the host (for Render: Dashboard > Environment) and redeploy.\n`
+  );
+  process.exit(1);
+}
+if (missing.length) {
+  // eslint-disable-next-line no-console
+  console.warn(`[config] WARNING: missing ${missing.join(', ')} - auth/database features may fail.`);
+}
+
 connectDB();
 
 const app = express();
@@ -195,9 +217,14 @@ app.use('/api/payments', paymentRoutes);
 app.use('/api/upload', uploadRoutes);
 
 // --- Static files ---
+// Must resolve to the same directory the upload route writes to, otherwise
+// freshly uploaded images are served from somewhere else.
+const UPLOADS_DIR = process.env.UPLOAD_DIR
+  ? path.resolve(process.env.UPLOAD_DIR)
+  : path.join(__dirname, 'uploads');
 app.use(
   '/uploads',
-  express.static(path.join(__dirname, 'uploads'), {
+  express.static(UPLOADS_DIR, {
     setHeaders(res) {
       if (res.req.url.endsWith('.avif')) res.setHeader('Content-Type', 'image/avif');
     },

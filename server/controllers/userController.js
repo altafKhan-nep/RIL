@@ -1,5 +1,6 @@
 const { User } = require('../models/User');
 const generateToken = require('../utils/generateToken');
+const { setAuthCookie, clearAuthCookie } = require('../utils/authCookie');
 const asyncHandler = require('../utils/asyncHandler');
 const { validateUser } = require('../middleware/validationMiddleware');
 
@@ -20,12 +21,15 @@ const authUser = async (req, res) => {
     user.lastLogin = new Date();
     user.loginCount += 1;
     await user.save();
+    const token = generateToken(user._id, user.tokenVersion || 0);
+    // httpOnly cookie so the browser app never has to hold the token in JS.
+    setAuthCookie(res, token);
     res.json({
       _id: user._id, name: user.name, email: user.email,
       isAdmin: user.isAdmin, role: user.role,
       permissions: user.getEffectivePermissions(),
       loyaltyPoints: user.loyaltyPoints,
-      token: generateToken(user._id, user.tokenVersion || 0),
+      token,
     });
   } else {
     res.status(401);
@@ -45,12 +49,14 @@ const registerUser = async (req, res) => {
   if (userExists) { res.status(400); throw new Error('User already exists'); }
   const user = await User.create({ name: name.trim(), email: email.toLowerCase().trim(), password });
   if (user) {
+    const token = generateToken(user._id, user.tokenVersion || 0);
+    setAuthCookie(res, token);
     res.status(201).json({
       _id: user._id, name: user.name, email: user.email,
       isAdmin: user.isAdmin, role: user.role,
       permissions: user.getEffectivePermissions(),
       loyaltyPoints: user.loyaltyPoints,
-      token: generateToken(user._id, user.tokenVersion || 0),
+      token,
     });
   } else {
     res.status(400); throw new Error('Invalid user data');
@@ -108,12 +114,16 @@ const updateUserProfile = async (req, res) => {
       user.passwordChangedAt = new Date();
     }
     const updatedUser = await user.save();
+    // A password change bumps tokenVersion, so the current cookie is now
+    // stale: mint and set a replacement to keep this session signed in.
+    const token = generateToken(updatedUser._id, updatedUser.tokenVersion || 0);
+    setAuthCookie(res, token);
     res.json({
       _id: updatedUser._id, name: updatedUser.name, email: updatedUser.email,
       isAdmin: updatedUser.isAdmin, role: updatedUser.role,
       permissions: updatedUser.getEffectivePermissions(),
       loyaltyPoints: updatedUser.loyaltyPoints, address: updatedUser.address,
-      phone: updatedUser.phone, token: generateToken(updatedUser._id, updatedUser.tokenVersion || 0),
+      phone: updatedUser.phone, token,
     });
   } else {
     res.status(404); throw new Error('User not found');
@@ -136,10 +146,32 @@ const addToWishlist = async (req, res) => {
   }
 };
 
+/**
+ * Clears the auth cookie. The JWT itself is stateless, so the client is
+ * expected to discard it; tokenVersion remains available for hard revocation.
+ */
+const logoutUser = async (req, res) => {
+  clearAuthCookie(res);
+  res.json({ message: 'Signed out' });
+};
+
+/**
+ * Re-issues a fresh cookie for the current session. The httpOnly cookie is not
+ * readable by the app, so an explicit endpoint is used to roll it forward.
+ */
+const refreshSession = async (req, res) => {
+  const user = req.user;
+  const token = generateToken(user._id, user.tokenVersion || 0);
+  setAuthCookie(res, token);
+  res.json({ _id: user._id, name: user.name, email: user.email, role: user.role, token });
+};
+
 module.exports = {
   authUser: asyncHandler(authUser),
   registerUser: asyncHandler(registerUser),
   getUserProfile: asyncHandler(getUserProfile),
   updateUserProfile: asyncHandler(updateUserProfile),
   addToWishlist: asyncHandler(addToWishlist),
+  logoutUser: asyncHandler(logoutUser),
+  refreshSession: asyncHandler(refreshSession),
 };

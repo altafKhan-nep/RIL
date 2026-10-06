@@ -9,7 +9,7 @@ class HttpError extends Error {
   }
 }
 
-function request(base, method, path, { token, body, query, headers = {} } = {}) {
+function request(base, method, path, { token, body, query, headers = {}, jar, cookie } = {}) {
   return new Promise((resolve, reject) => {
     let url = path;
     if (query) {
@@ -22,6 +22,14 @@ function request(base, method, path, { token, body, query, headers = {} } = {}) 
     const parsed = new URL(url, base);
     const h = { 'Content-Type': 'application/json', ...headers };
     if (token) h['Authorization'] = `Bearer ${token}`;
+    // Cookie-jar support mirrors browser behaviour so httpOnly session auth
+    // can be exercised end to end. A `jar` is a plain object of name->value.
+    const cookies = jar || cookie;
+    if (cookies && Object.keys(cookies).length) {
+      h['Cookie'] = Object.entries(cookies)
+        .map(([k, v]) => `${k}=${encodeURIComponent(v)}`)
+        .join('; ');
+    }
     // A string/Buffer body is sent verbatim (required for exact-byte webhook
     // signature tests); anything else is JSON encoded.
     const payload =
@@ -40,7 +48,26 @@ function request(base, method, path, { token, body, query, headers = {} } = {}) 
         res.on('end', () => {
           let json = null;
           try { json = data ? JSON.parse(data) : null; } catch { json = null; }
-          const out = { status: res.statusCode, headers: res.headers, body: json, raw: data };
+          // Capture Set-Cookie into the jar, honouring Max-Age=0 deletions.
+          const setCookies = [].concat(res.headers['set-cookie'] || []);
+          if (cookies) {
+            for (const sc of setCookies) {
+              const [pair, ...attrs] = sc.split(';');
+              const eq = pair.indexOf('=');
+              if (eq === -1) continue;
+              const name = pair.slice(0, eq).trim();
+              const value = pair.slice(eq + 1).trim();
+              const maxAge = attrs
+                .map((a) => a.trim())
+                .find((a) => /^max-age=-?\d+$/i.test(a));
+              const expired =
+                (maxAge && Number(maxAge.split('=')[1]) <= 0) ||
+                attrs.map((a) => a.trim()).some((a) => /expires=thu, 01 jan 1970/i.test(a));
+              if (!value || expired) delete cookies[name];
+              else cookies[name] = decodeURIComponent(value);
+            }
+          }
+          const out = { status: res.statusCode, headers: res.headers, body: json, raw: data, setCookie: setCookies };
           if (res.statusCode >= 400) return reject(new HttpError(res.statusCode, json, data));
           resolve(out);
         });
