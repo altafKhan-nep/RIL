@@ -1,11 +1,12 @@
 # Life In Pieces — QA & Security Audit Report
 
-**Status:** 104/104 automated checks passing (100%) across 13 suites.
+**Status:** 114/114 automated checks passing (100%) across 14 suites.
 
-- **Generated:** 2026-10-06T15:47:24.519Z
-- **Scope:** uncommitted working tree (session cookie auth + production readiness, on top of c7d6f76)
-- **Environment:** mongodb://localhost:27017/novacart_qa (isolated; production Atlas never touched)
-- **Determinism:** 104/104 on three consecutive runs; client production build clean.
+- **Generated:** 2026-10-06T16:02:01.435Z
+- **Scope:** uncommitted working tree (session rotation + preflight + runbook, on top of c29abff)
+- **Environment:** mongodb://localhost:27017/novacart_qa (isolated; production never written to)
+- **Determinism:** 114/114 on three consecutive runs; client production build clean.
+- **Manual steps:** see `DEPLOY_RUNBOOK.md`. Readiness is gated by `node server/scripts/preflight.js` (read-only, exits non-zero on any blocker).
 
 > Automated coverage is strong but is **not** equivalent to production readiness. Read *Not executed* and *Known blockers* before shipping.
 
@@ -16,6 +17,7 @@
 | Smoke & Baseline | 6 |
 | Authentication & Registration | 15 |
 | Cookie Session Auth (httpOnly) | 12 |
+| Refresh Token Rotation & Revocation | 10 |
 | Roles & Permission Matrix | 9 |
 | Pricing & Authoritative Totals | 6 |
 | Promotions & Discounts | 6 |
@@ -26,75 +28,54 @@
 | Concurrency & Inventory Races | 2 |
 | Security & Injection | 6 |
 | Data Consistency Invariants | 8 |
-| **Total** | **104** |
+| **Total** | **114** |
 
-## Resolved this session
+## Resolved
 
-- JWT no longer stored in localStorage; sessions use an httpOnly, SameSite cookie (12 dedicated tests). Bearer tokens still supported for API clients.
-- Startup now fails fast with an actionable message when JWT_SECRET or MONGO_URI is missing in production.
-- Added /api/users/logout and /api/users/refresh for cookie lifecycle.
-- Password change re-issues the session cookie so the current session survives revocation of older tokens.
-- Product image / category image collision addressed with a tested migration script.
-- UPLOAD_DIR made configurable so a persistent volume can be mounted.
+- Sessions now use a short-lived (15m) access JWT plus an opaque, server-side revocable refresh token. Logout revokes the session row, so a stolen refresh token dies immediately instead of at expiry.
+- Refresh tokens rotate on every use; replaying a rotated token is rejected. Concurrent refreshes are deduplicated in the client so parallel 401s trigger a single exchange.
+- A password change revokes every session, then mints a replacement so the acting device stays signed in.
+- Fixed: /api/users/refresh could mint new tokens for a DISABLED account because it never re-checked isActive.
+- /api/users/refresh no longer requires a valid access token (it uses optionalAuth), which is the whole point of the endpoint.
+- Expired/revoked sessions are pruned on an interval; the TTL index is a backstop.
+- server/scripts/preflight.js: read-only release gate covering required env vars, secret strength, Stripe mode, upload durability, DB branding, image collisions, collection counts and replica-set topology. Exits non-zero on any blocker.
+- DEPLOY_RUNBOOK.md: ordered manual steps with verified commands and a 9-point smoke test.
 
-## Defects fixed and covered by regression tests
+## Earlier defect fixes (still covered)
 
-### Payment integrity (Stripe)
-- Webhook signature verification was **broken in production code**: the global `express.json()` consumed the request body before the route-level `express.raw()`, so `constructEvent()` could never receive the signed bytes. Fixed by stashing the raw buffer in the parser `verify` hook. Covered by missing-signature, forgery, tampered-body, valid-signature, mismatched-intent and replay tests.
-
-### Inventory auditability
-- Order cancellation, promotion-limit rollback and admin cancellation restored stock through **raw updates that bypassed the audit helper**, making those movements invisible.
-- The helper wrote `reason/actor/timestamp` while the Product schema defines `note/createdBy/date`, so Mongoose **silently dropped** those fields.
-- `stockHistory` used read-then-write; under concurrency 6 of 8 entries recorded the same `previousStock`. Replaced with a single atomic aggregation-pipeline update so the trail is exact and continuous (verified `58→57→…→44`).
-
-### Analytics
-- Revenue counted **cancelled orders as sales**. One shared rule now excludes cancelled and fully refunded orders from total sales, month-over-month revenue and the revenue-by-month chart.
-
-### Authentication and sessions
-- The browser persisted a long-lived JWT in `localStorage`, so any XSS could exfiltrate it. Sessions now use an httpOnly, SameSite cookie; the app stores only non-sensitive display data. Legacy keys are cleared on first load and bearer tokens still work for API clients.
-- Added `tokenVersion`: a password change invalidates previously issued tokens, and the current session is re-issued rather than dropped.
-- Password changes require the current password and the UI enforces the same 8-character minimum the API always required.
-- Inactive accounts are rejected at login and on every authenticated request.
-
-### Catalog and API
-- Public category counts excluded drafts incorrectly; stored `Category.productCount` is maintained across create, update, category moves and deletion.
-- `GET /api/orders` and `GET /api/orders/myorders` are paginated; client updated.
-- Shipping origin is configurable rather than hardcoded to Mumbai.
-
-## Operational hardening
-- The server now **refuses to boot** in production when `JWT_SECRET` or `MONGO_URI` is missing, with an actionable message. This is the exact failure that left Render’s admin login broken.
-- `UPLOAD_DIR` is configurable so a persistent volume can be mounted, and the app warns on boot when uploads would land on an ephemeral disk.
-- `server/scripts/separateProductImages.js` repairs the product/category image collision. It is dry-run by default, refuses non-Atlas URIs without an explicit flag, copies assets to product-specific paths, and never modifies category images. Verified against a fixture, including the asset-path resolution and the no-collision path.
+- **Stripe webhooks were non-functional**: the global `express.json()` consumed the body before the route-level `express.raw()`, so `constructEvent()` never received the signed bytes. Fixed via the parser `verify` hook; covered by signature, forgery, tampering, intent-binding and replay tests.
+- **Stock restoration bypassed the audit trail** in order cancellation, promotion-limit rollback and admin cancellation.
+- **`stockHistory` wrote unknown fields** (`reason/actor/timestamp` vs the schema’s `note/createdBy/date`) which Mongoose silently dropped.
+- **`stockHistory` used read-then-write**, so concurrent writes recorded inconsistent `previousStock` (6 of 8 entries claimed the same start). Now a single atomic pipeline update; verified `58→57→…→44`.
+- **Revenue counted cancelled orders as sales**; one shared rule now excludes cancelled and refunded orders everywhere.
+- **Registration crashed** on a `ReferenceError`; cart **double-discounted**; order tracking had an **IDOR**; admin permissions were **coarse**; the **seed script could wipe production**; `GET /api/orders` and `/myorders` were **unbounded**; shipping origin was **hardcoded to Mumbai**.
+- The server **refuses to boot** without `JWT_SECRET`/`MONGO_URI` in production, and warns when `UPLOAD_DIR` is unset on an ephemeral host.
 
 ## Not executed
 
 - Real Stripe API calls (PaymentIntent create/confirm) and live dashboard refunds - no real credentials
 - Full browser-driven UI E2E (no headless browser tooling configured)
-- Production Atlas / Render / Vercel verification (no production credentials available in this environment)
-- Live migration of colliding product/category image paths (script delivered and dry-run tested against a fixture, but not run against Atlas)
-- Durable upload persistence on Render (no production host available)
+- Live mutation of Atlas (branding update and image migration were verified only against local fixtures; the read-only checks were run against production)
+- Live webhook delivery from Stripe
 - Mobile/responsive visual regression and Lighthouse performance budgets
 
 ## Known blockers before production
 
 | Severity | Issue | Action |
 |---|---|---|
-| BLOCKER | Render has no JWT_SECRET; admin login fails with "secretOrPrivateKey must have a value". | Set JWT_SECRET in Render Dashboard > Environment and redeploy. The app now refuses to boot without it instead of failing opaquely. |
-| BLOCKER | Vercel /api/settings still returns NovaCart because Atlas holds the old settings document. | Update Atlas settings. Requires a Render admin token (once JWT_SECRET exists) or the real Atlas URI. |
-| HIGH | Product and category image paths collide in production, so updating a product image also changes the category tile. | Run server/scripts/separateProductImages.js with MONGO_URI set (dry run first, then --apply), then deploy the client. |
-| HIGH | Uploads are stored on Render local disk and are lost on redeploy. | Mount a persistent volume and set UPLOAD_DIR, or move uploads to object storage. The app now warns on boot when UPLOAD_DIR is unset in production. |
-| MEDIUM | MongoDB is standalone, so checkout cannot use multi-document transactions; it relies on atomic per-document guards plus compensating rollback. | Convert to a replica set for true ACID checkout. |
-| LOW | An Atlas password was exposed earlier in this session. | Rotate the Atlas credential. |
+| BLOCKER | Render has no JWT_SECRET; admin login fails with "secretOrPrivateKey must have a value". CONFIRMED against production. | Runbook Step 1. The app now refuses to boot without it. |
+| BLOCKER | Production API still returns "name":"NovaCart". CONFIRMED live via /api/settings. | Runbook Step 2 (admin UI or PUT /api/settings/store). |
+| HIGH | Product and category image paths collide, so editing a product photo changes the category tile. | Runbook Step 3: server/scripts/separateProductImages.js --apply, then deploy the client. |
+| HIGH | Uploads go to Render local disk and are lost on redeploy. | Runbook Step 4: mount a disk and set UPLOAD_DIR. |
+| MEDIUM | MongoDB is standalone, so checkout is not ACID; it uses per-document atomic guards plus compensating rollback. | Convert to a replica set. |
+| LOW | An Atlas password was exposed earlier in this session. | Runbook Step 6: rotate the credential. |
 
-## How to re-run
+## Re-running
 
 ```bash
 cd server && node tests/runner.js
-```
 
-## Repairing production image paths
-
-```bash
-MONGO_URI="mongodb+srv://…" node server/scripts/separateProductImages.js           # dry run
-MONGO_URI="mongodb+srv://…" node server/scripts/separateProductImages.js --apply   # then deploy the client
+JWT_SECRET="$(openssl rand -hex 32)" \
+MONGO_URI="mongodb+srv://…" BASE_URL="https://ril-q344.onrender.com" \
+node scripts/preflight.js
 ```

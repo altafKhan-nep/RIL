@@ -1,11 +1,48 @@
 const API_URL = import.meta.env.VITE_API_URL || '/api';
 
-// Auth is carried by an httpOnly cookie set by the API, so no token is ever
-// held in JS storage. Centralising fetch here guarantees the cookie is sent
-// on every call (including cross-origin dev setups).
-const apiFetch = (url, options = {}) => {
-  const { credentials, ...rest } = options;
-  return fetch(url, { ...rest, credentials: credentials || 'include' });
+// Auth is carried by httpOnly cookies set by the API, so no token is ever held
+// in JS storage. Centralising fetch here guarantees cookies are sent on every
+// call (including cross-origin dev setups).
+//
+// The access cookie is deliberately short-lived, so a 401 on a normal request
+// means "your access token expired", not "you are signed out". We silently
+// exchange the refresh cookie for a new access token and replay the request
+// once. Concurrent 401s share a single refresh to avoid a refresh stampede.
+let refreshInFlight = null;
+
+const performRefresh = () => {
+  if (!refreshInFlight) {
+    refreshInFlight = fetch(`${API_URL}/users/refresh`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+    })
+      .then((r) => r.ok)
+      .catch(() => false)
+      .finally(() => {
+        refreshInFlight = null;
+      });
+  }
+  return refreshInFlight;
+};
+
+// Endpoints that must never trigger a refresh, or that establish/clear session.
+const noRetryPaths = ['/users/refresh', '/users/login'];
+
+const apiFetch = async (url, options = {}) => {
+  const { credentials, _skipRefreshRetry, ...rest } = options;
+  const creds = credentials || 'include';
+  const res = await fetch(url, { ...rest, credentials: creds });
+
+  const isAuthEndpoint = noRetryPaths.some((p) => String(url).includes(p));
+  if (res.status === 401 && !_skipRefreshRetry && !isAuthEndpoint) {
+    const refreshed = await performRefresh();
+    if (refreshed) {
+      // The response body was already consumed by neither call, so replay is safe.
+      return fetch(url, { ...rest, credentials: creds });
+    }
+  }
+  return res;
 };
 
 // Retained for API clients that still send a bearer token explicitly.

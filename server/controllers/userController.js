@@ -1,6 +1,13 @@
 const { User } = require('../models/User');
 const generateToken = require('../utils/generateToken');
-const { setAuthCookie, clearAuthCookie } = require('../utils/authCookie');
+const { setAuthCookies, clearAuthCookies, readRefreshCookie } = require('../utils/authCookie');
+const {
+  createSession,
+  resolveSession,
+  rotateSession,
+  revokeSession,
+  revokeAllSessions,
+} = require('../utils/refreshToken');
 const asyncHandler = require('../utils/asyncHandler');
 const { validateUser } = require('../middleware/validationMiddleware');
 
@@ -21,9 +28,13 @@ const authUser = async (req, res) => {
     user.lastLogin = new Date();
     user.loginCount += 1;
     await user.save();
+    // Short-lived access JWT plus an opaque, revocable refresh session.
     const token = generateToken(user._id, user.tokenVersion || 0);
-    // httpOnly cookie so the browser app never has to hold the token in JS.
-    setAuthCookie(res, token);
+    const session = await createSession(user._id, {
+      userAgent: req.headers['user-agent'] || '',
+      ip: req.ip || '',
+    });
+    setAuthCookies(res, { accessToken: token, refreshToken: session.raw });
     res.json({
       _id: user._id, name: user.name, email: user.email,
       isAdmin: user.isAdmin, role: user.role,
@@ -50,7 +61,11 @@ const registerUser = async (req, res) => {
   const user = await User.create({ name: name.trim(), email: email.toLowerCase().trim(), password });
   if (user) {
     const token = generateToken(user._id, user.tokenVersion || 0);
-    setAuthCookie(res, token);
+    const session = await createSession(user._id, {
+      userAgent: req.headers['user-agent'] || '',
+      ip: req.ip || '',
+    });
+    setAuthCookies(res, { accessToken: token, refreshToken: session.raw });
     res.status(201).json({
       _id: user._id, name: user.name, email: user.email,
       isAdmin: user.isAdmin, role: user.role,
@@ -114,10 +129,15 @@ const updateUserProfile = async (req, res) => {
       user.passwordChangedAt = new Date();
     }
     const updatedUser = await user.save();
-    // A password change bumps tokenVersion, so the current cookie is now
-    // stale: mint and set a replacement to keep this session signed in.
+    // A password change bumps tokenVersion and revokes every existing session,
+    // then mints a replacement so the current device stays signed in.
+    await revokeAllSessions(updatedUser._id);
     const token = generateToken(updatedUser._id, updatedUser.tokenVersion || 0);
-    setAuthCookie(res, token);
+    const session = await createSession(updatedUser._id, {
+      userAgent: req.headers['user-agent'] || '',
+      ip: req.ip || '',
+    });
+    setAuthCookies(res, { accessToken: token, refreshToken: session.raw });
     res.json({
       _id: updatedUser._id, name: updatedUser.name, email: updatedUser.email,
       isAdmin: updatedUser.isAdmin, role: updatedUser.role,
@@ -151,7 +171,11 @@ const addToWishlist = async (req, res) => {
  * expected to discard it; tokenVersion remains available for hard revocation.
  */
 const logoutUser = async (req, res) => {
-  clearAuthCookie(res);
+  // Revoking the server-side session is what makes logout meaningful: a
+  // stolen refresh token stops working immediately, not at expiry.
+  const presented = readRefreshCookie(req);
+  if (presented) await revokeSession(presented);
+  clearAuthCookies(res);
   res.json({ message: 'Signed out' });
 };
 
@@ -160,9 +184,41 @@ const logoutUser = async (req, res) => {
  * readable by the app, so an explicit endpoint is used to roll it forward.
  */
 const refreshSession = async (req, res) => {
-  const user = req.user;
+  // The access token may already be expired, so validate the refresh session
+  // directly rather than relying on req.user.
+  const presented = readRefreshCookie(req);
+  const session = await resolveSession(presented);
+  if (!session) {
+    clearAuthCookies(res);
+    res.status(401);
+    throw new Error('Session expired, please sign in again');
+  }
+  const rotated = await rotateSession(session, {
+    userAgent: req.headers['user-agent'] || '',
+    ip: req.ip || '',
+  });
+  if (!rotated) {
+    // Lost the race: the token was already used. Treat as theft/replay.
+    clearAuthCookies(res);
+    res.status(401);
+    throw new Error('Session expired, please sign in again');
+  }
+  const user = req.user || (await User.findById(session.user));
+  if (!user) {
+    clearAuthCookies(res);
+    res.status(401);
+    throw new Error('User not found');
+  }
+  // A disabled account must not be able to mint new credentials, even though
+  // its session row is still live.
+  if (!user.isActive) {
+    await revokeSession(rotated.raw);
+    clearAuthCookies(res);
+    res.status(403);
+    throw new Error('Account has been disabled');
+  }
   const token = generateToken(user._id, user.tokenVersion || 0);
-  setAuthCookie(res, token);
+  setAuthCookies(res, { accessToken: token, refreshToken: rotated.raw });
   res.json({ _id: user._id, name: user.name, email: user.email, role: user.role, token });
 };
 

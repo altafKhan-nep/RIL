@@ -1,5 +1,5 @@
 {
-  "passed": 104,
+  "passed": 114,
   "failed": 0,
   "results": [
     {
@@ -132,6 +132,46 @@
     },
     {
       "name": "No endpoint ever returns the token inside a readable cookie",
+      "ok": true
+    },
+    {
+      "name": "Login issues a separate refresh session row (hashed, not raw)",
+      "ok": true
+    },
+    {
+      "name": "Access cookie lifetime is short, refresh cookie is long",
+      "ok": true
+    },
+    {
+      "name": "Refresh rotates the token and invalidates the presented one",
+      "ok": true
+    },
+    {
+      "name": "Refresh works after the access token has expired",
+      "ok": true
+    },
+    {
+      "name": "Refresh rejects a request with no refresh cookie",
+      "ok": true
+    },
+    {
+      "name": "Logout revokes the session server-side",
+      "ok": true
+    },
+    {
+      "name": "Password change revokes other sessions but keeps this device",
+      "ok": true
+    },
+    {
+      "name": "Deactivating a user kills their refresh session",
+      "ok": true
+    },
+    {
+      "name": "Disabled user cannot refresh even with a live session row",
+      "ok": true
+    },
+    {
+      "name": "Refresh rotates on every call (no token reuse)",
       "ok": true
     },
     {

@@ -9,7 +9,7 @@ const {
   logoutUser,
   refreshSession,
 } = require('../controllers/userController');
-const { protect } = require('../middleware/authMiddleware');
+const { protect, optionalAuth } = require('../middleware/authMiddleware');
 
 router.post('/login', authUser);
 router.route('/').post(registerUser);
@@ -18,6 +18,7 @@ router.route('/wishlist/:id').post(protect, addToWishlist);
 // Logout works with or without a valid session so a stale cookie can always
 // be cleared.
 router.post('/logout', logoutUser);
-router.post('/refresh', protect, refreshSession);
+// optionalAuth, not protect: the access token is usually already expired here.
+router.post('/refresh', optionalAuth, refreshSession);
 
 module.exports = router;

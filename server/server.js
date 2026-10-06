@@ -250,6 +250,22 @@ const server = app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 
+// --- Refresh session cleanup ---
+// Expired/revoked sessions are removed periodically so the collection cannot
+// grow without bound. The TTL index is a backstop; this keeps it tidy even
+// when autoIndex is disabled on the host.
+const SESSION_PRUNE_MS = Number(process.env.SESSION_PRUNE_INTERVAL_MS) || 6 * 60 * 60 * 1000;
+const pruneTimer = setInterval(async () => {
+  try {
+    const { pruneSessions } = require('./utils/refreshToken');
+    const removed = await pruneSessions();
+    if (removed) console.log(`[sessions] pruned ${removed} expired/revoked session(s)`);
+  } catch (err) {
+    console.error('[sessions] prune failed:', err.message);
+  }
+}, SESSION_PRUNE_MS);
+pruneTimer.unref();
+
 // Graceful shutdown
 process.on('SIGTERM', () => {
   console.log('SIGTERM received. Shutting down gracefully...');
