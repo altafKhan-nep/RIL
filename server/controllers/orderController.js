@@ -204,7 +204,7 @@ const updateOrderToPaid = async (req, res) => {
     throw new Error('Payment intent does not match this order');
   }
 
-  const stripe = require('../config/stripe');
+  const stripe = require('../config/stripe').getStripe();
   if (!stripe) {
     res.status(503);
     throw new Error('Payment provider is not configured');
@@ -232,8 +232,12 @@ const updateOrderToPaid = async (req, res) => {
     throw new Error('Payment amount does not match order total');
   }
 
-  order.isPaid = true;
-  order.paidAt = Date.now();
+  // Idempotent: re-confirming a paid order keeps the original paidAt.
+  if (!order.isPaid) {
+    order.isPaid = true;
+    order.paidAt = Date.now();
+    order.paymentStatus = 'paid';
+  }
   order.paymentIntentId = paymentIntentId;
   const updatedOrder = await order.save();
   res.json(updatedOrder);

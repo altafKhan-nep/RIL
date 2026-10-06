@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
@@ -7,7 +7,12 @@ import { formatPrice } from '../utils/helpers';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
+// The publishable key is fetched at runtime from GET /api/payments/config, so
+// enabling Stripe only requires setting STRIPE_PUBLISHABLE_KEY on the API host -
+// no frontend rebuild. The build-time variable stays supported as an override
+// for local development.
+const buildTimeKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || null;
+const loadStripeFor = (publishableKey) => loadStripe(publishableKey || buildTimeKey);
 
 const CheckoutForm = ({ amount, onSuccess }) => {
   const stripe = useStripe();
@@ -94,6 +99,35 @@ const CheckoutPage = () => {
   const [placing, setPlacing] = useState(false);
   const [clientSecret, setClientSecret] = useState('');
   const [loadingIntent, setLoadingIntent] = useState(false);
+  // Card payment configuration, resolved at runtime from the API.
+  const [paymentsEnabled, setPaymentsEnabled] = useState(false);
+  const [paymentsChecked, setPaymentsChecked] = useState(false);
+  const [stripePromise, setStripePromise] = useState(null);
+  const [pendingIntentId, setPendingIntentId] = useState('');
+  // Refs so the success handler always sees the latest values without
+  // re-creating callbacks mid-checkout.
+  const pendingOrderId = useRef(null);
+  const pendingIntentIdRef = useRef('');
+
+  useEffect(() => {
+    let cancelled = false;
+    api.getPaymentConfig()
+      .then((cfg) => {
+        if (cancelled) return;
+        const enabled = Boolean(cfg?.enabled && cfg?.publishableKey);
+        setPaymentsEnabled(enabled);
+        if (enabled) setStripePromise(loadStripeFor(cfg.publishableKey));
+        // Default to COD when cards are unavailable so checkout still works.
+        if (!enabled) setPaymentMethod('cod');
+      })
+      .catch(() => {
+        if (!cancelled) setPaymentsEnabled(false);
+      })
+      .finally(() => {
+        if (!cancelled) setPaymentsChecked(true);
+      });
+    return () => { cancelled = true; };
+  }, []);
 
   const handleChange = (e) => {
     setAddress({ ...address, [e.target.name]: e.target.value });
@@ -109,68 +143,105 @@ const CheckoutPage = () => {
     setStep(2);
   };
 
-  const createPaymentIntent = async () => {
-    if (clientSecret) return;
-    setLoadingIntent(true);
-    setError('');
-    try {
-      const result = await api.createPaymentIntent(totalPrice);
-      if (result.clientSecret) {
-        setClientSecret(result.clientSecret);
-      } else {
-        setError('Failed to initialize payment');
-      }
-    } catch (err) {
-      setError('Payment initialization failed: ' + err.message);
-    }
-    setLoadingIntent(false);
-  };
-
-  const handlePaymentSubmit = async () => {
-    setError('');
-    if (paymentMethod === 'cod') {
-      await placeOrder('Cash on Delivery');
-    }
-  };
-
-  const placeOrder = async (method) => {
-    if (cartItems.length === 0) {
-      setError('Your cart is empty');
-      return;
-    }
-
-    const orderItems = cartItems.map((item) => ({
+  const buildOrderPayload = (method) => ({
+    orderItems: cartItems.map((item) => ({
       name: item.name,
       qty: item.qty,
       image: item.image,
       price: item.price,
       product: item.product,
-    }));
+    })),
+    shippingAddress: address,
+    paymentMethod: method,
+    // These are informational only: the server recomputes every financial
+    // field from the database and ignores whatever is sent here.
+    itemsPrice,
+    taxPrice,
+    shippingPrice,
+    discountPrice,
+    totalPrice,
+    promoCode,
+  });
 
+  const placeCodOrder = async () => {
+    if (cartItems.length === 0) {
+      setError('Your cart is empty');
+      return;
+    }
     setPlacing(true);
     try {
-      const order = await api.createOrder({
-        orderItems,
-        shippingAddress: address,
-        paymentMethod: method,
-        itemsPrice,
-        taxPrice,
-        shippingPrice,
-        discountPrice,
-        totalPrice,
-        promoCode,
-      });
+      const order = await api.createOrder(buildOrderPayload('Cash on Delivery'));
       clearCart();
       if (user) await refreshProfile();
       navigate(`/order-success/${order._id}`);
     } catch (err) {
       setError(err.message);
+    } finally {
       setPlacing(false);
     }
   };
 
+  const handlePaymentSubmit = async () => {
+    setError('');
+    if (paymentMethod === 'cod') {
+      await placeCodOrder();
+    }
+  };
+
+  /**
+   * Card flow. The order must exist BEFORE a payment intent can be bound to it,
+   * so the order is created first (unpaid), then the intent, then Stripe.js
+   * confirms, then /confirm reconciles the order with Stripe.
+   */
+  const startCardPayment = async () => {
+    if (cartItems.length === 0) {
+      setError('Your cart is empty');
+      return;
+    }
+    if (clientSecret) return;
+    setLoadingIntent(true);
+    setError('');
+    try {
+      const order = await api.createOrder(buildOrderPayload('Card'));
+      pendingOrderId.current = order._id;
+
+      const result = await api.createPaymentIntent(order._id);
+      if (!result.clientSecret) {
+        setError('Could not initialise the payment. Please try again.');
+        return;
+      }
+      setClientSecret(result.clientSecret);
+      setPendingIntentId(result.paymentIntentId);
+      pendingIntentIdRef.current = result.paymentIntentId;
+      if (user) await refreshProfile();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoadingIntent(false);
+    }
+  };
+
+  /** Called after Stripe.js reports the payment succeeded. */
   const handleStripeSuccess = async () => {
-    await placeOrder('Stripe');
+    setPlacing(true);
+    try {
+      // Reconcile with Stripe. If this call fails the webhook still marks the
+      // order paid, so the customer is not charged without an order.
+      if (pendingIntentIdRef.current) {
+        await api.confirmPayment(pendingIntentIdRef.current);
+      }
+      clearCart();
+      const orderId = pendingOrderId.current;
+      pendingOrderId.current = null;
+      pendingIntentIdRef.current = '';
+      setClientSecret('');
+      setPendingIntentId('');
+      navigate(`/order-success/${orderId}`);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setPlacing(false);
+    }
   };
 
   if (cartItems.length === 0) {
@@ -319,7 +390,10 @@ const CheckoutPage = () => {
                 </div>
                 <div className="p-6">
                   {/* Payment Options */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                  <div className={`grid grid-cols-1 ${paymentsEnabled ? 'sm:grid-cols-2' : ''} gap-4 mb-6`}>
+                    {/* The card option is hidden entirely when the API reports
+                        Stripe is not configured, so nobody reaches a dead form. */}
+                    {paymentsEnabled && (
                     <button type="button"
                       onClick={() => { setPaymentMethod('card'); setError(''); setClientSecret(''); }}
                       className={`relative p-5 rounded-xl border-2 text-left transition-all duration-300 ${paymentMethod === 'card' ? 'border-primary bg-gradient-to-br from-primary/5 to-primary/10 shadow-md' : 'border-surface-container-high hover:border-outline-variant bg-surface-container-low/50'}`}>
@@ -343,6 +417,7 @@ const CheckoutPage = () => {
                         ))}
                       </div>
                     </button>
+                    )}
 
                     <button type="button"
                       onClick={() => { setPaymentMethod('cod'); setError(''); setClientSecret(''); }}
@@ -368,12 +443,22 @@ const CheckoutPage = () => {
                         </p>
                       </div>
                     </button>
+
+                    {/* Explains why cards are unavailable rather than silently omitting them. */}
+                    {paymentsChecked && !paymentsEnabled && (
+                      <div className="flex items-start gap-3 p-4 rounded-xl border border-surface-container-high bg-surface-container-low/40">
+                        <span className="material-symbols-outlined text-on-surface-variant text-lg">info</span>
+                        <p className="text-xs text-on-surface-variant leading-relaxed">
+                          Card payment is not available right now. Please choose cash on delivery.
+                        </p>
+                      </div>
+                    )}
                   </div>
 
                   {/* Stripe: Show card form directly */}
                   {paymentMethod === 'card' && !clientSecret && (
                     <button
-                      onClick={createPaymentIntent}
+                      onClick={startCardPayment}
                       disabled={loadingIntent}
                       className="w-full py-4 rounded-xl font-bold text-white text-sm tracking-wide transition-all duration-300 hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mb-2"
                       style={{ background: 'linear-gradient(135deg, #C06534, #B2541C)' }}>

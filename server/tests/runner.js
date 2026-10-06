@@ -46,7 +46,7 @@ function waitForServer(url, timeoutMs = 30000) {
 }
 
 async function startServer() {
-  const env = { ...process.env, MONGO_URI: process.env.QA_MONGO_URI || 'mongodb://localhost:27017/novacart_qa', NODE_ENV: 'test', JWT_SECRET: process.env.QA_JWT_SECRET || 'qa_test_secret', ORDER_RATE_LIMIT_MAX: process.env.QA_ORDER_RATE_LIMIT || '100000', LOGIN_RATE_LIMIT_MAX: process.env.QA_LOGIN_RATE_LIMIT || '100000', STRIPE_SECRET_KEY: process.env.QA_STRIPE_SECRET_KEY || 'sk_test_qa_dummy', STRIPE_WEBHOOK_SECRET: process.env.QA_STRIPE_WEBHOOK_SECRET || 'whsec_qa_dummy_secret' };
+  const env = { ...process.env, MONGO_URI: process.env.QA_MONGO_URI || 'mongodb://localhost:27017/novacart_qa', NODE_ENV: 'test', JWT_SECRET: process.env.QA_JWT_SECRET || 'qa_test_secret', ORDER_RATE_LIMIT_MAX: process.env.QA_ORDER_RATE_LIMIT || '100000', LOGIN_RATE_LIMIT_MAX: process.env.QA_LOGIN_RATE_LIMIT || '100000', STRIPE_SECRET_KEY: process.env.QA_STRIPE_SECRET_KEY || 'sk_test_qa_dummy', STRIPE_WEBHOOK_SECRET: process.env.QA_STRIPE_WEBHOOK_SECRET || 'whsec_qa_dummy_secret', STRIPE_PUBLISHABLE_KEY: process.env.QA_STRIPE_PUBLISHABLE_KEY || 'pk_test_qa_dummy' };
   const child = spawn('node', ['server.js'], { cwd: SERVER_DIR, env, stdio: 'ignore' });
   await waitForServer(BASE);
   return child;

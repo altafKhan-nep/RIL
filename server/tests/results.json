@@ -1,5 +1,5 @@
 {
-  "passed": 114,
+  "passed": 128,
   "failed": 0,
   "results": [
     {
@@ -332,6 +332,62 @@
     },
     {
       "name": "Webhook replay for an already-paid order is idempotent",
+      "ok": true
+    },
+    {
+      "name": "GET /payments/config is public and reports the publishable key",
+      "ok": true
+    },
+    {
+      "name": "create-intent requires an orderId (the old client flow omitted it)",
+      "ok": true
+    },
+    {
+      "name": "create-intent rejects an unknown order",
+      "ok": true
+    },
+    {
+      "name": "create-intent rejects another customer's order",
+      "ok": true
+    },
+    {
+      "name": "create-intent refuses an already-paid order",
+      "ok": true
+    },
+    {
+      "name": "create-intent refuses a cancelled order",
+      "ok": true
+    },
+    {
+      "name": "create-intent requires authentication",
+      "ok": true
+    },
+    {
+      "name": "confirm requires an intent id",
+      "ok": true
+    },
+    {
+      "name": "Webhook: charge.refunded marks the order refunded",
+      "ok": true
+    },
+    {
+      "name": "Webhook: payment_intent.payment_failed records the failure",
+      "ok": true
+    },
+    {
+      "name": "Webhook: unknown event types are acknowledged, not retried forever",
+      "ok": true
+    },
+    {
+      "name": "Webhook: succeeded event cannot mark an order with a different intent paid",
+      "ok": true
+    },
+    {
+      "name": "Regression: mongodb+srv:// URIs are recognised as Atlas",
+      "ok": true
+    },
+    {
+      "name": "Stripe config reports each missing key so setup is diagnosable",
       "ok": true
     },
     {

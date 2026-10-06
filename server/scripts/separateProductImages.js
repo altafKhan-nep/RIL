@@ -43,7 +43,7 @@ const fail = (msg) => {
 
 const MONGO_URI = process.env.MONGO_URI;
 if (!MONGO_URI) fail('MONGO_URI is required. Refusing to guess a database.');
-if (!/srv=/.test(MONGO_URI) && !ALLOW_LOCAL) {
+if (!/^mongodb\+srv:\/\//.test(MONGO_URI) && !ALLOW_LOCAL) {
   fail(
     'MONGO_URI is not an Atlas (srv) connection string. This script rewrites ' +
       'production data; pass --allow-local if this really is a local database.'

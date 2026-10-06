@@ -83,6 +83,19 @@ const orderSchema = mongoose.Schema(
       default: '',
       index: true,
     },
+    // Full payment lifecycle, driven by Stripe webhooks. Without these fields
+    // Mongoose silently strips the values, so failures and refunds were being
+    // lost.
+    paymentStatus: {
+      type: String,
+      enum: ['unpaid', 'pending', 'paid', 'failed', 'refunded', 'disputed'],
+      default: 'unpaid',
+      index: true,
+    },
+    paymentError: {
+      type: String,
+      default: '',
+    },
     refundStatus: {
       type: String,
       enum: ['none', 'pending', 'refunded', 'failed'],

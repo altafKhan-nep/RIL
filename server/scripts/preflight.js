@@ -45,7 +45,7 @@ const checkConfig = () => {
 
   if (!MONGO_URI) {
     fail('MONGO_URI is provided', 'not set in this shell');
-  } else if (/srv=/.test(MONGO_URI)) {
+  } else if (/^mongodb\+srv:\/\//.test(MONGO_URI)) {
     pass('MONGO_URI is provided', 'Atlas cluster');
   } else {
     warn('MONGO_URI is provided', 'not an Atlas (srv) URI — confirm this is intended');

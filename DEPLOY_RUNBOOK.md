@@ -136,6 +136,48 @@ Without this, checkout is COD-only.
 
 ---
 
+## Step 5b — Stripe card payments (optional; COD works without it)
+
+Card payments are **entirely configuration-driven**. Paste three values into
+Render and the feature turns on — there is no code change and **no frontend
+rebuild**, because the browser fetches the publishable key at runtime from
+`GET /api/payments/config`.
+
+| Render variable | Where to get it | Required |
+|---|---|---|
+| `STRIPE_SECRET_KEY` | Stripe Dashboard → Developers → API keys → *Secret key* | Yes |
+| `STRIPE_PUBLISHABLE_KEY` | same page → *Publishable key* | Yes |
+| `STRIPE_WEBHOOK_SECRET` | created by the webhook endpoint below | Recommended |
+
+Optional: `STRIPE_CURRENCY` (defaults to `usd`), `STRIPE_API_VERSION`.
+
+**Create the webhook** — Stripe Dashboard → Developers → Webhooks → Add endpoint:
+- URL: `https://ril-q344.onrender.com/api/payments/webhook`
+- Events: `payment_intent.succeeded`, `payment_intent.payment_failed`,
+  `charge.refunded`, `charge.dispute.created`
+- Copy the *Signing secret* into `STRIPE_WEBHOOK_SECRET`.
+
+Without the webhook secret, payments still succeed but the order is only marked
+paid by the browser calling `/confirm`; if that call is lost the order stays
+unpaid. The webhook is the authoritative path — set it.
+
+**Verify it is live:**
+```bash
+curl -s https://ril-q344.onrender.com/api/payments/config
+```
+Expect `"enabled":true`, a `pk_…` publishable key, and `"liveMode":false` while
+you are on test keys.
+
+Then run `node server/scripts/preflight.js` — it validates the key format and
+warns if the webhook secret or publishable key is missing.
+
+**The card flow is:** create order → create intent bound to that order →
+Stripe.js confirms → `/confirm` reconciles with Stripe → webhook is the
+authoritative confirmation. The amount always comes from the server-side order
+total; the browser cannot influence it.
+
+---
+
 ## Step 6 — Rotate the exposed Atlas password
 
 **Why:** The Atlas credential was shared in plain text during development.

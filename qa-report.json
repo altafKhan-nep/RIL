@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-10-06T16:02:01.435Z",
-  "commitAudited": "uncommitted working tree (session rotation + preflight + runbook, on top of c29abff)",
+  "generatedAt": "2026-10-06T16:36:20.479Z",
+  "commitAudited": "uncommitted working tree (Stripe card flow + tooling fixes, on top of b7b9729)",
   "target": "Life In Pieces storefront (formerly NovaCart)",
   "environment": {
     "api": "node server (isolated QA run)",
@@ -8,13 +8,13 @@
     "note": "Never touches production Atlas. NODE_ENV=test, dedicated JWT secret, raised rate limits."
   },
   "totals": {
-    "suites": 14,
-    "tests": 114,
-    "passed": 114,
+    "suites": 15,
+    "tests": 128,
+    "passed": 128,
     "failed": 0,
     "passRate": 100
   },
-  "determinism": "114/114 on three consecutive runs; client production build clean.",
+  "determinism": "128/128 on three consecutive runs; client production build clean.",
   "suites": [
     {
       "name": "Smoke & Baseline",
@@ -160,6 +160,26 @@
       ]
     },
     {
+      "name": "Stripe Configuration & Card Flow Contract",
+      "count": 14,
+      "tests": [
+        "GET /payments/config is public and reports the publishable key",
+        "create-intent requires an orderId (the old client flow omitted it)",
+        "create-intent rejects an unknown order",
+        "create-intent rejects another customer's order",
+        "create-intent refuses an already-paid order",
+        "create-intent refuses a cancelled order",
+        "create-intent requires authentication",
+        "confirm requires an intent id",
+        "Webhook: charge.refunded marks the order refunded",
+        "Webhook: payment_intent.payment_failed records the failure",
+        "Webhook: unknown event types are acknowledged, not retried forever",
+        "Webhook: succeeded event cannot mark an order with a different intent paid",
+        "Regression: mongodb+srv:// URIs are recognised as Atlas",
+        "Stripe config reports each missing key so setup is diagnosable"
+      ]
+    },
+    {
       "name": "Refunds, Free Shipping, Stock Audit & Analytics",
       "count": 15,
       "tests": [
@@ -216,10 +236,10 @@
     }
   ],
   "notExecuted": [
-    "Real Stripe API calls (PaymentIntent create/confirm) and live dashboard refunds - no real credentials",
+    "Real Stripe API calls (PaymentIntent create/retrieve, refunds) - no live credentials in this environment",
+    "Live Stripe webhook delivery - requires a public endpoint and Stripe CLI forwarding",
     "Full browser-driven UI E2E (no headless browser tooling configured)",
-    "Live mutation of Atlas (branding update and image migration were verified only against local fixtures; the read-only checks were run against production)",
-    "Live webhook delivery from Stripe",
+    "Live mutation of Atlas (branding update and image migration verified only against local fixtures)",
     "Mobile/responsive visual regression and Lighthouse performance budgets"
   ],
   "knownBlockers": [
@@ -231,37 +251,44 @@
     {
       "severity": "BLOCKER",
       "issue": "Production API still returns \"name\":\"NovaCart\". CONFIRMED live via /api/settings.",
-      "action": "Runbook Step 2 (admin UI or PUT /api/settings/store)."
+      "action": "Runbook Step 2."
+    },
+    {
+      "severity": "BLOCKER",
+      "issue": "Production runs commit 36778a9; the fixes in c7d6f76, c29abff, b7b9729 and the current work are not pushed.",
+      "action": "git push, then redeploy on Render."
     },
     {
       "severity": "HIGH",
       "issue": "Product and category image paths collide, so editing a product photo changes the category tile.",
-      "action": "Runbook Step 3: server/scripts/separateProductImages.js --apply, then deploy the client."
+      "action": "Runbook Step 3."
     },
     {
       "severity": "HIGH",
       "issue": "Uploads go to Render local disk and are lost on redeploy.",
-      "action": "Runbook Step 4: mount a disk and set UPLOAD_DIR."
+      "action": "Runbook Step 4."
     },
     {
       "severity": "MEDIUM",
-      "issue": "MongoDB is standalone, so checkout is not ACID; it uses per-document atomic guards plus compensating rollback.",
+      "issue": "MongoDB is standalone, so checkout is not ACID.",
       "action": "Convert to a replica set."
     },
     {
       "severity": "LOW",
-      "issue": "An Atlas password was exposed earlier in this session.",
-      "action": "Runbook Step 6: rotate the credential."
+      "issue": "An Atlas password has been exposed in chat and must be treated as compromised.",
+      "action": "Rotate it (Runbook Step 6) before using the URI again."
     }
   ],
   "resolvedThisSession": [
-    "Sessions now use a short-lived (15m) access JWT plus an opaque, server-side revocable refresh token. Logout revokes the session row, so a stolen refresh token dies immediately instead of at expiry.",
-    "Refresh tokens rotate on every use; replaying a rotated token is rejected. Concurrent refreshes are deduplicated in the client so parallel 401s trigger a single exchange.",
-    "A password change revokes every session, then mints a replacement so the acting device stays signed in.",
-    "Fixed: /api/users/refresh could mint new tokens for a DISABLED account because it never re-checked isActive.",
-    "/api/users/refresh no longer requires a valid access token (it uses optionalAuth), which is the whole point of the endpoint.",
-    "Expired/revoked sessions are pruned on an interval; the TTL index is a backstop.",
-    "server/scripts/preflight.js: read-only release gate covering required env vars, secret strength, Stripe mode, upload durability, DB branding, image collisions, collection counts and replica-set topology. Exits non-zero on any blocker.",
-    "DEPLOY_RUNBOOK.md: ordered manual steps with verified commands and a 9-point smoke test."
+    "Card payments were completely non-functional: the client called create-intent with a client-supplied amount and no orderId, but the server requires an existing order to bind the intent to, so the request always failed with 400. The flow is now create order -> create intent bound to that order -> Stripe.js confirms -> /confirm reconciles.",
+    "The publishable key was a build-time Vite variable, so setting it on the API host would never have reached the browser. It is now served at runtime from GET /api/payments/config, meaning enabling Stripe requires only pasting keys into Render with no frontend rebuild.",
+    "When Stripe is unconfigured the card option is hidden and checkout explains why, instead of rendering a broken payment form; COD remains available.",
+    "Payment intents are idempotent: an existing usable intent is reused and creation is keyed per order, so a double click or refresh cannot double-charge.",
+    "Charge currency is validated server-side, so a correct-amount charge in the wrong currency cannot satisfy an order.",
+    "Webhooks now also handle payment_intent.payment_failed, charge.refunded and charge.dispute.created, and acknowledge unknown event types so Stripe stops retrying.",
+    "Added paymentStatus and paymentError to the Order schema; Mongoose was silently stripping them, losing every failure and refund state.",
+    "Refunds use an idempotency key and never report success unless Stripe confirmed it.",
+    "Removed the dead StripeProvider component, which hardcoded a build-time key and would have broken silently if reused.",
+    "Fixed a bug in my own tooling: both maintenance scripts tested /srv=/ which never matches mongodb+srv://, so every real Atlas URI was rejected. A regression test now covers it."
   ]
 }

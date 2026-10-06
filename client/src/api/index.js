@@ -490,11 +490,19 @@ export const api = {
   },
 
   // Payments
-  createPaymentIntent: async (amount, currency = 'usd', orderId) => {
+  // Public: tells the browser whether card payments are usable and supplies the
+  // publishable key, so enabling Stripe needs no frontend rebuild.
+  getPaymentConfig: async () => {
+    const res = await apiFetch(`${API_URL}/payments/config`);
+    return handleResponse(res);
+  },
+  // orderId is required: an intent is always bound to an existing order, and the
+  // amount is always taken server-side from that order.
+  createPaymentIntent: async (orderId) => {
     const res = await apiFetch(`${API_URL}/payments/create-intent`, {
       method: 'POST',
-      headers: getHeaders(true),
-      body: JSON.stringify({ amount, currency, orderId }),
+      headers: getHeaders(),
+      body: JSON.stringify({ orderId }),
     });
     return handleResponse(res);
   },
