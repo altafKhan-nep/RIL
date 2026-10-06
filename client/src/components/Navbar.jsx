@@ -32,24 +32,24 @@ const TopBar = () => {
             24/7 {t('nav.support')}
           </span>
           <span className="w-px h-3.5 bg-outline-variant/50" />
-          <a href="tel:18006682278" className="flex items-center gap-1.5 text-[#aaa] hover:text-[#D4AF37] transition-colors">
+          <a href="tel:18006682278" className="flex items-center gap-1.5 text-[#aaa] hover:text-[#C89B58] transition-colors">
             <span className="material-symbols-outlined text-[15px]">call</span>
             1-800-LIP-CART
           </a>
         </div>
         <div className="flex items-center gap-4">
-          <Link to="/account" className="flex items-center gap-1.5 text-[#aaa] hover:text-[#D4AF37] transition-colors">
+          <Link to="/account" className="flex items-center gap-1.5 text-[#aaa] hover:text-[#C89B58] transition-colors">
             <span className="material-symbols-outlined text-[15px]">location_on</span>
             {t('nav.trackOrder')}
           </Link>
-          <Link to="/help" className="flex items-center gap-1.5 text-[#aaa] hover:text-[#D4AF37] transition-colors">
+          <Link to="/help" className="flex items-center gap-1.5 text-[#aaa] hover:text-[#C89B58] transition-colors">
             <span className="material-symbols-outlined text-[15px]">help</span>
             {t('nav.help')}
           </Link>
           {/* Language Switcher */}
           <button
             onClick={toggleLanguage}
-            className="flex items-center gap-1 px-2 py-1 rounded-md bg-white/10 hover:bg-white/20 text-[#aaa] hover:text-[#D4AF37] transition-colors font-medium"
+            className="flex items-center gap-1 px-2 py-1 rounded-md bg-white/10 hover:bg-white/20 text-[#aaa] hover:text-[#C89B58] transition-colors font-medium"
           >
             <span className="material-symbols-outlined text-[14px]">translate</span>
             {language === 'en' ? 'नेपाली' : 'English'}
@@ -79,7 +79,7 @@ const MiniCart = ({ open }) => {
       <div className="p-4 border-b border-white/10">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-bold text-white">{t('nav.cart')} ({cartItems.length})</h3>
-          <Link to="/cart" className="text-xs font-semibold text-[#D4AF37] hover:underline">{t('common.view')}</Link>
+          <Link to="/cart" className="text-xs font-semibold text-[#C89B58] hover:underline">{t('common.view')}</Link>
         </div>
       </div>
       <div className="max-h-64 overflow-y-auto divide-y divide-surface-container/40">
@@ -91,7 +91,7 @@ const MiniCart = ({ open }) => {
             <div className="flex-1 min-w-0">
               <p className="text-xs font-semibold text-white truncate">{item.name}</p>
               <p className="text-xs text-[#aaa] mt-0.5">{t('products.quantity')}: {item.qty}</p>
-              <p className="text-xs font-bold text-[#D4AF37] mt-1">{formatPrice(item.price * item.qty)}</p>
+              <p className="text-xs font-bold text-[#C89B58] mt-1">{formatPrice(item.price * item.qty)}</p>
             </div>
           </div>
         ))}
@@ -106,7 +106,7 @@ const MiniCart = ({ open }) => {
           <span className="text-sm font-semibold text-white">{t('cart.subtotal')}</span>
           <span className="text-sm font-bold text-white">{formatPrice(total)}</span>
         </div>
-        <Link to="/cart" className="block w-full text-center bg-[#D4AF37] text-black text-sm font-semibold py-2.5 rounded-lg hover:bg-[#D4AF37]/90 transition-colors">
+        <Link to="/cart" className="block w-full text-center bg-[#C89B58] text-black text-sm font-semibold py-2.5 rounded-lg hover:bg-[#C89B58]/90 transition-colors">
           {t('cart.checkout')}
         </Link>
       </div>
@@ -135,24 +135,24 @@ const AccountDropdown = ({ open }) => {
       </div>
       <div className="p-2">
         {isAdmin && (
-          <Link to="/admin" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-[#aaa] hover:bg-white/10 hover:text-[#D4AF37] transition-colors">
+          <Link to="/admin" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-[#aaa] hover:bg-white/10 hover:text-[#C89B58] transition-colors">
             <span className="material-symbols-outlined text-lg">dashboard</span>
             {t('nav.admin')}
           </Link>
         )}
-        <Link to="/account" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-[#aaa] hover:bg-white/10 hover:text-[#D4AF37] transition-colors">
+        <Link to="/account" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-[#aaa] hover:bg-white/10 hover:text-[#C89B58] transition-colors">
           <span className="material-symbols-outlined text-lg">person</span>
           {t('nav.account')}
         </Link>
-        <Link to="/account" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-[#aaa] hover:bg-white/10 hover:text-[#D4AF37] transition-colors">
+        <Link to="/account" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-[#aaa] hover:bg-white/10 hover:text-[#C89B58] transition-colors">
           <span className="material-symbols-outlined text-lg">shopping_bag</span>
           {t('nav.orders')}
         </Link>
-        <Link to="/account" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-[#aaa] hover:bg-white/10 hover:text-[#D4AF37] transition-colors">
+        <Link to="/account" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-[#aaa] hover:bg-white/10 hover:text-[#C89B58] transition-colors">
           <span className="material-symbols-outlined text-lg">favorite</span>
           {t('nav.wishlist')}
         </Link>
-        <Link to="/help" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-[#aaa] hover:bg-white/10 hover:text-[#D4AF37] transition-colors">
+        <Link to="/help" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-[#aaa] hover:bg-white/10 hover:text-[#C89B58] transition-colors">
           <span className="material-symbols-outlined text-lg">help</span>
           {t('nav.help')}
         </Link>
@@ -262,7 +262,7 @@ const Navbar = () => {
       <TopBar />
 
       {activeBanner && (
-        <div className="relative overflow-hidden bg-gradient-to-r from-[#D4AF37] via-[#D4AF37]/95 to-[#D4AF37]/80">
+        <div className="relative overflow-hidden bg-gradient-to-r from-[#C89B58] via-[#C89B58]/95 to-[#C89B58]/80">
           <div className="max-w-[1400px] mx-auto px-4 md:px-6 lg:px-10 py-2.5 flex items-center justify-center gap-4">
             {activeBanner.image && (
               <img src={activeBanner.image} alt={activeBanner.title} className="w-10 h-10 rounded-lg object-cover shrink-0" />
@@ -283,15 +283,15 @@ const Navbar = () => {
       <header
         className={`sticky top-0 z-50 w-full transition-all duration-300 ${
           scrolled
-            ? 'bg-[#331E0F]/98 backdrop-blur-xl shadow-[0_10px_30px_rgba(0,0,0,0.4)]'
-            : 'bg-[#331E0F]/95 backdrop-blur-md'
+            ? 'bg-[#3A2114]/98 backdrop-blur-xl shadow-[0_10px_30px_rgba(0,0,0,0.4)]'
+            : 'bg-[#3A2114]/95 backdrop-blur-md'
         }`}
       >
         <div className="max-w-[1400px] mx-auto flex items-center h-16 lg:h-[72px]">
           {/* Hamburger — attached to left edge */}
           <button
             onClick={() => setDrawerOpen(true)}
-            className="hidden lg:flex p-3 text-[#aaa] hover:bg-white/10 hover:text-[#D4AF37] transition-colors -ml-1"
+            className="hidden lg:flex p-3 text-[#aaa] hover:bg-white/10 hover:text-[#C89B58] transition-colors -ml-1"
             aria-label="Browse Categories"
           >
             <span className="material-symbols-outlined text-[22px]">menu</span>
@@ -300,18 +300,20 @@ const Navbar = () => {
           <div className="flex items-center justify-between flex-1 gap-4 lg:gap-6 px-2 md:px-4 lg:px-6">
             {/* Logo */}
             <Link to="/" className="flex items-center gap-2.5 shrink-0 group">
-              <img
-                src="/logo_lip.png"
-                alt="Life In Pieces"
-                width={500}
-                height={627}
-                className="h-11 w-auto rounded-lg object-cover shrink-0 transition-opacity group-hover:opacity-85"
-              />
+              <span className="bg-[#F9F4ED] rounded-xl p-1 shrink-0 transition-opacity group-hover:opacity-85">
+                <img
+                  src="/logo_lip.png"
+                  alt="Life In Pieces"
+                  width={500}
+                  height={500}
+                  className="h-9 w-auto object-contain block"
+                />
+              </span>
               <div className="hidden sm:block">
                 <span className="font-serif text-lg font-semibold text-white tracking-tight block leading-tight">
                   Life In Pieces
                 </span>
-                <span className="text-[10px] text-[#D4AF37] font-medium tracking-[0.2em] uppercase leading-none">
+                <span className="text-[10px] text-[#C89B58] font-medium tracking-[0.2em] uppercase leading-none">
                   {t('nav.curated')}
                 </span>
               </div>
@@ -322,7 +324,7 @@ const Navbar = () => {
               <form onSubmit={handleSearch} className="w-full relative">
                 <div className={`flex items-center rounded-full border transition-all duration-300 ${
                   searchFocused
-                    ? 'border-[#D4AF37] bg-white/10 shadow-[0_2px_12px_rgba(212, 175, 55, 0.15)]'
+                    ? 'border-[#C89B58] bg-white/10 shadow-[0_2px_12px_rgba(212, 175, 55, 0.15)]'
                     : 'border-white/10 bg-white/10 hover:border-white/30'
                 }`}>
                   <span className="material-symbols-outlined text-[#aaa] ml-4 text-[20px]">search</span>
@@ -346,7 +348,7 @@ const Navbar = () => {
                   )}
                   <button
                     type="submit"
-                    className="bg-[#D4AF37] text-black px-5 py-2.5 rounded-full text-sm font-semibold hover:bg-[#D4AF37]/90 transition-colors m-0.5"
+                    className="bg-[#C89B58] text-black px-5 py-2.5 rounded-full text-sm font-semibold hover:bg-[#C89B58]/90 transition-colors m-0.5"
                   >
                     {t('common.search')}
                   </button>
@@ -360,7 +362,7 @@ const Navbar = () => {
                           key={cat}
                           type="button"
                           onMouseDown={() => { navigate(`/shop/${cat.toLowerCase().replace(' ', '-')}`); setSearchFocused(false); }}
-                          className="px-3 py-1.5 rounded-full text-xs font-medium bg-[#F3EEE8] text-[#7C6C60] hover:bg-[#D4AF37]/20 hover:text-[#8C6A2F] transition-colors"
+                          className="px-3 py-1.5 rounded-full text-xs font-medium bg-[#F3EEE8] text-[#7C6C60] hover:bg-[#C89B58]/20 hover:text-[#8C6A2F] transition-colors"
                         >
                           {cat}
                         </button>
@@ -376,7 +378,7 @@ const Navbar = () => {
               {/* Wishlist */}
               <Link
                 to="/account"
-                className="hidden md:flex p-2.5 rounded-full text-[#aaa] hover:text-[#D4AF37] hover:bg-white/10 transition-colors"
+                className="hidden md:flex p-2.5 rounded-full text-[#aaa] hover:text-[#C89B58] hover:bg-white/10 transition-colors"
                 aria-label="Wishlist"
               >
                 <span className="material-symbols-outlined text-[22px]">favorite</span>
@@ -391,11 +393,11 @@ const Navbar = () => {
                 <Link
                   to="/cart"
                   aria-label="Shopping Cart"
-                  className="relative p-2.5 rounded-full text-[#aaa] hover:text-[#D4AF37] hover:bg-white/10 transition-colors flex items-center"
+                  className="relative p-2.5 rounded-full text-[#aaa] hover:text-[#C89B58] hover:bg-white/10 transition-colors flex items-center"
                 >
                   <span className="material-symbols-outlined text-[22px]">shopping_cart</span>
                   {itemsCount > 0 && (
-                    <span className="absolute -top-0.5 -right-0.5 bg-[#D4AF37] text-black text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center border-2 border-[#331E0F] leading-none animate-fade-up">
+                    <span className="absolute -top-0.5 -right-0.5 bg-[#C89B58] text-black text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center border-2 border-[#3A2114] leading-none animate-fade-up">
                       {itemsCount}
                     </span>
                   )}
@@ -407,11 +409,11 @@ const Navbar = () => {
               <Link
                 to="/cart"
                 aria-label="Shopping Cart"
-                className="md:hidden relative p-2.5 rounded-full text-[#aaa] hover:text-[#D4AF37] transition-colors"
+                className="md:hidden relative p-2.5 rounded-full text-[#aaa] hover:text-[#C89B58] transition-colors"
               >
                 <span className="material-symbols-outlined text-[22px]">shopping_cart</span>
                 {itemsCount > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 bg-[#D4AF37] text-black text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center border-2 border-[#331E0F] leading-none">
+                  <span className="absolute -top-0.5 -right-0.5 bg-[#C89B58] text-black text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center border-2 border-[#3A2114] leading-none">
                     {itemsCount}
                   </span>
                 )}
@@ -420,7 +422,7 @@ const Navbar = () => {
               {/* Language Toggle */}
               <button
                 onClick={toggleLanguage}
-                className="hidden md:flex p-2.5 rounded-full text-[#aaa] hover:text-[#D4AF37] hover:bg-white/10 transition-colors"
+                className="hidden md:flex p-2.5 rounded-full text-[#aaa] hover:text-[#C89B58] hover:bg-white/10 transition-colors"
                 title={language === 'en' ? 'नेपालीमा स्विच गर्नुहोस्' : 'Switch to English'}
               >
                 <span className="material-symbols-outlined text-[22px]">translate</span>
@@ -443,7 +445,7 @@ const Navbar = () => {
                     <span className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-primary/70 text-black flex items-center justify-center text-xs font-bold shadow-sm">
                       {user.name.charAt(0).toUpperCase()}
                     </span>
-                    <span className="text-sm font-medium text-white group-hover:text-[#D4AF37] transition-colors max-w-[100px] truncate">
+                    <span className="text-sm font-medium text-white group-hover:text-[#C89B58] transition-colors max-w-[100px] truncate">
                       {user.name.split(' ')[0]}
                     </span>
                     <span className="material-symbols-outlined text-sm text-[#aaa]">expand_more</span>
@@ -453,7 +455,7 @@ const Navbar = () => {
               ) : (
                 <Link
                   to="/login"
-                  className="hidden md:inline-flex items-center gap-1.5 bg-[#D4AF37] text-black text-sm font-semibold px-5 py-2.5 rounded-full hover:bg-[#D4AF37]/90 hover:shadow-md transition-all duration-200"
+                  className="hidden md:inline-flex items-center gap-1.5 bg-[#C89B58] text-black text-sm font-semibold px-5 py-2.5 rounded-full hover:bg-[#C89B58]/90 hover:shadow-md transition-all duration-200"
                 >
                   <span className="material-symbols-outlined text-lg">person</span>
                   {t('nav.login')}
@@ -463,7 +465,7 @@ const Navbar = () => {
               {/* Mobile Language Toggle */}
               <button
                 onClick={toggleLanguage}
-                className="lg:hidden p-2.5 rounded-full text-[#aaa] hover:text-[#D4AF37] transition-colors"
+                className="lg:hidden p-2.5 rounded-full text-[#aaa] hover:text-[#C89B58] transition-colors"
                 title={language === 'en' ? 'नेपालीमा स्विच गर्नुहोस्' : 'Switch to English'}
               >
                 <span className="material-symbols-outlined text-[22px]">translate</span>
@@ -483,13 +485,13 @@ const Navbar = () => {
 
         {/* Mobile Drawer */}
         {mobileOpen && (
-          <div className="lg:hidden bg-[#331E0F] border-t border-white/10 animate-fade-up">
+          <div className="lg:hidden bg-[#3A2114] border-t border-white/10 animate-fade-up">
             <div className="px-4 py-4 space-y-4 max-h-[85vh] overflow-y-auto">
               {/* Search */}
               <form onSubmit={handleSearch} className="flex items-center relative">
                 <span className="material-symbols-outlined absolute left-3.5 text-[#aaa] text-lg pointer-events-none">search</span>
                 <input
-                  className="w-full bg-white/10 rounded-full py-2.5 pl-10 pr-4 text-sm text-white outline-none border border-transparent focus:border-[#D4AF37]/30 transition-colors"
+                  className="w-full bg-white/10 rounded-full py-2.5 pl-10 pr-4 text-sm text-white outline-none border border-transparent focus:border-[#C89B58]/30 transition-colors"
                   placeholder={t('nav.search')}
                   type="text"
                   value={query}
@@ -508,7 +510,7 @@ const Navbar = () => {
                     <p className="text-xs text-[#aaa]">{isAdmin ? t('nav.admin') : t('checkout.shippingAddress')}</p>
                   </div>
                   {isAdmin && (
-                    <Link to="/admin" onClick={() => setMobileOpen(false)} className="text-xs font-semibold text-[#D4AF37]">
+                    <Link to="/admin" onClick={() => setMobileOpen(false)} className="text-xs font-semibold text-[#C89B58]">
                       {t('nav.admin')}
                     </Link>
                   )}
@@ -524,7 +526,7 @@ const Navbar = () => {
                     onClick={() => setMobileOpen(false)}
                     className={({ isActive }) =>
                       `flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
-                        isActive ? 'bg-[#D4AF37]/8 text-[#D4AF37]' : 'text-[#aaa] hover:bg-white/10 hover:text-white'
+                        isActive ? 'bg-[#C89B58]/8 text-[#C89B58]' : 'text-[#aaa] hover:bg-white/10 hover:text-white'
                       }`
                     }
                   >
@@ -559,7 +561,7 @@ const Navbar = () => {
               {/* Language Switcher */}
               <button
                 onClick={toggleLanguage}
-                className="flex items-center justify-center gap-2 w-full py-3 rounded-xl border border-white/10 text-sm font-semibold text-[#aaa] hover:bg-white/10 hover:text-[#D4AF37] hover:border-[#D4AF37]/30 transition-all"
+                className="flex items-center justify-center gap-2 w-full py-3 rounded-xl border border-white/10 text-sm font-semibold text-[#aaa] hover:bg-white/10 hover:text-[#C89B58] hover:border-[#C89B58]/30 transition-all"
               >
                 <span className="material-symbols-outlined text-lg">translate</span>
                 {language === 'en' ? 'नेपालीमा स्विच गर्नुहोस्' : 'Switch to English'}
@@ -578,7 +580,7 @@ const Navbar = () => {
                 <Link
                   to="/login"
                   onClick={() => setMobileOpen(false)}
-                  className="flex items-center justify-center gap-2 bg-[#D4AF37] text-black font-semibold py-3 rounded-full w-full text-sm"
+                  className="flex items-center justify-center gap-2 bg-[#C89B58] text-black font-semibold py-3 rounded-full w-full text-sm"
                 >
                   <span className="material-symbols-outlined text-lg">person</span>
                   {t('nav.login')}

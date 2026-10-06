@@ -56,7 +56,7 @@ const CheckoutForm = ({ amount, onSuccess }) => {
         type="submit"
         disabled={!stripe || processing}
         className="w-full mt-5 py-3.5 rounded-xl font-bold text-white text-sm transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-        style={{ background: 'linear-gradient(135deg, #B08570, #a17c6b)' }}
+        style={{ background: 'linear-gradient(135deg, #C06534, #B2541C)' }}
       >
         {processing ? (
           <>
@@ -184,7 +184,7 @@ const CheckoutPage = () => {
         <button
           onClick={() => navigate('/shop')}
           className="px-8 py-3 rounded-xl font-bold text-white text-sm transition-all duration-300 hover:shadow-lg hover:scale-105"
-          style={{ background: 'linear-gradient(135deg, #B08570, #a17c6b)' }}
+          style={{ background: 'linear-gradient(135deg, #C06534, #B2541C)' }}
         >
           Continue Shopping
         </button>
@@ -296,7 +296,7 @@ const CheckoutPage = () => {
                   )}
                   <button type="submit"
                     className="w-full mt-6 py-4 rounded-xl font-bold text-white text-sm tracking-wide transition-all duration-300 hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
-                    style={{ background: 'linear-gradient(135deg, #B08570, #a17c6b)' }}>
+                    style={{ background: 'linear-gradient(135deg, #C06534, #B2541C)' }}>
                     Continue to Payment
                     <span className="material-symbols-outlined text-xl">arrow_forward</span>
                   </button>
@@ -376,7 +376,7 @@ const CheckoutPage = () => {
                       onClick={createPaymentIntent}
                       disabled={loadingIntent}
                       className="w-full py-4 rounded-xl font-bold text-white text-sm tracking-wide transition-all duration-300 hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mb-2"
-                      style={{ background: 'linear-gradient(135deg, #B08570, #a17c6b)' }}>
+                      style={{ background: 'linear-gradient(135deg, #C06534, #B2541C)' }}>
                       {loadingIntent ? (
                         <>
                           <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24" fill="none">
@@ -408,7 +408,7 @@ const CheckoutPage = () => {
                           appearance: {
                             theme: 'stripe',
                             variables: {
-                              colorPrimary: '#a17c6b',
+                              colorPrimary: '#B2541C',
                               colorBackground: '#FFFFFF',
                               colorText: '#1F1A16',
                               colorDanger: '#dc2626',
@@ -442,7 +442,7 @@ const CheckoutPage = () => {
                         onClick={handlePaymentSubmit}
                         disabled={placing}
                         className="flex-1 py-4 rounded-xl font-bold text-white text-sm tracking-wide transition-all duration-300 hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2"
-                        style={{ background: 'linear-gradient(135deg, #B08570, #a17c6b)' }}>
+                        style={{ background: 'linear-gradient(135deg, #C06534, #B2541C)' }}>
                         {placing ? (
                           <>
                             <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24" fill="none">

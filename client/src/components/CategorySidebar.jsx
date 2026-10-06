@@ -89,7 +89,7 @@ const CategorySidebar = ({ activeCategory }) => {
         <div className="p-3 border-t border-outline-variant/8 hidden lg:block">
           <div
             className="relative rounded-2xl p-4 text-center overflow-hidden"
-            style={{ backgroundColor: sidebarPromo.sidebarBgColor || '#a17c6b' }}
+            style={{ backgroundColor: sidebarPromo.sidebarBgColor || '#B2541C' }}
           >
             {/* Decorative circles */}
             <div className="absolute -top-4 -right-4 w-12 h-12 rounded-full bg-white/[0.08] pointer-events-none" />
@@ -111,7 +111,7 @@ const CategorySidebar = ({ activeCategory }) => {
             <button
               onClick={() => navigate('/shop')}
               className="mt-3 w-full bg-white/[0.92] text-[12px] font-bold py-2 rounded-xl hover:bg-white active:bg-white/90 transition-all duration-200 shadow-sm relative"
-              style={{ color: sidebarPromo.sidebarBgColor || '#a17c6b' }}
+              style={{ color: sidebarPromo.sidebarBgColor || '#B2541C' }}
             >
               {sidebarPromo.sidebarButtonText || t('sidebar.shopNow')}
             </button>

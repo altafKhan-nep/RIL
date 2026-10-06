@@ -77,7 +77,7 @@ const TrendBadge = ({ value }) => {
   );
 };
 
-const MiniAreaChart = ({ data, height = 100, color = '#a17c6b' }) => {
+const MiniAreaChart = ({ data, height = 100, color = '#B2541C' }) => {
   if (!data || data.length === 0) return null;
   const values = data.map(d => d.total || d.value || 0);
   const max = Math.max(...values, 1);
@@ -288,7 +288,7 @@ const AdminDashboard = () => {
 
         {/* Quick Actions */}
         <div className="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-8 gap-2">
-          <QuickAction icon="add_box" label="Add Product" to="/admin/products" color="#a17c6b" />
+          <QuickAction icon="add_box" label="Add Product" to="/admin/products" color="#B2541C" />
           <QuickAction icon="receipt_long" label="Orders" to="/admin/orders" color="#3b82f6" />
           <QuickAction icon="people" label="Customers" to="/admin/customers" color="#10b981" />
           <QuickAction icon="inventory_2" label="Inventory" to="/admin/inventory" color="#f59e0b" />
@@ -304,7 +304,7 @@ const AdminDashboard = () => {
             <h3 className="text-sm font-bold text-on-surface uppercase tracking-wider">Revenue Trend</h3>
             <span className="text-xs text-on-surface-variant">Last 6 months</span>
           </div>
-          <MiniAreaChart data={chartData} color="#a17c6b" />
+          <MiniAreaChart data={chartData} color="#B2541C" />
           <div className="flex justify-between mt-2">
             {chartData.map((d, i) => (
               <span key={i} className="text-[9px] text-on-surface-variant font-medium">{d.month}</span>

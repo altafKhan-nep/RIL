@@ -151,8 +151,8 @@ const AdminLayout = ({ children }) => {
               src="/logo_lip.png"
               alt="Life In Pieces"
               width={500}
-              height={627}
-              className="h-10 w-auto rounded-lg object-cover group-hover:opacity-85 transition-opacity shrink-0"
+              height={500}
+              className="h-10 w-auto object-contain group-hover:opacity-85 transition-opacity shrink-0"
             />
             {!collapsed && (
               <span className="font-serif text-xl font-semibold text-primary whitespace-nowrap">
@@ -211,8 +211,8 @@ const AdminLayout = ({ children }) => {
               src="/logo_lip.png"
               alt="Life In Pieces"
               width={500}
-              height={627}
-              className="h-10 w-auto rounded-lg object-cover shrink-0"
+              height={500}
+              className="h-10 w-auto object-contain shrink-0"
             />
             <span className="font-serif text-xl font-semibold text-primary">
               Life In Pieces

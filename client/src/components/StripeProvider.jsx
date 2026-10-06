@@ -13,7 +13,7 @@ export const StripeProvider = ({ children, amount }) => {
         appearance: {
           theme: 'stripe',
           variables: {
-            colorPrimary: '#a17c6b',
+            colorPrimary: '#B2541C',
             colorBackground: '#FFFFFF',
             colorText: '#1F1A16',
             colorDanger: '#dc2626',
@@ -27,7 +27,7 @@ export const StripeProvider = ({ children, amount }) => {
               borderRadius: '9999px',
             },
             '.Input:focus': {
-              border: '2px solid #a17c6b',
+              border: '2px solid #B2541C',
               boxShadow: '0 0 0 2px rgba(212, 175, 55, 0.1)',
             },
           },

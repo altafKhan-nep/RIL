@@ -22,7 +22,7 @@ const INITIAL_FORM = {
   sidebarTitle: 'Special Offer',
   sidebarSubtitle: '',
   sidebarButtonText: 'Shop Now',
-  sidebarBgColor: '#a17c6b',
+  sidebarBgColor: '#B2541C',
 };
 
 const Toast = ({ message, type, onClose }) => {
@@ -104,7 +104,7 @@ const PromoFormPanel = ({ open, promotion, categories, onSave, onClose }) => {
         sidebarTitle: promotion.sidebarTitle || 'Special Offer',
         sidebarSubtitle: promotion.sidebarSubtitle || '',
         sidebarButtonText: promotion.sidebarButtonText || 'Shop Now',
-        sidebarBgColor: promotion.sidebarBgColor || '#a17c6b',
+        sidebarBgColor: promotion.sidebarBgColor || '#B2541C',
       });
     } else {
       setForm(INITIAL_FORM);
@@ -436,7 +436,7 @@ const PromoFormPanel = ({ open, promotion, categories, onSave, onClose }) => {
                       value={form.sidebarBgColor}
                       onChange={(e) => handleChange('sidebarBgColor', e.target.value)}
                       className={inputClass('sidebarBgColor')}
-                      placeholder="#a17c6b"
+                      placeholder="#B2541C"
                     />
                   </div>
                 </div>
@@ -445,7 +445,7 @@ const PromoFormPanel = ({ open, promotion, categories, onSave, onClose }) => {
                   <p className="text-[10px] font-bold text-on-surface-variant/40 uppercase tracking-wider mb-2">Preview</p>
                   <div
                     className="rounded-lg p-3 text-center max-w-[200px]"
-                    style={{ backgroundColor: form.sidebarBgColor || '#a17c6b' }}
+                    style={{ backgroundColor: form.sidebarBgColor || '#B2541C' }}
                   >
                     <p className="text-white text-[11px] font-bold uppercase tracking-wide mb-0.5">
                       {form.sidebarTitle || 'Special Offer'}
@@ -456,7 +456,7 @@ const PromoFormPanel = ({ open, promotion, categories, onSave, onClose }) => {
                     <p className="text-white/70 text-[11px] mb-2">
                       Code: {form.code || 'CODE'}
                     </p>
-                    <div className="w-full bg-white text-[12px] font-bold py-1.5 rounded text-center" style={{ color: form.sidebarBgColor || '#a17c6b' }}>
+                    <div className="w-full bg-white text-[12px] font-bold py-1.5 rounded text-center" style={{ color: form.sidebarBgColor || '#B2541C' }}>
                       {form.sidebarButtonText || 'Shop Now'}
                     </div>
                   </div>

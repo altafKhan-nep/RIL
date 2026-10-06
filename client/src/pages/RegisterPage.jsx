@@ -89,7 +89,7 @@ const RegisterPage = () => {
 
       <div className="w-full max-w-md relative z-10">
         <Link to="/" className="flex items-center justify-center gap-2 mb-8 group">
-          <img src="/logo_lip.png" alt="Life In Pieces" width={500} height={627} className="h-12 w-auto rounded-lg object-cover shrink-0" />
+          <img src="/logo_lip.png" alt="Life In Pieces" width={500} height={500} className="h-12 w-auto object-contain shrink-0" />
           <span className="text-xl font-bold text-primary">Life In Pieces</span>
         </Link>
 

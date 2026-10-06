@@ -5,8 +5,8 @@
 @layer base {
   body {
     font-family: 'Poppins', system-ui, -apple-system, 'Segoe UI', sans-serif;
-    background-color: #FCFAF7;
-    color: #26201B;
+    background-color: #FDFAF6;
+    color: #2E2016;
     overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
@@ -36,21 +36,21 @@
 @layer components {
   /* Ambient shadows */
   .ambient-shadow-primary {
-    box-shadow: 0 10px 25px -5px rgba(161, 124, 107, 0.30);
+    box-shadow: 0 10px 25px -5px rgba(178, 84, 28, 0.30);
   }
   .ambient-shadow-surface {
-    box-shadow: 0 4px 20px rgba(60, 40, 30, 0.06);
+    box-shadow: 0 4px 20px rgba(74, 44, 29, 0.06);
   }
 
   /* Primary button */
   .btn-primary {
-    background: #D4AF37;
-    color: #000000;
+    background: linear-gradient(135deg, #C06534, #B2541C);
+    color: #ffffff;
     transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   }
   .btn-primary:hover {
     transform: scale(1.05);
-    box-shadow: 0 10px 25px -5px rgba(212, 175, 55, 0.4);
+    box-shadow: 0 10px 25px -5px rgba(178, 84, 28, 0.4);
   }
   .btn-primary:active {
     transform: scale(0.95);
@@ -58,24 +58,24 @@
 
   /* Secondary button */
   .btn-secondary {
-    background: linear-gradient(135deg, #F8F0DE, #EAD9B8);
+    background: linear-gradient(135deg, #F8EEDC, #E7D3AC);
     color: #4A380F;
     transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   }
   .btn-secondary:hover {
     transform: scale(1.05);
-    box-shadow: 0 10px 25px -5px rgba(197, 160, 89, 0.45);
+    box-shadow: 0 10px 25px -5px rgba(200, 155, 88, 0.45);
   }
 
   /* Ghost button */
   .btn-ghost {
     background: transparent;
-    border: 2px solid #a17c6b;
-    color: #a17c6b;
+    border: 2px solid #B2541C;
+    color: #B2541C;
     transition: all 0.3s ease;
   }
   .btn-ghost:hover {
-    background: rgba(161, 124, 107, 0.08);
+    background: rgba(178, 84, 28, 0.08);
   }
 
   /* Product card hover lift */
@@ -84,7 +84,7 @@
   }
   .product-card:hover {
     transform: translateY(-8px) scale(1.02);
-    box-shadow: 0 12px 30px rgba(60, 40, 30, 0.10);
+    box-shadow: 0 12px 30px rgba(74, 44, 29, 0.10);
   }
 
   .lift-bounce {
@@ -92,7 +92,7 @@
   }
   .lift-bounce:hover {
     transform: translateY(-8px) scale(1.02);
-    box-shadow: 0 12px 30px rgba(60, 40, 30, 0.10);
+    box-shadow: 0 12px 30px rgba(74, 44, 29, 0.10);
   }
 }
 
@@ -180,9 +180,9 @@
 }
 
 @keyframes pulseSubtle {
-  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(161, 124, 107, 0.4); }
-  70% { transform: scale(1.02); box-shadow: 0 0 0 4px rgba(161, 124, 107, 0); }
-  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(161, 124, 107, 0); }
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(178, 84, 28, 0.4); }
+  70% { transform: scale(1.02); box-shadow: 0 0 0 4px rgba(178, 84, 28, 0); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(178, 84, 28, 0); }
 }
 .pulse-tag {
   animation: pulseSubtle 2s infinite;
@@ -198,5 +198,5 @@
 }
 .card-lift:hover {
   transform: translateY(-4px) scale(1.01);
-  box-shadow: 0 12px 30px rgba(60, 40, 30, 0.10);
+  box-shadow: 0 12px 30px rgba(74, 44, 29, 0.10);
 }

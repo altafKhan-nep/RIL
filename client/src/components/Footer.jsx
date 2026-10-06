@@ -20,7 +20,7 @@ const FooterBannerStrip = () => {
             <Link
               key={banner._id}
               to={banner.link || '/shop'}
-              className="flex items-center gap-3 shrink-0 px-4 py-2 rounded-xl border border-[#333]/50 hover:shadow-md transition-all duration-200 hover:border-[#D4AF37]/20 group"
+              className="flex items-center gap-3 shrink-0 px-4 py-2 rounded-xl border border-[#333]/50 hover:shadow-md transition-all duration-200 hover:border-[#C89B58]/20 group"
               style={{ background: banner.bgColor || '#252525' }}
             >
               {banner.image && (
@@ -30,7 +30,7 @@ const FooterBannerStrip = () => {
                 <p className="text-xs font-bold text-white whitespace-nowrap">{banner.title}</p>
                 {banner.subtitle && <p className="text-[10px] text-[#999] whitespace-nowrap">{banner.subtitle}</p>}
               </div>
-              <span className="text-[10px] font-semibold text-[#D4AF37] group-hover:underline whitespace-nowrap">
+              <span className="text-[10px] font-semibold text-[#C89B58] group-hover:underline whitespace-nowrap">
                 {banner.ctaText || 'Learn More'}
               </span>
             </Link>
@@ -67,19 +67,21 @@ const Footer = () => {
   return (
     <>
       <FooterBannerStrip />
-      <footer className="bg-[#1a1a1a] border-t-[3px] border-[#D4AF37] mt-12">
+      <footer className="bg-[#241610] border-t-[3px] border-[#C89B58] mt-12">
         <div className="max-w-container-max mx-auto px-4 md:px-margin-desktop py-10">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-12">
             {/* Brand */}
             <div className="md:col-span-1">
               <Link to="/" className="flex items-center gap-2.5 mb-3">
-                <img
-                  src="/logo_lip.png"
-                  alt="Life In Pieces"
-                  width={500}
-                  height={627}
-                  className="h-12 w-auto rounded-lg object-cover shrink-0"
-                />
+                <span className="bg-[#F9F4ED] rounded-xl p-1 shrink-0">
+                  <img
+                    src="/logo_lip.png"
+                    alt="Life In Pieces"
+                    width={500}
+                    height={500}
+                    className="h-10 w-auto object-contain block"
+                  />
+                </span>
                 <span className="font-serif text-xl font-semibold text-white">Life In Pieces</span>
               </Link>
               <p className="text-sm text-[#999] leading-relaxed">
@@ -96,7 +98,7 @@ const Footer = () => {
                     href={social.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-8 h-8 rounded-lg bg-[#252525] flex items-center justify-center text-[#999] hover:bg-[#D4AF37] hover:text-[#111] transition-colors"
+                    className="w-8 h-8 rounded-lg bg-[#252525] flex items-center justify-center text-[#999] hover:bg-[#C89B58] hover:text-[#111] transition-colors"
                     aria-label={social.name}
                   >
                     <span className="material-symbols-outlined text-lg">{social.icon}</span>
@@ -119,7 +121,7 @@ const Footer = () => {
                   { label: 'Books', to: '/shop/Books' },
                 ].map((link) => (
                   <li key={link.to}>
-                    <Link to={link.to} className="text-sm text-[#999] hover:text-[#D4AF37] transition-colors">
+                    <Link to={link.to} className="text-sm text-[#999] hover:text-[#C89B58] transition-colors">
                       {link.label}
                     </Link>
                   </li>
@@ -134,7 +136,7 @@ const Footer = () => {
                 {footerLinks.length > 0
                   ? footerLinks.map((link) => (
                       <li key={link._id}>
-                        <Link to={link.url} className="text-sm text-[#999] hover:text-[#D4AF37] transition-colors">
+                        <Link to={link.url} className="text-sm text-[#999] hover:text-[#C89B58] transition-colors">
                           {link.label}
                         </Link>
                       </li>
@@ -146,7 +148,7 @@ const Footer = () => {
                       { label: 'FAQ', to: '/help#general-faq' },
                     ].map((item) => (
                       <li key={item.to}>
-                        <Link to={item.to} className="text-sm text-[#999] hover:text-[#D4AF37] transition-colors">
+                        <Link to={item.to} className="text-sm text-[#999] hover:text-[#C89B58] transition-colors">
                           {item.label}
                         </Link>
                       </li>
@@ -165,9 +167,9 @@ const Footer = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder={t('newsletter.placeholder')}
-                  className="flex-1 bg-[#252525] text-sm rounded-lg px-3 py-2 border border-[#333] outline-none focus:border-[#D4AF37] transition-colors"
+                  className="flex-1 bg-[#252525] text-sm rounded-lg px-3 py-2 border border-[#333] outline-none focus:border-[#C89B58] transition-colors"
                 />
-                <button type="submit" className="bg-[#D4AF37] text-black text-sm font-semibold px-3 py-2 rounded-lg hover:bg-white transition-colors">
+                <button type="submit" className="bg-[#C89B58] text-black text-sm font-semibold px-3 py-2 rounded-lg hover:bg-white transition-colors">
                   <span className="material-symbols-outlined text-lg">send</span>
                 </button>
               </form>
@@ -182,9 +184,9 @@ const Footer = () => {
               &copy; {new Date().getFullYear()} Life In Pieces. {t('footer.rights')}
             </p>
             <div className="flex items-center gap-4 text-xs text-[#999]">
-              <Link to="/privacy" className="hover:text-[#D4AF37] transition-colors">Privacy Policy</Link>
-              <Link to="/terms" className="hover:text-[#D4AF37] transition-colors">Terms of Service</Link>
-              <Link to="/help" className="hover:text-[#D4AF37] transition-colors">{t('nav.help')}</Link>
+              <Link to="/privacy" className="hover:text-[#C89B58] transition-colors">Privacy Policy</Link>
+              <Link to="/terms" className="hover:text-[#C89B58] transition-colors">Terms of Service</Link>
+              <Link to="/help" className="hover:text-[#C89B58] transition-colors">{t('nav.help')}</Link>
             </div>
           </div>
         </div>

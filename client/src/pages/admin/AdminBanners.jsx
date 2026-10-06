@@ -551,7 +551,7 @@ const BannerFormModal = ({ open, banner, onSave, onClose }) => {
                   placeholder="#ffffff"
                 />
                 <div className="flex gap-1.5">
-                  {['#ffffff', '#FBF8F4', '#F1EAE2', '#F6ECE5', '#a17c6b', '#4A3B32', '#C5A059', '#2C1E12', '#1F305E', '#1F1A16', '#E3DAD0'].map((color) => (
+                  {['#ffffff', '#FBF8F4', '#F1EAE2', '#F6ECE5', '#B2541C', '#4A3B32', '#C89B58', '#4A2C1D', '#1F305E', '#1F1A16', '#E3DAD0'].map((color) => (
                     <button
                       key={color}
                       type="button"

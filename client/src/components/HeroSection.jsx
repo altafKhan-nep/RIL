@@ -81,7 +81,7 @@ const HeroSection = () => {
   return (
     <section
       className="relative rounded-3xl overflow-hidden bg-surface-container-lowest min-h-[340px] md:min-h-[420px]"
-      style={{ boxShadow: '0 25px 60px -12px rgba(212, 175, 55, 0.15), 0 8px 20px -4px rgba(0, 0, 0, 0.05)' }}
+      style={{ boxShadow: '0 25px 60px -12px rgba(178, 84, 28, 0.15), 0 8px 20px -4px rgba(0, 0, 0, 0.05)' }}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
@@ -97,26 +97,26 @@ const HeroSection = () => {
           {/* Nav arrows — glass morphism */}
           <button
             onClick={prev}
-            className="absolute left-4 md:left-6 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-2xl bg-white/15 backdrop-blur-xl border border-white/20 flex items-center justify-center text-white hover:bg-white/25 hover:scale-110 shadow-lg transition-all duration-300"
+            className="absolute left-4 md:left-6 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-2xl bg-white/60 backdrop-blur-xl border border-outline-variant/30 flex items-center justify-center text-on-surface hover:bg-white/80 hover:scale-110 shadow-lg transition-all duration-300"
           >
             <span className="material-symbols-outlined text-lg">chevron_left</span>
           </button>
           <button
             onClick={next}
-            className="absolute right-4 md:right-6 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-2xl bg-white/15 backdrop-blur-xl border border-white/20 flex items-center justify-center text-white hover:bg-white/25 hover:scale-110 shadow-lg transition-all duration-300"
+            className="absolute right-4 md:right-6 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-2xl bg-white/60 backdrop-blur-xl border border-outline-variant/30 flex items-center justify-center text-on-surface hover:bg-white/80 hover:scale-110 shadow-lg transition-all duration-300"
           >
             <span className="material-symbols-outlined text-lg">chevron_right</span>
           </button>
 
           {/* Bottom bar — glass panel with progress dots + counter */}
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-4 bg-black/20 backdrop-blur-2xl border border-white/10 rounded-full px-5 py-2.5 shadow-lg">
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-4 bg-white/60 backdrop-blur-2xl border border-outline-variant/20 rounded-full px-5 py-2.5 shadow-lg">
             {/* Slide counter */}
-            <span className="text-[11px] font-bold text-white/70 tabular-nums">
-              {String(activeIdx + 1).padStart(2, '0')}<span className="text-white/30 mx-1">/</span>{String(slides.length).padStart(2, '0')}
+            <span className="text-[11px] font-bold text-on-surface-variant tabular-nums">
+              {String(activeIdx + 1).padStart(2, '0')}<span className="text-on-surface-variant/50 mx-1">/</span>{String(slides.length).padStart(2, '0')}
             </span>
 
             {/* Divider */}
-            <div className="w-[1px] h-3 bg-white/15" />
+            <div className="w-[1px] h-3 bg-outline-variant/30" />
 
             {/* Progress dots */}
             <div className="flex items-center gap-2">
@@ -128,12 +128,12 @@ const HeroSection = () => {
                 >
                   <span className={`block rounded-full transition-all duration-500 ${
                     i === activeIdx
-                      ? 'w-8 h-2 bg-white'
-                      : 'w-2 h-2 bg-white/25 group-hover:bg-white/50'
+                      ? 'w-8 h-2 bg-primary'
+                      : 'w-2 h-2 bg-outline-variant/40 group-hover:bg-outline-variant/60'
                   }`} />
                   {i === activeIdx && (
                     <span
-                      className="absolute inset-0 rounded-full bg-white/40 origin-left"
+                      className="absolute inset-0 rounded-full bg-primary/30 origin-left"
                       style={{ transform: `scaleX(${progress / 100})` }}
                     />
                   )}
@@ -159,7 +159,7 @@ const PremiumSlide = ({ slide, isActive, index, activeIdx }) => {
       <img src={slide.image} alt={slide.title} className="w-full h-full object-cover" />
 
       {/* Subtle gradient — just enough for text readability */}
-      <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-black/10 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-r from-[#FDFAF6]/95 via-[#FDFAF6]/70 to-transparent" />
 
       {/* Content */}
       <div className="absolute inset-0 flex items-center">
@@ -167,16 +167,16 @@ const PremiumSlide = ({ slide, isActive, index, activeIdx }) => {
           <div className="max-w-xl">
             {/* Badge */}
             {slide.ctaText && (
-              <div className={`inline-flex items-center gap-1.5 bg-white/15 backdrop-blur-sm border border-white/20 rounded-full px-3.5 py-1.5 mb-4 transition-all duration-500 delay-100 ${
+              <div className={`inline-flex items-center gap-1.5 bg-white/60 backdrop-blur-sm border border-outline-variant/30 rounded-full px-3.5 py-1.5 mb-4 transition-all duration-500 delay-100 ${
                 isActive ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'
               }`}>
-                <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-                <span className="text-[11px] font-bold text-white uppercase tracking-widest">{slide.ctaText}</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+                <span className="text-[11px] font-bold text-on-surface uppercase tracking-widest">{slide.ctaText}</span>
               </div>
             )}
 
             {/* Title */}
-            <h2 className={`text-3xl md:text-4xl lg:text-[3.25rem] font-extrabold text-white mb-4 leading-[1.1] tracking-tight transition-all duration-700 delay-200 ${
+            <h2 className={`text-3xl md:text-4xl lg:text-[3.25rem] font-extrabold text-on-surface mb-4 leading-[1.1] tracking-tight transition-all duration-700 delay-200 ${
               isActive ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'
             }`}>
               {slide.title}
@@ -184,7 +184,7 @@ const PremiumSlide = ({ slide, isActive, index, activeIdx }) => {
 
             {/* Subtitle */}
             {slide.subtitle && (
-              <p className={`text-white/70 text-sm md:text-base mb-7 max-w-md leading-relaxed transition-all duration-700 delay-300 ${
+              <p className={`text-on-surface-variant text-sm md:text-base mb-7 max-w-md leading-relaxed transition-all duration-700 delay-300 ${
                 isActive ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'
               }`}>
                 {slide.subtitle}
@@ -197,7 +197,7 @@ const PremiumSlide = ({ slide, isActive, index, activeIdx }) => {
             }`}>
               <Link
                 to={slide.link || '/shop'}
-                className="group relative inline-flex items-center gap-2.5 bg-primary text-on-primary text-sm font-bold px-7 py-3.5 rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-[0_12px_30px_-5px_rgba(212, 175, 55, 0.5)] hover:scale-[1.03] active:scale-[0.97]"
+                className="group relative inline-flex items-center gap-2.5 bg-primary text-on-primary text-sm font-bold px-7 py-3.5 rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-[0_12px_30px_-5px_rgba(178, 84, 28, 0.5)] hover:scale-[1.03] active:scale-[0.97]"
               >
                 <span className="absolute inset-0 bg-gradient-to-r from-primary-container/0 via-white/10 to-primary-container/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
                 <span className="relative z-10">{t('hero.shopNow')}</span>
@@ -206,7 +206,7 @@ const PremiumSlide = ({ slide, isActive, index, activeIdx }) => {
 
               <Link
                 to="/shop?flash=true"
-                className="group inline-flex items-center gap-2 bg-surface-container-lowest/40 backdrop-blur-md border border-outline-variant/15 text-on-surface text-sm font-semibold px-6 py-3.5 rounded-2xl hover:bg-surface-container-lowest/60 hover:border-primary/20 hover:scale-[1.03] active:scale-[0.97] transition-all duration-300"
+                className="group inline-flex items-center gap-2 bg-surface-container-lowest/40 backdrop-blur-md border border-outline-variant/40 text-on-surface text-sm font-semibold px-6 py-3.5 rounded-2xl hover:bg-surface-container-lowest/60 hover:border-primary/20 hover:scale-[1.03] active:scale-[0.97] transition-all duration-300"
               >
                 <span className="material-symbols-outlined text-lg text-primary group-hover:animate-[wiggle_0.3s_ease-in-out]">flash_on</span>
                 <span>{t('products.flashDeals')}</span>
@@ -220,19 +220,19 @@ const PremiumSlide = ({ slide, isActive, index, activeIdx }) => {
               <div className="flex items-center gap-1.5">
                 <div className="flex -space-x-1.5">
                   {[0,1,2].map((i) => (
-                    <div key={i} className="w-5 h-5 rounded-full border-2 border-black/20 bg-white/20 flex items-center justify-center">
-                      <span className="material-symbols-outlined text-[10px] text-white">person</span>
+                    <div key={i} className="w-5 h-5 rounded-full border-2 border-outline-variant/40 bg-white/70 flex items-center justify-center">
+                      <span className="material-symbols-outlined text-[10px] text-on-surface-variant">person</span>
                     </div>
                   ))}
                 </div>
-                <span className="text-[11px] font-semibold text-white/60">2.4k+</span>
+                <span className="text-[11px] font-semibold text-on-surface-variant">2.4k+</span>
               </div>
-              <div className="w-[1px] h-3 bg-white/20" />
+              <div className="w-[1px] h-3 bg-outline-variant/30" />
               <div className="flex items-center gap-1">
                 {[1,2,3,4,5].map((i) => (
-                  <span key={i} className="material-symbols-outlined text-[13px] text-yellow-400">star</span>
+                  <span key={i} className="material-symbols-outlined text-[13px] text-[#A87A38]">star</span>
                 ))}
-                <span className="text-[11px] font-semibold text-white/60 ml-1">4.9</span>
+                <span className="text-[11px] font-semibold text-on-surface-variant ml-1">4.9</span>
               </div>
             </div>
           </div>
@@ -247,7 +247,7 @@ const PremiumFallback = () => {
   return (
     <section
       className="relative rounded-3xl overflow-hidden min-h-[340px] md:min-h-[420px]"
-      style={{ boxShadow: '0 25px 60px -12px rgba(212, 175, 55, 0.15), 0 8px 20px -4px rgba(0, 0, 0, 0.05)' }}
+      style={{ boxShadow: '0 25px 60px -12px rgba(178, 84, 28, 0.15), 0 8px 20px -4px rgba(0, 0, 0, 0.05)' }}
     >
     {/* Top shine */}
     <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-primary-container/40 to-transparent z-30" />
@@ -291,12 +291,12 @@ const PremiumFallback = () => {
 
           {/* CTAs */}
           <div className="flex items-center gap-3 animate-fade-up" style={{ animationDelay: '300ms' }}>
-            <Link to="/shop" className="group relative inline-flex items-center gap-2.5 bg-primary text-on-primary text-sm font-bold px-7 py-3.5 rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-[0_12px_30px_-5px_rgba(212, 175, 55, 0.5)] hover:scale-[1.03] active:scale-[0.97]">
+            <Link to="/shop" className="group relative inline-flex items-center gap-2.5 bg-primary text-on-primary text-sm font-bold px-7 py-3.5 rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-[0_12px_30px_-5px_rgba(178, 84, 28, 0.5)] hover:scale-[1.03] active:scale-[0.97]">
               <span className="absolute inset-0 bg-gradient-to-r from-primary-container/0 via-white/10 to-primary-container/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
               <span className="relative z-10">{t('hero.shopNow')}</span>
               <span className="material-symbols-outlined text-lg relative z-10 group-hover:translate-x-0.5 transition-transform duration-300">arrow_forward</span>
             </Link>
-            <Link to="/shop?flash=true" className="group inline-flex items-center gap-2 bg-surface-container-lowest/40 backdrop-blur-md border border-outline-variant/15 text-on-surface text-sm font-semibold px-6 py-3.5 rounded-2xl hover:bg-surface-container-lowest/60 hover:border-primary/20 hover:scale-[1.03] active:scale-[0.97] transition-all duration-300">
+            <Link to="/shop?flash=true" className="group inline-flex items-center gap-2 bg-surface-container-lowest/40 backdrop-blur-md border border-outline-variant/40 text-on-surface text-sm font-semibold px-6 py-3.5 rounded-2xl hover:bg-surface-container-lowest/60 hover:border-primary/20 hover:scale-[1.03] active:scale-[0.97] transition-all duration-300">
               <span className="material-symbols-outlined text-lg text-primary group-hover:animate-[wiggle_0.3s_ease-in-out]">flash_on</span>
               <span>{t('products.flashDeals')}</span>
             </Link>

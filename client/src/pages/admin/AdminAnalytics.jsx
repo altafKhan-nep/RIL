@@ -103,7 +103,7 @@ const TrendBadge = ({ value, label }) => {
   );
 };
 
-const AreaChart = ({ data, valueKey, labelKey, height = 280, color = '#a17c6b', secondaryData, secondaryColor, secondaryLabel }) => {
+const AreaChart = ({ data, valueKey, labelKey, height = 280, color = '#B2541C', secondaryData, secondaryColor, secondaryLabel }) => {
   const [hoveredIdx, setHoveredIdx] = useState(null);
   if (!data || data.length === 0) {
     return (
@@ -473,7 +473,7 @@ const AdminAnalytics = () => {
           valueKey="total"
           labelKey="month"
           height={280}
-          color="#a17c6b"
+          color="#B2541C"
           secondaryData={chartCustomerData.length > 0 ? chartCustomerData : null}
           secondaryColor="#6B8FD4"
           secondaryLabel="New Customers"
@@ -491,7 +491,7 @@ const AdminAnalytics = () => {
                   const revenue = cat.revenue || 0;
                   const units = cat.unitsSold || 0;
                   const width = Math.max((revenue / topCategoriesMaxRevenue) * 100, 5);
-                  const colors = ['#a17c6b', '#6B8FD4', '#E8CE7A', '#C08A4A', '#10b981', '#8b5cf6'];
+                  const colors = ['#B2541C', '#6B8FD4', '#E8D1A3', '#C08A4A', '#10b981', '#8b5cf6'];
                   return (
                     <div key={cat._id || i}>
                       <div className="flex items-center gap-3 mb-1.5">

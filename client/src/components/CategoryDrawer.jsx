@@ -88,7 +88,7 @@ const CategoryDrawer = ({ open, onClose }) => {
         }`}
       >
         {/* ─── Header ─── */}
-        <div className="relative bg-gradient-to-br from-[#422815] via-[#331E0F] to-[#331E0F] px-5 pt-5 pb-5 shrink-0">
+        <div className="relative bg-gradient-to-br from-[#4A2C1D] via-[#3A2114] to-[#3A2114] px-5 pt-5 pb-5 shrink-0">
           {/* Decorative circles */}
           <div className="absolute -top-8 -right-8 w-24 h-24 rounded-full bg-white/[0.06] pointer-events-none" />
           <div className="absolute -bottom-12 -left-6 w-20 h-20 rounded-full bg-white/[0.04] pointer-events-none" />
