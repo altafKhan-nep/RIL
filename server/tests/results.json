@@ -1,0 +1,374 @@
+{
+  "passed": 92,
+  "failed": 0,
+  "results": [
+    {
+      "name": "GET /api/health returns ok",
+      "ok": true
+    },
+    {
+      "name": "GET /api/settings returns all sections",
+      "ok": true
+    },
+    {
+      "name": "GET /api/products returns paginated list",
+      "ok": true
+    },
+    {
+      "name": "POST /api/users/login valid credentials returns token",
+      "ok": true
+    },
+    {
+      "name": "POST /api/users/login wrong password returns 401",
+      "ok": true
+    },
+    {
+      "name": "GET /api/users/profile without token returns 401",
+      "ok": true
+    },
+    {
+      "name": "Register valid user returns token and does not crash",
+      "ok": true
+    },
+    {
+      "name": "Register duplicate email returns 400",
+      "ok": true
+    },
+    {
+      "name": "Register invalid email returns 400",
+      "ok": true
+    },
+    {
+      "name": "Register short password returns 400",
+      "ok": true
+    },
+    {
+      "name": "Register blank name returns 400",
+      "ok": true
+    },
+    {
+      "name": "Login valid credentials returns token",
+      "ok": true
+    },
+    {
+      "name": "Login wrong password returns 401",
+      "ok": true
+    },
+    {
+      "name": "Login unknown email returns 401",
+      "ok": true
+    },
+    {
+      "name": "Login empty body returns 400",
+      "ok": true
+    },
+    {
+      "name": "Profile update name persists",
+      "ok": true
+    },
+    {
+      "name": "Password change requires current password",
+      "ok": true
+    },
+    {
+      "name": "Password change: new password works, old fails, old token revoked",
+      "ok": true
+    },
+    {
+      "name": "Deactivated account cannot log in",
+      "ok": true
+    },
+    {
+      "name": "Protected route without token returns 401",
+      "ok": true
+    },
+    {
+      "name": "Protected route with garbage token returns 401",
+      "ok": true
+    },
+    {
+      "name": "content_manager CANNOT delete products (privilege escalation)",
+      "ok": true
+    },
+    {
+      "name": "content_manager CANNOT edit inventory",
+      "ok": true
+    },
+    {
+      "name": "content_manager CANNOT delete promotions",
+      "ok": true
+    },
+    {
+      "name": "order_manager CANNOT create products",
+      "ok": true
+    },
+    {
+      "name": "order_manager CANNOT edit promotions",
+      "ok": true
+    },
+    {
+      "name": "customer CANNOT access admin dashboard stats",
+      "ok": true
+    },
+    {
+      "name": "customer CANNOT access admin orders list",
+      "ok": true
+    },
+    {
+      "name": "admin CAN create and delete products",
+      "ok": true
+    },
+    {
+      "name": "unauthenticated CANNOT create products",
+      "ok": true
+    },
+    {
+      "name": "Order total is server-computed from DB prices (not client)",
+      "ok": true
+    },
+    {
+      "name": "Free shipping applies at/above threshold",
+      "ok": true
+    },
+    {
+      "name": "New order is NOT auto-marked paid",
+      "ok": true
+    },
+    {
+      "name": "Draft product cannot be ordered",
+      "ok": true
+    },
+    {
+      "name": "Insufficient stock is rejected",
+      "ok": true
+    },
+    {
+      "name": "Stock is decremented exactly by ordered qty",
+      "ok": true
+    },
+    {
+      "name": "Percentage promo discount is computed server-side",
+      "ok": true
+    },
+    {
+      "name": "Fixed promo discount is applied",
+      "ok": true
+    },
+    {
+      "name": "Expired promo is rejected",
+      "ok": true
+    },
+    {
+      "name": "Invalid promo code is rejected",
+      "ok": true
+    },
+    {
+      "name": "Usage limit is enforced (usageLimit=1, two orders)",
+      "ok": true
+    },
+    {
+      "name": "Client cannot inflate discount via cartTotal",
+      "ok": true
+    },
+    {
+      "name": "Legal status transition Pending -> Processing -> Shipped -> Delivered",
+      "ok": true
+    },
+    {
+      "name": "Illegal transition Delivered -> Cancelled is rejected",
+      "ok": true
+    },
+    {
+      "name": "Illegal transition Pending -> Delivered is rejected",
+      "ok": true
+    },
+    {
+      "name": "Customer cancellation restores stock exactly once",
+      "ok": true
+    },
+    {
+      "name": "Double cancellation does not double-restore stock",
+      "ok": true
+    },
+    {
+      "name": "Idempotency key prevents duplicate orders",
+      "ok": true
+    },
+    {
+      "name": "Customer cannot view another customer's order (IDOR)",
+      "ok": true
+    },
+    {
+      "name": "Order tracking requires authentication",
+      "ok": true
+    },
+    {
+      "name": "Admin-created product appears in public listing",
+      "ok": true
+    },
+    {
+      "name": "Admin price update propagates to storefront",
+      "ok": true
+    },
+    {
+      "name": "Admin-created category appears publicly",
+      "ok": true
+    },
+    {
+      "name": "Admin deactivated category is hidden publicly",
+      "ok": true
+    },
+    {
+      "name": "Admin stock update changes storefront availability",
+      "ok": true
+    },
+    {
+      "name": "Webhook rejects a request with no signature",
+      "ok": true
+    },
+    {
+      "name": "Webhook rejects a forged signature",
+      "ok": true
+    },
+    {
+      "name": "Webhook rejects a signature over different bytes (tampered body)",
+      "ok": true
+    },
+    {
+      "name": "Webhook accepts a correctly signed event and confirms the order",
+      "ok": true
+    },
+    {
+      "name": "Webhook does not confirm an order with a mismatched intent id",
+      "ok": true
+    },
+    {
+      "name": "Webhook replay for an already-paid order is idempotent",
+      "ok": true
+    },
+    {
+      "name": "free_shipping promotion zeroes shipping on a small order",
+      "ok": true
+    },
+    {
+      "name": "free_shipping promo still pays tax on merchandise",
+      "ok": true
+    },
+    {
+      "name": "Unpaid cancelled order has refundStatus none",
+      "ok": true
+    },
+    {
+      "name": "stockHistory records every order decrement",
+      "ok": true
+    },
+    {
+      "name": "stockHistory records cancellation restoration exactly once",
+      "ok": true
+    },
+    {
+      "name": "Opening stock is recorded without changing the balance",
+      "ok": true
+    },
+    {
+      "name": "Editing stock through the product API is audited",
+      "ok": true
+    },
+    {
+      "name": "Deleting a product keeps Category.productCount accurate",
+      "ok": true
+    },
+    {
+      "name": "Moving a product between categories updates both counts",
+      "ok": true
+    },
+    {
+      "name": "Concurrent decrements produce an exact audit chain",
+      "ok": true
+    },
+    {
+      "name": "Public category counts exclude draft products",
+      "ok": true
+    },
+    {
+      "name": "Stored Category.productCount stays accurate after a sale",
+      "ok": true
+    },
+    {
+      "name": "Dashboard revenue excludes cancelled orders",
+      "ok": true
+    },
+    {
+      "name": "Admin order list is paginated",
+      "ok": true
+    },
+    {
+      "name": "Order tracking origin matches configured region (not hardcoded Mumbai)",
+      "ok": true
+    },
+    {
+      "name": "Concurrent orders never drive stock negative",
+      "ok": true
+    },
+    {
+      "name": "Concurrent single-use promo: exactly one wins",
+      "ok": true
+    },
+    {
+      "name": "NoSQL injection via keyword is rejected or sanitized",
+      "ok": true
+    },
+    {
+      "name": "XSS payload in search does not return raw script",
+      "ok": true
+    },
+    {
+      "name": "Protected admin route without token returns 401",
+      "ok": true
+    },
+    {
+      "name": "Order tracking without token returns 401 (IDOR protection)",
+      "ok": true
+    },
+    {
+      "name": "Invalid ObjectId in tracking returns 400 not 500",
+      "ok": true
+    },
+    {
+      "name": "Security headers are present",
+      "ok": true
+    },
+    {
+      "name": "INV-1: Product stock never goes negative",
+      "ok": true
+    },
+    {
+      "name": "INV-2: Order total = items + tax + shipping - discount",
+      "ok": true
+    },
+    {
+      "name": "INV-4: Order quantity is always > 0",
+      "ok": true
+    },
+    {
+      "name": "INV-9: Draft products are not publicly purchasable",
+      "ok": true
+    },
+    {
+      "name": "INV-11: User cannot access another user's order",
+      "ok": true
+    },
+    {
+      "name": "INV-15: UI total (order total) equals backend total",
+      "ok": true
+    },
+    {
+      "name": "INV-19: Duplicate idempotency key does not create duplicate orders",
+      "ok": true
+    },
+    {
+      "name": "INV-20: Failed order does not leave partial state",
+      "ok": true
+    }
+  ]
+}

@@ -36,7 +36,7 @@ const UserDashboard = () => {
 
   useEffect(() => {
     refreshProfile().catch(() => {});
-    api.getMyOrders().then(setOrders).catch(() => []).finally(() => setLoading(false));
+    api.getMyOrders().then((res) => setOrders(res?.orders || res || [])).catch(() => []).finally(() => setLoading(false));
   }, []);
 
   useEffect(() => {
@@ -78,14 +78,18 @@ const UserDashboard = () => {
       showToast('Passwords do not match', 'error');
       return;
     }
-    if (passwordForm.new.length < 6) {
-      showToast('Password must be at least 6 characters', 'error');
+    if (!passwordForm.current) {
+      showToast('Please enter your current password', 'error');
+      return;
+    }
+    if (passwordForm.new.length < 8) {
+      showToast('Password must be at least 8 characters', 'error');
       return;
     }
     try {
-      await api.updateProfile({ password: passwordForm.new });
+      await api.updateProfile({ currentPassword: passwordForm.current, password: passwordForm.new });
       setPasswordForm({ current: '', new: '', confirm: '' });
-      showToast('Password changed successfully');
+      showToast('Password changed successfully. Please sign in again on other devices.');
     } catch (err) {
       showToast(err.message || 'Failed to change password', 'error');
     }

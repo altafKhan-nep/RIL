@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
 const express = require('express');
-const { protect, admin } = require('../middleware/authMiddleware');
+const { protect, requirePermission } = require('../middleware/authMiddleware');
 const asyncHandler = require('../utils/asyncHandler');
 const router = express.Router();
 
@@ -32,7 +32,7 @@ function fileFilter(req, file, cb) {
 
 const upload = multer({ storage, fileFilter, limits: { fileSize: 5 * 1024 * 1024 } });
 
-router.post('/', protect, admin, upload.single('image'), asyncHandler(async (req, res) => {
+router.post('/', protect, requirePermission('products:edit'), upload.single('image'), asyncHandler(async (req, res) => {
   if (!req.file) {
     res.status(400);
     throw new Error('No image file provided');
@@ -40,7 +40,7 @@ router.post('/', protect, admin, upload.single('image'), asyncHandler(async (req
   res.json({ url: `/uploads/${req.file.filename}` });
 }));
 
-router.post('/multiple', protect, admin, upload.array('images', 10), asyncHandler(async (req, res) => {
+router.post('/multiple', protect, requirePermission('products:edit'), upload.array('images', 10), asyncHandler(async (req, res) => {
   if (!req.files || req.files.length === 0) {
     res.status(400);
     throw new Error('No image files provided');

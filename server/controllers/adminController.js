@@ -4,8 +4,23 @@ const Product = require('../models/Product');
 const asyncHandler = require('../utils/asyncHandler');
 const { validateUser } = require('../middleware/validationMiddleware');
 const ObjectId = require('mongoose').Types.ObjectId;
+const { incrementStock } = require('../utils/stockAudit');
+const { processRefund } = require('../utils/refunds');
 
 const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+// ---------------------------------------------------------------------------
+// Revenue definition (single source of truth, enforced across every metric):
+//   Revenue counts orders that are NOT cancelled. Unpaid COD orders are
+//   counted because they are genuine orders; cancelled orders are never
+//   sales, and refunded orders are excluded once fully refunded.
+// ---------------------------------------------------------------------------
+const REVENUE_STATUSES = ['Pending', 'Processing', 'Shipped', 'Out for Delivery', 'Delivered'];
+const revenueMatch = (extra = {}) => ({
+  status: { $in: REVENUE_STATUSES },
+  refundStatus: { $nin: ['refunded'] },
+  ...extra,
+});
 
 // @desc    Get admin dashboard stats
 // @route   GET /api/admin/stats
@@ -17,6 +32,7 @@ const getAdminStats = asyncHandler(async (req, res) => {
   const endOfLastMonth = new Date(startOfThisMonth.getTime() - 1);
 
   const totalSalesResult = await Order.aggregate([
+    { $match: revenueMatch() },
     { $group: { _id: null, total: { $sum: '$totalPrice' } } },
   ]);
   const totalSales = totalSalesResult.length ? totalSalesResult[0].total : 0;
@@ -120,11 +136,7 @@ const getAdminStats = asyncHandler(async (req, res) => {
   const repeatCustomerRate = totalCustomers > 0 ? (repeatCount / totalCustomers) * 100 : 0;
 
   const revenueThisMonthResult = await Order.aggregate([
-    {
-      $match: {
-        createdAt: { $gte: startOfThisMonth },
-      },
-    },
+    { $match: revenueMatch({ createdAt: { $gte: startOfThisMonth } }) },
     { $group: { _id: null, total: { $sum: '$totalPrice' } } },
   ]);
   const revenueThisMonth = revenueThisMonthResult.length
@@ -132,11 +144,7 @@ const getAdminStats = asyncHandler(async (req, res) => {
     : 0;
 
   const revenueLastMonthResult = await Order.aggregate([
-    {
-      $match: {
-        createdAt: { $gte: startOfLastMonth, $lte: endOfLastMonth },
-      },
-    },
+    { $match: revenueMatch({ createdAt: { $gte: startOfLastMonth, $lte: endOfLastMonth } }) },
     { $group: { _id: null, total: { $sum: '$totalPrice' } } },
   ]);
   const revenueLastMonth = revenueLastMonthResult.length
@@ -504,13 +512,8 @@ const updateOrderStatus = asyncHandler(async (req, res) => {
   const updatedOrder = await Order.findByIdAndUpdate(req.params.id, updateOps, { new: true });
 
   if (status === 'Cancelled') {
-    const Product = require('../models/Product');
     for (const item of order.orderItems) {
-      await Product.findByIdAndUpdate(
-        item.product,
-        { $inc: { countInStock: item.qty } },
-        { new: true }
-      );
+      await incrementStock(item.product, item.qty, 'Stock restored: order cancelled by admin', req.user._id);
     }
   }
 
@@ -538,7 +541,24 @@ const cancelOrder = asyncHandler(async (req, res) => {
     throw new Error('Order is already cancelled');
   }
 
+  // Refund a paid order. Cancelled / Paid / Refunded stay independent facts.
+  if (order.isPaid) {
+    const refundStatus = await processRefund(order, req.body.reason || 'Cancelled by admin');
+    order.refundStatus = refundStatus;
+    order.refundedAmount = refundStatus === 'refunded' ? order.totalPrice : 0;
+    order.refundReason = req.body.reason || 'Cancelled by admin';
+    if (refundStatus === 'refunded') order.refundedAt = Date.now();
+  }
+
   order.status = 'Cancelled';
+  order.cancelledAt = Date.now();
+  order.cancelReason = req.body.reason || 'Cancelled by admin';
+
+  // Restore stock exactly once (the guard above prevents a second cancel).
+  for (const item of order.orderItems) {
+    await incrementStock(item.product, item.qty, 'Stock restored: order cancelled by admin', req.user._id);
+  }
+
   const updatedOrder = await order.save();
 
   res.json(updatedOrder);
@@ -552,11 +572,11 @@ const getAnalytics = asyncHandler(async (req, res) => {
 
   const revenueByMonth = await Order.aggregate([
     {
-      $match: {
+      $match: revenueMatch({
         createdAt: {
           $gte: new Date(now.getFullYear(), now.getMonth() - 11, 1),
         },
-      },
+      }),
     },
     {
       $group: {

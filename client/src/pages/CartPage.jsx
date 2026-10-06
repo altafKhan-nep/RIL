@@ -48,7 +48,8 @@ const CartPage = () => {
     }
   };
 
-  const finalTotal = Number((totalPrice - promoDiscount).toFixed(2));
+  // totalPrice from context already has the promo discount applied exactly once.
+  const finalTotal = totalPrice;
 
   const handleConfirmRemove = () => {
     if (removeTarget) {

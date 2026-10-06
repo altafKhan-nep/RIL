@@ -1,0 +1,235 @@
+{
+  "generatedAt": "2026-10-06T15:29:36.831Z",
+  "commitAudited": "uncommitted working tree (QA remediation on top of 36778a9)",
+  "target": "Life In Pieces storefront (formerly NovaCart)",
+  "environment": {
+    "api": "node server (isolated QA run)",
+    "database": "mongodb://localhost:27017/novacart_qa",
+    "note": "Never touches production Atlas. Server booted with NODE_ENV=test, dedicated JWT secret and raised rate limits."
+  },
+  "totals": {
+    "suites": 12,
+    "tests": 92,
+    "passed": 92,
+    "failed": 0,
+    "passRate": 100
+  },
+  "determinism": "92/92 on 3 consecutive consecutive runs (this report reflects run N of the final sequence).",
+  "suites": [
+    {
+      "name": "Smoke & Baseline",
+      "count": 6,
+      "tests": [
+        "GET /api/health returns ok",
+        "GET /api/settings returns all sections",
+        "GET /api/products returns paginated list",
+        "POST /api/users/login valid credentials returns token",
+        "POST /api/users/login wrong password returns 401",
+        "GET /api/users/profile without token returns 401"
+      ]
+    },
+    {
+      "name": "Authentication & Registration",
+      "count": 15,
+      "tests": [
+        "Register valid user returns token and does not crash",
+        "Register duplicate email returns 400",
+        "Register invalid email returns 400",
+        "Register short password returns 400",
+        "Register blank name returns 400",
+        "Login valid credentials returns token",
+        "Login wrong password returns 401",
+        "Login unknown email returns 401",
+        "Login empty body returns 400",
+        "Profile update name persists",
+        "Password change requires current password",
+        "Password change: new password works, old fails, old token revoked",
+        "Deactivated account cannot log in",
+        "Protected route without token returns 401",
+        "Protected route with garbage token returns 401"
+      ]
+    },
+    {
+      "name": "Roles & Permission Matrix",
+      "count": 9,
+      "tests": [
+        "content_manager CANNOT delete products (privilege escalation)",
+        "content_manager CANNOT edit inventory",
+        "content_manager CANNOT delete promotions",
+        "order_manager CANNOT create products",
+        "order_manager CANNOT edit promotions",
+        "customer CANNOT access admin dashboard stats",
+        "customer CANNOT access admin orders list",
+        "admin CAN create and delete products",
+        "unauthenticated CANNOT create products"
+      ]
+    },
+    {
+      "name": "Pricing & Authoritative Totals",
+      "count": 6,
+      "tests": [
+        "Order total is server-computed from DB prices (not client)",
+        "Free shipping applies at/above threshold",
+        "New order is NOT auto-marked paid",
+        "Draft product cannot be ordered",
+        "Insufficient stock is rejected",
+        "Stock is decremented exactly by ordered qty"
+      ]
+    },
+    {
+      "name": "Promotions & Discounts",
+      "count": 6,
+      "tests": [
+        "Percentage promo discount is computed server-side",
+        "Fixed promo discount is applied",
+        "Expired promo is rejected",
+        "Invalid promo code is rejected",
+        "Usage limit is enforced (usageLimit=1, two orders)",
+        "Client cannot inflate discount via cartTotal"
+      ]
+    },
+    {
+      "name": "Orders, Cancellation & Idempotency",
+      "count": 8,
+      "tests": [
+        "Legal status transition Pending -> Processing -> Shipped -> Delivered",
+        "Illegal transition Delivered -> Cancelled is rejected",
+        "Illegal transition Pending -> Delivered is rejected",
+        "Customer cancellation restores stock exactly once",
+        "Double cancellation does not double-restore stock",
+        "Idempotency key prevents duplicate orders",
+        "Customer cannot view another customer's order (IDOR)",
+        "Order tracking requires authentication"
+      ]
+    },
+    {
+      "name": "Admin ↔ Storefront Synchronization",
+      "count": 5,
+      "tests": [
+        "Admin-created product appears in public listing",
+        "Admin price update propagates to storefront",
+        "Admin-created category appears publicly",
+        "Admin deactivated category is hidden publicly",
+        "Admin stock update changes storefront availability"
+      ]
+    },
+    {
+      "name": "Stripe Webhook Signature Verification",
+      "count": 6,
+      "tests": [
+        "Webhook rejects a request with no signature",
+        "Webhook rejects a forged signature",
+        "Webhook rejects a signature over different bytes (tampered body)",
+        "Webhook accepts a correctly signed event and confirms the order",
+        "Webhook does not confirm an order with a mismatched intent id",
+        "Webhook replay for an already-paid order is idempotent"
+      ]
+    },
+    {
+      "name": "Refunds, Free Shipping, Stock Audit & Analytics",
+      "count": 15,
+      "tests": [
+        "free_shipping promotion zeroes shipping on a small order",
+        "free_shipping promo still pays tax on merchandise",
+        "Unpaid cancelled order has refundStatus none",
+        "stockHistory records every order decrement",
+        "stockHistory records cancellation restoration exactly once",
+        "Opening stock is recorded without changing the balance",
+        "Editing stock through the product API is audited",
+        "Deleting a product keeps Category.productCount accurate",
+        "Moving a product between categories updates both counts",
+        "Concurrent decrements produce an exact audit chain",
+        "Public category counts exclude draft products",
+        "Stored Category.productCount stays accurate after a sale",
+        "Dashboard revenue excludes cancelled orders",
+        "Admin order list is paginated",
+        "Order tracking origin matches configured region (not hardcoded Mumbai)"
+      ]
+    },
+    {
+      "name": "Concurrency & Inventory Races",
+      "count": 2,
+      "tests": [
+        "Concurrent orders never drive stock negative",
+        "Concurrent single-use promo: exactly one wins"
+      ]
+    },
+    {
+      "name": "Security & Injection",
+      "count": 6,
+      "tests": [
+        "NoSQL injection via keyword is rejected or sanitized",
+        "XSS payload in search does not return raw script",
+        "Protected admin route without token returns 401",
+        "Order tracking without token returns 401 (IDOR protection)",
+        "Invalid ObjectId in tracking returns 400 not 500",
+        "Security headers are present"
+      ]
+    },
+    {
+      "name": "Data Consistency Invariants",
+      "count": 8,
+      "tests": [
+        "INV-1: Product stock never goes negative",
+        "INV-2: Order total = items + tax + shipping - discount",
+        "INV-4: Order quantity is always > 0",
+        "INV-9: Draft products are not publicly purchasable",
+        "INV-11: User cannot access another user's order",
+        "INV-15: UI total (order total) equals backend total",
+        "INV-19: Duplicate idempotency key does not create duplicate orders",
+        "INV-20: Failed order does not leave partial state"
+      ]
+    }
+  ],
+  "notExecuted": [
+    "Real Stripe API calls (PaymentIntent create/confirm) and live dashboard refund - no real credentials available",
+    "Full browser-driven UI E2E (no headless browser tooling configured in this environment)",
+    "Production Atlas / Render / Vercel verification (no production credentials, JWT_SECRET missing on Render)",
+    "Durable upload persistence across Render redeploys (object storage not configured)",
+    "Mobile/responsive visual regression and Lighthouse performance budgets"
+  ],
+  "knownBlockers": [
+    {
+      "severity": "BLOCKER",
+      "area": "Production auth",
+      "issue": "Render service has no JWT_SECRET; admin login fails with \"secretOrPrivateKey must have a value\".",
+      "action": "Set JWT_SECRET on the Render service and redeploy."
+    },
+    {
+      "severity": "BLOCKER",
+      "area": "Production branding",
+      "issue": "Vercel /api/settings still returns NovaCart because Atlas holds the old settings document.",
+      "action": "Update Atlas settings (requires a Render admin token or the real Atlas URI)."
+    },
+    {
+      "severity": "HIGH",
+      "area": "Product vs category images",
+      "issue": "Product and category image paths collide in production, so updated product images also changed category imagery.",
+      "action": "Repoint category.image to distinct paths in Atlas."
+    },
+    {
+      "severity": "HIGH",
+      "area": "Upload durability",
+      "issue": "Uploads are written to Render local disk and are lost on redeploy.",
+      "action": "Move uploads to durable object storage."
+    },
+    {
+      "severity": "MEDIUM",
+      "area": "Session security",
+      "issue": "JWT is persisted in localStorage; tokenVersion provides revocation-on-password-change but not on explicit logout or theft.",
+      "action": "Move to httpOnly cookie refresh tokens."
+    },
+    {
+      "severity": "MEDIUM",
+      "area": "Transactionality",
+      "issue": "MongoDB is standalone, so checkout cannot use multi-document transactions; relies on atomic per-doc guards plus compensating rollback.",
+      "action": "Convert to a replica set for true ACID checkout."
+    },
+    {
+      "severity": "LOW",
+      "area": "Secrets hygiene",
+      "issue": "An Atlas password was exposed earlier in this session.",
+      "action": "Rotate the Atlas credential."
+    }
+  ]
+}

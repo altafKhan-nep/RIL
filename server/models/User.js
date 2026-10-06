@@ -91,6 +91,11 @@ const userSchema = mongoose.Schema(
     },
     permissions: [{ type: String, enum: Object.values(PERMISSIONS) }],
     isActive: { type: Boolean, default: true },
+    // Bumped on password change / forced logout. Any JWT issued before this
+    // value is rejected, so a stolen or stale token cannot outlive a password
+    // change.
+    tokenVersion: { type: Number, default: 0 },
+    passwordChangedAt: { type: Date },
     avatar: { type: String, default: '' },
     phone: { type: String, default: '' },
     wishlist: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }],

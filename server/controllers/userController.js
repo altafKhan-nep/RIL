@@ -12,6 +12,10 @@ const authUser = async (req, res) => {
   }
 
   const user = await User.findOne({ email: email.toLowerCase() });
+  if (user && !user.isActive) {
+    res.status(403);
+    throw new Error('Account has been disabled');
+  }
   if (user && (await user.matchPassword(password))) {
     user.lastLogin = new Date();
     user.loginCount += 1;
@@ -21,7 +25,7 @@ const authUser = async (req, res) => {
       isAdmin: user.isAdmin, role: user.role,
       permissions: user.getEffectivePermissions(),
       loyaltyPoints: user.loyaltyPoints,
-      token: generateToken(user._id),
+      token: generateToken(user._id, user.tokenVersion || 0),
     });
   } else {
     res.status(401);
@@ -46,7 +50,7 @@ const registerUser = async (req, res) => {
       isAdmin: user.isAdmin, role: user.role,
       permissions: user.getEffectivePermissions(),
       loyaltyPoints: user.loyaltyPoints,
-      token: generateToken(user._id),
+      token: generateToken(user._id, user.tokenVersion || 0),
     });
   } else {
     res.status(400); throw new Error('Invalid user data');
@@ -72,16 +76,36 @@ const getUserProfile = async (req, res) => {
 const updateUserProfile = async (req, res) => {
   const user = await User.findById(req.user._id);
   if (user) {
+    if (req.body.email && req.body.email.toLowerCase() !== user.email) {
+      const taken = await User.findOne({ email: req.body.email.toLowerCase() });
+      if (taken) {
+        res.status(400);
+        throw new Error('Email is already in use');
+      }
+    }
     user.name = req.body.name || user.name;
     user.email = req.body.email || user.email;
     user.phone = req.body.phone || user.phone;
     user.address = req.body.address || user.address;
     if (req.body.password) {
-      if (req.body.password.length < 6) {
+      // Changing a password requires proving knowledge of the current one, and
+      // invalidates every previously issued token.
+      const currentPassword = req.body.currentPassword;
+      if (!currentPassword) {
         res.status(400);
-        throw new Error('Password must be at least 6 characters');
+        throw new Error('Current password is required to set a new password');
+      }
+      if (!(await user.matchPassword(currentPassword))) {
+        res.status(401);
+        throw new Error('Current password is incorrect');
+      }
+      if (req.body.password.length < 8) {
+        res.status(400);
+        throw new Error('Password must be at least 8 characters');
       }
       user.password = req.body.password;
+      user.tokenVersion = (user.tokenVersion || 0) + 1;
+      user.passwordChangedAt = new Date();
     }
     const updatedUser = await user.save();
     res.json({
@@ -89,7 +113,7 @@ const updateUserProfile = async (req, res) => {
       isAdmin: updatedUser.isAdmin, role: updatedUser.role,
       permissions: updatedUser.getEffectivePermissions(),
       loyaltyPoints: updatedUser.loyaltyPoints, address: updatedUser.address,
-      phone: updatedUser.phone, token: generateToken(updatedUser._id),
+      phone: updatedUser.phone, token: generateToken(updatedUser._id, updatedUser.tokenVersion || 0),
     });
   } else {
     res.status(404); throw new Error('User not found');

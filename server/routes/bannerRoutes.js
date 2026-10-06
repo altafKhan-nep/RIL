@@ -9,9 +9,9 @@ const {
   deleteBanner,
   reorderBanners,
 } = require('../controllers/bannerController');
-const { protect, admin, requirePermission } = require('../middleware/authMiddleware');
+const { protect, requirePermission } = require('../middleware/authMiddleware');
 
-router.get('/', protect, admin, getBanners);
+router.get('/', protect, requirePermission('banners:view'), getBanners);
 router.get('/active/:position', getActiveBannersByPosition);
 router.get('/:id', getBannerById);
 router.post('/', protect, requirePermission('banners:create'), createBanner);

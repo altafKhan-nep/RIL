@@ -84,7 +84,10 @@ const getPublicCategories = asyncHandler(async (req, res) => {
   const categories = await Category.find({ isActive: true }).sort({ order: 1, name: 1 });
 
   const productCounts = await Product.aggregate([
-    { $match: { $or: [{ isActive: true }, { isActive: { $exists: false } }] } },
+    // Only publicly purchasable products should be counted. Product uses
+    // `status` (active | draft | out of stock) — it has no `isActive` field,
+    // so a previous `isActive` filter here silently counted drafts too.
+    { $match: { status: { $ne: 'draft' } } },
     { $group: { _id: '$category', count: { $sum: 1 } } },
   ]);
 

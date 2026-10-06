@@ -1,16 +1,10 @@
-const sanitizeHtml = (text) => {
-  if (typeof text !== 'string') return text;
-  return text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#x27;');
-};
-
+// NOTE: We intentionally do NOT HTML-encode stored data here. Encoding at
+// persistence time corrupts values (e.g. "5 > 3" becomes "5 &gt; 3" in the
+// database). XSS protection is handled at render time by React's escaping
+// and by the xss() middleware on the response.
 const sanitizeObject = (obj) => {
   if (obj === null || obj === undefined) return obj;
-  if (typeof obj === 'string') return sanitizeHtml(obj.trim());
+  if (typeof obj === 'string') return obj.trim();
   if (Array.isArray(obj)) return obj.map(sanitizeObject);
   if (typeof obj === 'object') {
     const sanitized = {};

@@ -226,6 +226,11 @@ const promotions = [
 
 const seed = async () => {
   try {
+    if (process.env.NODE_ENV === 'production' && process.env.ALLOW_PROD_SEED !== 'true') {
+      console.error('REFUSING to run destructive seed in production.');
+      console.error('Set ALLOW_PROD_SEED=true explicitly to override.');
+      process.exit(1);
+    }
     await connectDB();
 
     console.log('Clearing existing data...');

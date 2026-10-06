@@ -100,7 +100,7 @@ const MainShell = () => (
           <Route path="/cart" element={<CartPage />} />
           <Route path="/checkout" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
           <Route path="/order-success/:id" element={<OrderSuccessPage />} />
-          <Route path="/track/:id" element={<OrderTrackingPage />} />
+          <Route path="/track/:id" element={<ProtectedRoute><OrderTrackingPage /></ProtectedRoute>} />
           <Route path="/account" element={<ProtectedRoute><UserDashboard /></ProtectedRoute>} />
           <Route path="/help" element={<HelpPage />} />
           <Route path="/support" element={<SupportPage />} />

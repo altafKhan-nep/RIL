@@ -42,9 +42,9 @@ router.put('/orders/:id/cancel', protect, requirePermission('orders:cancel'), ca
 
 router.get('/analytics', protect, requirePermission('analytics:view'), getAnalytics);
 
-router.put('/inventory/bulk', protect, requirePermission('products:edit'), bulkUpdateStock);
-router.put('/inventory/:id/adjust', protect, requirePermission('products:edit'), adjustStock);
-router.get('/inventory/:id/history', protect, requirePermission('products:view'), getStockHistory);
+router.put('/inventory/bulk', protect, requirePermission('inventory:edit'), bulkUpdateStock);
+router.put('/inventory/:id/adjust', protect, requirePermission('inventory:edit'), adjustStock);
+router.get('/inventory/:id/history', protect, requirePermission('inventory:view'), getStockHistory);
 
 // @desc    Seed database (production)
 // @route   POST /api/admin/seed
@@ -53,6 +53,9 @@ router.post('/seed', protect, requirePermission('products:edit'), async (req, re
   try {
     if (req.user.role !== 'super_admin') {
       return res.status(403).json({ message: 'Only super admin can seed' });
+    }
+    if (process.env.NODE_ENV === 'production' && process.env.ALLOW_PROD_SEED !== 'true') {
+      return res.status(403).json({ message: 'Seeding is disabled in production' });
     }
 
     const products = require('../seed/seedData');

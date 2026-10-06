@@ -74,11 +74,10 @@ export const AuthProvider = ({ children }) => {
 
   const register = useCallback(async (name, email, password) => {
     const data = await api.register(name, email, password);
-    setUser({ ...data, token: data.token });
-    persistUser({ ...data, token: data.token });
     const profile = await api.getProfile();
-    setUser((prev) => ({ ...prev, ...profile }));
-    persistUser({ ...prev, ...profile, token: data.token });
+    const merged = { ...data, ...profile, token: data.token };
+    setUser(merged);
+    persistUser(merged);
     return data;
   }, [persistUser]);
 

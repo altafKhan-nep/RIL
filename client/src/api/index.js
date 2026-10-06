@@ -142,7 +142,7 @@ export const api = {
   },
   trackOrder: async (orderId) => {
     const res = await fetch(`${API_URL}/orders/track/${orderId}`, {
-      headers: getHeaders(false),
+      headers: getHeaders(true),
     });
     return handleResponse(res);
   },

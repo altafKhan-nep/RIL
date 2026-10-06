@@ -98,11 +98,9 @@ const validateOrder = (data) => {
     }
   }
 
-  if (data.totalPrice === undefined || data.totalPrice === null || data.totalPrice === '') {
-    errors.push('Total price is required');
-  } else if (typeof data.totalPrice !== 'number' || data.totalPrice <= 0) {
-    errors.push('Total price must be greater than 0');
-  }
+  // NOTE: totalPrice is intentionally NOT validated here. The server
+  // computes the authoritative total from database prices and settings;
+  // any client-supplied totalPrice is ignored.
 
   return { isValid: errors.length === 0, errors };
 };

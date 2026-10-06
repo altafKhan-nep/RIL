@@ -15,6 +15,11 @@ const protect = async (req, res, next) => {
       if (!req.user.isActive) {
         return res.status(403).json({ message: 'Account has been disabled' });
       }
+      // Reject tokens issued before the user's last password change.
+      const tokenVersion = decoded.tv || 0;
+      if (tokenVersion !== (req.user.tokenVersion || 0)) {
+        return res.status(401).json({ message: 'Session invalidated, please sign in again' });
+      }
       return next();
     } catch (error) {
       return res.status(401).json({ message: 'Not authorized, token failed' });

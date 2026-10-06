@@ -11,7 +11,7 @@ const {
   validatePromotion,
   getActivePromotions,
 } = require('../controllers/promotionController');
-const { protect, admin, requirePermission } = require('../middleware/authMiddleware');
+const { protect, requirePermission } = require('../middleware/authMiddleware');
 
 // Public: Get active sidebar promotion
 router.get('/sidebar', asyncHandler(async (req, res) => {
@@ -26,11 +26,11 @@ router.get('/sidebar', asyncHandler(async (req, res) => {
   res.json(promo || null);
 }));
 
-router.get('/', protect, admin, getPromotions);
+router.get('/', protect, requirePermission('promotions:view'), getPromotions);
 router.post('/', protect, requirePermission('promotions:create'), createPromotion);
 router.get('/active', getActivePromotions);
 router.post('/validate', protect, validatePromotion);
-router.get('/:id', protect, admin, getPromotionById);
+router.get('/:id', protect, requirePermission('promotions:view'), getPromotionById);
 router.put('/:id', protect, requirePermission('promotions:edit'), updatePromotion);
 router.delete('/:id', protect, requirePermission('promotions:delete'), deletePromotion);
 

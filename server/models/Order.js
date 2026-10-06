@@ -78,6 +78,31 @@ const orderSchema = mongoose.Schema(
     paidAt: {
       type: Date,
     },
+    paymentIntentId: {
+      type: String,
+      default: '',
+      index: true,
+    },
+    refundStatus: {
+      type: String,
+      enum: ['none', 'pending', 'refunded', 'failed'],
+      default: 'none',
+    },
+    refundedAmount: {
+      type: Number,
+      default: 0,
+    },
+    refundReason: {
+      type: String,
+      default: '',
+    },
+    refundedAt: {
+      type: Date,
+    },
+    refundId: {
+      type: String,
+      default: '',
+    },
     deliveredAt: {
       type: Date,
     },
@@ -129,6 +154,11 @@ const orderSchema = mongoose.Schema(
     promoCode: {
       type: String,
       default: '',
+    },
+    idempotencyKey: {
+      type: String,
+      default: '',
+      index: true,
     },
   },
   {

@@ -1,5 +1,7 @@
 const Product = require('../models/Product');
 const asyncHandler = require('../utils/asyncHandler');
+const { setStock, recordOpeningStock } = require('../utils/stockAudit');
+const { recomputeCategoryCount } = require('../utils/categoryCounts');
 const { validateProduct } = require('../middleware/validationMiddleware');
 
 const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -84,7 +86,10 @@ const deleteProduct = async (req, res) => {
   const product = await Product.findById(req.params.id);
 
   if (product) {
+    const category = product.category;
     await product.deleteOne();
+    // Keep the stored count honest after a deletion.
+    await recomputeCategoryCount(category);
     res.json({ message: 'Product removed' });
   } else {
     res.status(404);
@@ -125,6 +130,9 @@ const createProduct = async (req, res) => {
   });
 
   const createdProduct = await product.save();
+  // Seed the audit trail with the opening balance, then sync the category count.
+  await recordOpeningStock(createdProduct._id, createdProduct.countInStock, req.user._id);
+  await recomputeCategoryCount(createdProduct.category);
   res.status(201).json(createdProduct);
 };
 
@@ -160,6 +168,9 @@ const updateProduct = async (req, res) => {
 
     const product = await Product.findById(req.params.id);
 
+    // Captured before any mutation so a category move can fix both counts.
+    const previousCategory = product ? product.category : null;
+
     if (product) {
       product.name = name || product.name;
       product.slug = slug || product.slug;
@@ -169,7 +180,11 @@ const updateProduct = async (req, res) => {
       product.description = description || product.description;
       product.price = price !== undefined ? price : product.price;
       product.originalPrice = originalPrice !== undefined ? originalPrice : product.originalPrice;
-      product.countInStock = countInStock !== undefined ? countInStock : product.countInStock;
+      // Stock is applied through the audited helper so every change is
+      // recorded in stockHistory. categoryCount is kept in sync below.
+      if (countInStock !== undefined && Number(countInStock) !== product.countInStock) {
+        await setStock(product._id, Number(countInStock), 'Stock updated via product edit', req.user._id);
+      }
       product.images = images || product.images;
       product.colors = colors || product.colors;
       product.features = features || product.features;
@@ -180,6 +195,11 @@ const updateProduct = async (req, res) => {
       product.isNewArrival = isNewArrival !== undefined ? isNewArrival : product.isNewArrival;
 
     const updatedProduct = await product.save();
+    // Category may have changed, and draft/active transitions change the count.
+    if (previousCategory !== updatedProduct.category) {
+      await recomputeCategoryCount(previousCategory);
+    }
+    await recomputeCategoryCount(updatedProduct.category);
     res.json(updatedProduct);
   } else {
     res.status(404);

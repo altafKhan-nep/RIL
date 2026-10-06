@@ -102,7 +102,17 @@ app.use((req, res, next) => {
 });
 
 // --- Body parser ---
-app.use(express.json({ limit: '100kb' }));
+// The raw body must be preserved for Stripe webhook signature verification.
+// A route-level express.raw() cannot recover it because this global parser
+// already consumed the stream, so we stash the Buffer during verification.
+app.use(
+  express.json({
+    limit: '100kb',
+    verify: (req, res, buf) => {
+      req.rawBody = buf;
+    },
+  })
+);
 
 // --- NoSQL injection prevention ---
 app.use(mongoSanitize());
@@ -149,7 +159,7 @@ const loginLimiter = rateLimit({
 });
 const orderLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 20,
+  max: parseInt(process.env.ORDER_RATE_LIMIT_MAX, 10) || 20,
   standardHeaders: true,
   legacyHeaders: false,
   message: { message: 'Too many order requests, please try again later.' },

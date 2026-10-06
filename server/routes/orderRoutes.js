@@ -11,11 +11,12 @@ const {
   updateOrderStatus,
   cancelOrder,
 } = require('../controllers/orderController');
-const { protect, admin } = require('../middleware/authMiddleware');
+const { protect, requirePermission } = require('../middleware/authMiddleware');
+const { PERMISSIONS } = require('../models/User');
 const ObjectId = require('mongoose').Types.ObjectId;
 
-// Public tracking endpoint (no auth required)
-router.get('/track/:orderId', asyncHandler(async (req, res) => {
+// Order tracking — requires authentication and order ownership.
+router.get('/track/:orderId', protect, asyncHandler(async (req, res) => {
   if (!ObjectId.isValid(req.params.orderId)) {
     return res.status(400).json({ message: 'Invalid order ID format' });
   }
@@ -29,18 +30,23 @@ router.get('/track/:orderId', asyncHandler(async (req, res) => {
     throw new Error('Order not found');
   }
 
-  // Return with orderId field for frontend
+  // Ownership check: only the order owner or an admin may track it.
+  if (order.user.toString() !== req.user._id.toString() && !req.user.isAdminRole()) {
+    res.status(403);
+    throw new Error('Not authorized to view this order');
+  }
+
   const orderObj = order.toObject();
   orderObj.orderId = order._id;
 
   res.json(orderObj);
 }));
 
-router.route('/').post(protect, addOrderItems).get(protect, admin, getOrders);
+router.route('/').post(protect, addOrderItems).get(protect, requirePermission(PERMISSIONS.ORDERS_VIEW), getOrders);
 router.route('/myorders').get(protect, getMyOrders);
 router.route('/:id').get(protect, getOrderById);
 router.route('/:id/pay').put(protect, updateOrderToPaid);
-router.route('/:id/status').put(protect, admin, updateOrderStatus);
+router.route('/:id/status').put(protect, requirePermission(PERMISSIONS.ORDERS_EDIT), updateOrderStatus);
 router.route('/:id/cancel').put(protect, cancelOrder);
 
 module.exports = router;
