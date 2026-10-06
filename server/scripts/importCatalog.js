@@ -53,7 +53,10 @@ try {
 
 const categories = Array.isArray(payload.categories) ? payload.categories : [];
 const products = Array.isArray(payload.products) ? payload.products : [];
-if (!categories.length && !products.length) fail('File contains no categories or products.');
+// Banners reference their product by slug, never by ObjectId: ids differ per
+// database, so a stored link copied between environments silently 404s.
+const banners = Array.isArray(payload.banners) ? payload.banners : [];
+if (!categories.length && !products.length && !banners.length) fail('File contains no categories, products or banners.');
 
 // --- Validate before touching the database -------------------------------
 const problems = [];
@@ -92,6 +95,19 @@ for (const [label, list] of [['categories', cleanCategories], ['products', clean
   for (const item of list) {
     if (seen.has(item.slug)) problems.push(`duplicate ${label} slug "${item.slug}" inside the file`);
     seen.add(item.slug);
+  }
+}
+
+const cleanBanners = banners.map((b, i) => {
+  const title = norm(b.title);
+  if (!title) problems.push(`banners[${i}] missing title`);
+  if (!norm(b.productSlug)) problems.push(`banners[${i}] ("${title}") must reference productSlug, not a hardcoded id`);
+  if (!Array.isArray(b.targetPages) || !b.targetPages.length) problems.push(`banners[${i}] ("${title}") has no targetPages`);
+  return { ...b, title, productSlug: norm(b.productSlug) };
+});
+for (const b of cleanBanners) {
+  if (b.productSlug && !catSlugs.has(b.productSlug)) {
+    problems.push(`banners ("${b.title}") references unknown product slug "${b.productSlug}"`);
   }
 }
 
@@ -159,6 +175,52 @@ if (problems.length) {
 
   console.log(`Categories: ${catInserted} ${DRY_RUN ? 'would be written' : 'written'}, ${catSkipped} already present`);
   console.log(`Products:   ${prodInserted} ${DRY_RUN ? 'would be written' : 'written'}, ${prodSkipped} already present`);
+
+  // Banners: resolve productSlug -> the real _id in THIS database, so the link
+  // can never point at an id that only existed in another environment.
+  let bannerInserted = 0, bannerSkipped = 0;
+  if (cleanBanners.length) {
+    const slugToId = new Map(
+      (await db.collection('products').find({}, { projection: { slug: 1 } }).toArray()).map((p) => [p.slug, p._id])
+    );
+    const existingBannerTitles = new Set(
+      (await db.collection('banners').find({}, { projection: { title: 1 } }).toArray()).map((b) => b.title)
+    );
+
+    for (const b of cleanBanners) {
+      const productId = slugToId.get(b.productSlug);
+      if (!productId) {
+        console.log(`  ! banner "${b.title}" skipped: product slug "${b.productSlug}" not found in this database`);
+        continue;
+      }
+      const doc = {
+        title: b.title,
+        subtitle: b.subtitle || '',
+        description: b.description || '',
+        image: b.image || '',
+        ctaText: b.ctaText || 'Shop Now',
+        link: `/product/${productId}`,
+        position: b.position || 'hero',
+        order: typeof b.order === 'number' ? b.order : 0,
+        bgColor: b.bgColor || '#ffffff',
+        isActive: b.isActive !== false,
+        targetPages: Array.isArray(b.targetPages) && b.targetPages.length ? b.targetPages : ['home'],
+        product: productId,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      if (existingBannerTitles.has(b.title)) {
+        bannerSkipped += 1;
+        if (!REPLACE) continue;
+        await db.collection('banners').updateOne({ title: b.title }, { $set: doc });
+        bannerInserted += 1;
+        continue;
+      }
+      if (!DRY_RUN) await db.collection('banners').insertOne(doc);
+      bannerInserted += 1;
+    }
+    console.log(`Banners:    ${bannerInserted} ${DRY_RUN ? 'would be written' : 'written'}, ${bannerSkipped} already present`);
+  }
 
   if (!DRY_RUN) {
     // Keep the stored category counts honest; the storefront relies on them.

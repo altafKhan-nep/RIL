@@ -104,6 +104,31 @@ module.exports = {
       },
     },
     {
+      name: 'Catalog banners reference real products and resolvable images',
+      fn: async () => {
+        const catalog = readCatalog();
+        const banners = catalog.banners || [];
+        assert.ok(banners.length, 'catalog should define banners');
+
+        const productSlugs = new Set(catalog.products.map((p) => p.slug));
+        for (const b of banners) {
+          // A hardcoded ObjectId link is the bug this guards against: ids are
+          // per-database, so a link copied from another environment 404s.
+          assert.ok(b.productSlug, `banner "${b.title}" must use productSlug`);
+          assert.ok(productSlugs.has(b.productSlug),
+            `banner "${b.title}" references unknown product "${b.productSlug}"`);
+          assert.ok(!/\/[a-f0-9]{24}/.test(String(b.link || '')),
+            `banner "${b.title}" must not carry a hardcoded id in link`);
+          assert.ok(b.title && b.ctaText, `banner "${b.title}" needs a title and ctaText`);
+          assert.ok(['hero', 'promo', 'footer', 'sidebar'].includes(b.position),
+            `banner "${b.title}" has invalid position "${b.position}"`);
+          if (!isRemote(b.image)) {
+            assert.ok(resolveAsset(b.image), `banner "${b.title}" image missing on disk: ${b.image}`);
+          }
+        }
+      },
+    },
+    {
       name: 'Every catalog product has the fields the storefront needs',
       fn: async () => {
         const catalog = readCatalog();

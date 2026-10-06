@@ -340,5 +340,82 @@
       "rating": 0,
       "numReviews": 0
     }
+  ],
+  "banners": [
+    {
+      "title": "Heirloom Kitchen Cabinetry",
+      "subtitle": "Hand-dovelled solid hardwood carcasses with soft-close hardware and factory-finished faces that age beautifully.",
+      "description": "",
+      "ctaText": "Shop Cabinetry",
+      "productSlug": "heirloom-kitchen-cabinets",
+      "image": "/uploads/heirloom-kitchen-cabinets-product.avif",
+      "position": "hero",
+      "order": 0,
+      "bgColor": "#4A2C1D",
+      "isActive": true,
+      "targetPages": [
+        "home"
+      ]
+    },
+    {
+      "title": "The Signature Kitchen Island",
+      "subtitle": "A full-width centerpiece in book-matched stone with integrated seating and hidden prep storage.",
+      "description": "",
+      "ctaText": "Explore Islands",
+      "productSlug": "signature-kitchen-island",
+      "image": "/uploads/signature-kitchen-island-product.avif",
+      "position": "hero",
+      "order": 1,
+      "bgColor": "#5C321C",
+      "isActive": true,
+      "targetPages": [
+        "home"
+      ]
+    },
+    {
+      "title": "Live-Edge Dining Tables",
+      "subtitle": "One-of-a-kind slabs, each selected for grain and edge character, paired with engineered steel or hardwood bases.",
+      "description": "",
+      "ctaText": "View Tables",
+      "productSlug": "live-edge-dining-table",
+      "image": "/uploads/live-edge-dining-table-product.avif",
+      "position": "hero",
+      "order": 2,
+      "bgColor": "#3A2114",
+      "isActive": true,
+      "targetPages": [
+        "home"
+      ]
+    },
+    {
+      "title": "Reach-In Closet Systems",
+      "subtitle": "Built to the opening. Flush, built-in storage with adjustable shelving.",
+      "description": "",
+      "ctaText": "Shop Closets",
+      "productSlug": "reach-in-closet-system",
+      "image": "/uploads/reach-in-closet-system-product.avif",
+      "position": "promo",
+      "order": 0,
+      "bgColor": "#F7F1E8",
+      "isActive": true,
+      "targetPages": [
+        "home"
+      ]
+    },
+    {
+      "title": "Architectural Fireplace Mantels",
+      "subtitle": "Cast and carved surrounds engineered for high-output inserts.",
+      "description": "",
+      "ctaText": "Shop Mantels",
+      "productSlug": "architectural-fireplace-mantel",
+      "image": "/uploads/architectural-fireplace-mantel-product.avif",
+      "position": "promo",
+      "order": 1,
+      "bgColor": "#F7F1E8",
+      "isActive": true,
+      "targetPages": [
+        "home"
+      ]
+    }
   ]
 }

@@ -1,5 +1,5 @@
 {
-  "passed": 133,
+  "passed": 134,
   "failed": 0,
   "results": [
     {
@@ -496,6 +496,10 @@
     },
     {
       "name": "The logo asset is present and referenced by the storefront",
+      "ok": true
+    },
+    {
+      "name": "Catalog banners reference real products and resolvable images",
       "ok": true
     },
     {

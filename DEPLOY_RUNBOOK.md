@@ -97,9 +97,16 @@ MONGO_URI="mongodb+srv://…" node scripts/importCatalog.js \
 MONGO_URI="mongodb+srv://…" node scripts/importCatalog.js --file catalog-export.json
 ```
 
-`catalog-export.json` holds your 9 real Life In Pieces products and 9 categories
-with pricing, descriptions and the `/uploads/*.avif` image paths. Add
+`catalog-export.json` holds your 9 real Life In Pieces products, 9 categories and
+5 banners, with pricing, descriptions and the `/uploads/*.avif` image paths. Add
 `--replace` to overwrite existing documents.
+
+Banners reference their product by **slug**, and the importer resolves that to
+the correct `_id` for the target database. A banner link copied between
+environments as a hardcoded id would 404, which is what this avoids.
+
+Production starts with **0 banners**, so the homepage has no hero or promo
+content until this import runs.
 
 **Verify:**
 ```bash
