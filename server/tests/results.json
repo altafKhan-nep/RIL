@@ -1,5 +1,5 @@
 {
-  "passed": 128,
+  "passed": 133,
   "failed": 0,
   "results": [
     {
@@ -480,6 +480,26 @@
     },
     {
       "name": "Security headers are present",
+      "ok": true
+    },
+    {
+      "name": "Every local image path in the catalog resolves to a real file",
+      "ok": true
+    },
+    {
+      "name": "Product images use a path distinct from their category image",
+      "ok": true
+    },
+    {
+      "name": "No orphan product image files (a file no product references)",
+      "ok": true
+    },
+    {
+      "name": "The logo asset is present and referenced by the storefront",
+      "ok": true
+    },
+    {
+      "name": "Every catalog product has the fields the storefront needs",
       "ok": true
     },
     {

@@ -120,7 +120,7 @@
       "originalPrice": 0,
       "category": "Boutique Walk-In Closet",
       "images": [
-        "/uploads/boutique-walk-in-closet.avif"
+        "/uploads/boutique-walk-in-closet-product.avif"
       ],
       "countInStock": 1,
       "status": "active",
@@ -259,7 +259,7 @@
       "originalPrice": 0,
       "category": "Live-Edge Dining Table",
       "images": [
-        "/uploads/live-edge-dining-table.avif"
+        "/uploads/live-edge-dining-table-product.avif"
       ],
       "countInStock": 1,
       "status": "active",
