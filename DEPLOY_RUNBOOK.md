@@ -38,8 +38,39 @@ is fixed.
 curl -s https://ril-q344.onrender.com/api/health
 ```
 
-The app now refuses to boot without this variable, so a missing value shows up
-immediately in the Render logs rather than as a confusing login error.
+The app now refuses to boot without this variable when `NODE_ENV=production`, so a
+missing value shows up immediately in the Render logs rather than as a confusing
+login error. If `NODE_ENV` is not set on your service, also set it to
+`production` so this guard arms.
+
+---
+
+## Step 1b — If you cannot sign in as admin
+
+`secretOrPrivateKey must have a value` is **not** a credentials problem — no
+login can succeed until Step 1 is done. Once it is, if you still cannot get in
+(wrong password, or no admin account exists), set a known one:
+
+```bash
+cd server
+# See which admin accounts exist (emails + roles only, never secrets)
+MONGO_URI="mongodb+srv://…" node scripts/resetAdmin.js --list
+
+# Create an admin, or reset an existing one to a password you choose
+MONGO_URI="mongodb+srv://…" node scripts/resetAdmin.js \
+  --email "you@example.com" --password "YourNewPassword123" --name "Your Name"
+```
+
+Roles: `super_admin` (default), `admin`, `content_manager`, `order_manager`.
+Resetting also revokes that user's active sessions and invalidates old tokens.
+
+> Passwords are hashed and cannot be recovered or displayed. If you have lost
+> the password, reset it — the old one cannot be read back by anyone.
+
+The seed data creates these accounts if you ever run the seed:
+`superadmin@novacart.com`, `admin@novacart.com`, `content@novacart.com`,
+`orders@novacart.com` — all with password `password123`. Change them before
+going live, or use `resetAdmin.js` instead.
 
 ---
 
