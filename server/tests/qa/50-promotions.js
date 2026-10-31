@@ -125,5 +125,18 @@ module.exports = {
         assert.strictEqual(res.body.discountPrice, 1);
       },
     },
+    {
+      name: 'Public active promotions never expose usedByUsers or internal targeting',
+      fn: async ({ BASE, request }) => {
+        const res = await request.get(BASE, '/api/promotions/active');
+        assert.strictEqual(res.status, 200);
+        assert.ok(Array.isArray(res.body));
+        for (const promo of res.body) {
+          assert.strictEqual(promo.usedByUsers, undefined, 'usedByUsers must not leak customer ids');
+          assert.strictEqual(promo.applicableProducts, undefined);
+          assert.strictEqual(promo.applicableCategories, undefined);
+        }
+      },
+    },
   ],
 };

@@ -232,12 +232,25 @@ router.post('/webhook', asyncHandler(async (req, res) => {
     case 'payment_intent.succeeded': {
       const orderId = intent.metadata && intent.metadata.orderId;
       if (orderId) {
-        // isPaid:false keeps this idempotent under Stripe's retries.
-        await Order.findOneAndUpdate(
-          { _id: orderId, paymentIntentId: intent.id, isPaid: false },
-          { $set: { isPaid: true, paidAt: new Date(), paymentStatus: 'paid' } },
-          { new: true }
-        );
+        const order = await Order.findOne({ _id: orderId, paymentIntentId: intent.id });
+        // Verify the charge matches the order before treating it as paid. A
+        // webhook is authenticated, but amount/currency must still agree with
+        // the authoritative order, otherwise a misconfigured intent could pay
+        // the wrong sum.
+        const amountMatches = order && Math.round(intent.amount / 100 * 100) / 100 === Math.round(order.totalPrice * 100) / 100;
+        const currencyMatches = order && (!intent.currency || intent.currency === stripeConfig.resolveCurrency());
+        if (order && amountMatches && currencyMatches) {
+          // isPaid:false keeps this idempotent under Stripe's retries.
+          await Order.findOneAndUpdate(
+            { _id: orderId, paymentIntentId: intent.id, isPaid: false },
+            { $set: { isPaid: true, paidAt: new Date(), paymentStatus: 'paid' } }
+          );
+        } else if (order) {
+          await Order.updateOne(
+            { _id: orderId, isPaid: false },
+            { $set: { paymentStatus: 'failed', paymentError: 'Payment amount/currency did not match the order' } }
+          );
+        }
       }
       break;
     }

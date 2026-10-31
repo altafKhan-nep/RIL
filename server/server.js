@@ -87,7 +87,31 @@ app.use((req, res, next) => {
 
 // --- Helmet ---
 app.disable('x-powered-by');
-app.use(helmet());
+app.use(
+  helmet({
+    // The API is normally consumed by the Vercel-hosted SPA, but it can also
+    // serve the built client directly (npm start behind nginx). The policy
+    // therefore allows the analytics-free third parties the storefront
+    // actually uses: Google Fonts and Stripe.js/Elements.
+    contentSecurityPolicy: {
+      useDefaults: true,
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", 'https://js.stripe.com'],
+        styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+        fontSrc: ["'self'", 'https://fonts.gstatic.com', 'data:'],
+        imgSrc: ["'self'", 'data:', 'blob:', 'https:'],
+        connectSrc: ["'self'", 'https://api.stripe.com'],
+        frameSrc: ['https://js.stripe.com', 'https://hooks.stripe.com'],
+        objectSrc: ["'none'"],
+        baseUri: ["'self'"],
+        formAction: ["'self'"],
+        frameAncestors: ["'none'"],
+      },
+    },
+    crossOriginEmbedderPolicy: false,
+  })
+);
 
 // --- CORS ---
 const allowedOrigins = [
@@ -235,7 +259,9 @@ app.use(
 if (process.env.NODE_ENV === 'production') {
   const clientDist = path.join(__dirname, '../client/dist');
   app.use(express.static(clientDist));
-  app.get('*', (req, res) => {
+  app.get('*', (req, res, next) => {
+    // Unknown API/upload paths must be a JSON 404, not the SPA shell.
+    if (req.path.startsWith('/api') || req.path.startsWith('/uploads')) return next();
     res.sendFile(path.join(clientDist, 'index.html'));
   });
 }
@@ -267,16 +293,35 @@ const pruneTimer = setInterval(async () => {
 pruneTimer.unref();
 
 // Graceful shutdown
-process.on('SIGTERM', () => {
-  console.log('SIGTERM received. Shutting down gracefully...');
-  server.close(() => {
-    const mongoose = require('mongoose');
-    mongoose.connection.close(false, () => {
+let shuttingDown = false;
+const shutdown = (signal) => {
+  if (shuttingDown) return;
+  shuttingDown = true;
+  console.log(`${signal} received. Shutting down gracefully...`);
+  // Force-exit if connections refuse to drain (e.g. a stuck keep-alive).
+  const force = setTimeout(() => {
+    console.error('Graceful shutdown timed out; exiting.');
+    process.exit(1);
+  }, 10000);
+  force.unref();
+
+  server.close(async () => {
+    try {
+      const mongoose = require('mongoose');
+      await mongoose.disconnect();
       console.log('MongoDB connection closed.');
+      clearTimeout(force);
       process.exit(0);
-    });
+    } catch (err) {
+      console.error('Error closing MongoDB connection:', err.message);
+      clearTimeout(force);
+      process.exit(1);
+    }
   });
-});
+};
+
+process.once('SIGTERM', () => shutdown('SIGTERM'));
+process.once('SIGINT', () => shutdown('SIGINT'));
 
 process.on('unhandledRejection', (err) => {
   console.error('Unhandled Rejection:', err.message);

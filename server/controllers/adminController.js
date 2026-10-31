@@ -1,13 +1,32 @@
-const { User } = require('../models/User');
+const { User, ROLES, PERMISSIONS } = require('../models/User');
 const Order = require('../models/Order');
 const Product = require('../models/Product');
 const asyncHandler = require('../utils/asyncHandler');
-const { validateUser } = require('../middleware/validationMiddleware');
+const { validateProfile } = require('../middleware/validationMiddleware');
 const ObjectId = require('mongoose').Types.ObjectId;
-const { incrementStock } = require('../utils/stockAudit');
-const { processRefund } = require('../utils/refunds');
+const { incrementStock, setStock, adjustStockBy } = require('../utils/stockAudit');
+const { revokeAllSessions } = require('../utils/refreshToken');
+const {
+  STATUS_TRANSITIONS,
+  ADMIN_CANCELLABLE,
+  transitionOrder,
+  cancelOrderAtomically,
+} = require('../utils/orderLifecycle');
 
 const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+// Never serialise a password hash, even to an authenticated administrator.
+const sanitizeUser = (user) => {
+  const obj = typeof user.toObject === 'function' ? user.toObject() : { ...user };
+  delete obj.password;
+  return obj;
+};
+
+const clampInt = (value, fallback, min, max) => {
+  const n = Number.parseInt(value, 10);
+  if (!Number.isFinite(n)) return fallback;
+  return Math.min(Math.max(n, min), max);
+};
 
 // ---------------------------------------------------------------------------
 // Revenue definition (single source of truth, enforced across every metric):
@@ -73,11 +92,11 @@ const getAdminStats = asyncHandler(async (req, res) => {
 
   const monthlySales = await Order.aggregate([
     {
-      $match: {
+      $match: revenueMatch({
         createdAt: {
           $gte: new Date(now.getFullYear(), now.getMonth() - 5, 1),
         },
-      },
+      }),
     },
     {
       $group: {
@@ -93,6 +112,7 @@ const getAdminStats = asyncHandler(async (req, res) => {
   ]);
 
   const topProducts = await Order.aggregate([
+    { $match: revenueMatch() },
     { $unwind: '$orderItems' },
     {
       $group: {
@@ -208,8 +228,8 @@ const getAllProducts = asyncHandler(async (req, res) => {
 // @route   GET /api/admin/users
 // @access  Private/Admin
 const getAllUsers = asyncHandler(async (req, res) => {
-  const pageSize = Number(req.query.pageSize) || 100;
-  const page = Number(req.query.page) || 1;
+  const pageSize = clampInt(req.query.pageSize, 100, 1, 500);
+  const page = clampInt(req.query.page, 1, 1, 100000);
 
   const filter = {};
   if (req.query.role) {
@@ -245,7 +265,18 @@ const getAllUsers = asyncHandler(async (req, res) => {
         totalSpent: {
           $sum: {
             $map: {
-              input: '$userOrders',
+              input: {
+                $filter: {
+                  input: '$userOrders',
+                  as: 'o',
+                  cond: {
+                    $and: [
+                      { $ne: ['$$o.status', 'Cancelled'] },
+                      { $ne: ['$$o.refundStatus', 'refunded'] },
+                    ],
+                  },
+                },
+              },
               as: 'order',
               in: '$$order.totalPrice',
             },
@@ -281,7 +312,7 @@ const getUserById = asyncHandler(async (req, res) => {
   const orderCount = await Order.countDocuments({ user: user._id });
 
   const totalSpentResult = await Order.aggregate([
-    { $match: { user: user._id } },
+    { $match: revenueMatch({ user: user._id }) },
     { $group: { _id: null, total: { $sum: '$totalPrice' } } },
   ]);
   const totalSpent = totalSpentResult.length ? totalSpentResult[0].total : 0;
@@ -304,8 +335,37 @@ const updateUser = asyncHandler(async (req, res) => {
     throw new Error('User not found');
   }
 
-  if (req.body.name !== undefined) user.name = req.body.name;
+  // Validate the fields that are shared with the customer profile endpoint.
+  const profileValidation = validateProfile({
+    name: req.body.name,
+    email: req.body.email,
+    phone: req.body.phone,
+    password: req.body.password,
+    address: req.body.address,
+  });
+  if (!profileValidation.isValid) {
+    res.status(400);
+    throw new Error(profileValidation.errors.join(', '));
+  }
+
+  const nextEmail = req.body.email !== undefined ? req.body.email.toLowerCase().trim() : user.email;
+  if (nextEmail !== user.email) {
+    const taken = await User.findOne({ email: nextEmail, _id: { $ne: user._id } });
+    if (taken) {
+      res.status(400);
+      throw new Error('Email is already in use');
+    }
+  }
+
+  if (req.body.name !== undefined) user.name = req.body.name.trim();
+  user.email = nextEmail;
+
+  let invalidateSessions = false;
   if (req.body.role !== undefined) {
+    if (!Object.values(ROLES).includes(req.body.role)) {
+      res.status(400);
+      throw new Error('Invalid role');
+    }
     // Prevent non-super_admin from granting super_admin role
     if (req.body.role === 'super_admin' && req.user.role !== 'super_admin') {
       res.status(403);
@@ -318,21 +378,35 @@ const updateUser = asyncHandler(async (req, res) => {
     }
     user.role = req.body.role;
   }
-  if (req.body.permissions !== undefined) user.permissions = req.body.permissions;
+  if (req.body.permissions !== undefined) {
+    if (!Array.isArray(req.body.permissions) || req.body.permissions.some((p) => !Object.values(PERMISSIONS).includes(p))) {
+      res.status(400);
+      throw new Error('Invalid permissions list');
+    }
+    user.permissions = req.body.permissions;
+  }
   if (req.body.isActive !== undefined) user.isActive = req.body.isActive;
-  if (req.body.email !== undefined) user.email = req.body.email;
   if (req.body.phone !== undefined) user.phone = req.body.phone;
   if (req.body.address !== undefined) user.address = req.body.address;
   if (req.body.password) {
-    if (req.body.password.length < 6) {
+    if (req.body.password.length < 8) {
       res.status(400);
-      throw new Error('Password must be at least 6 characters');
+      throw new Error('Password must be at least 8 characters');
     }
     user.password = req.body.password;
+    user.passwordChangedAt = new Date();
+    user.tokenVersion = (user.tokenVersion || 0) + 1;
+    invalidateSessions = true;
+  }
+  if (user.isActive === false) {
+    user.tokenVersion = (user.tokenVersion || 0) + 1;
+    invalidateSessions = true;
   }
 
   const updatedUser = await user.save();
-  res.json(updatedUser);
+  if (invalidateSessions) await revokeAllSessions(updatedUser._id);
+
+  res.json(sanitizeUser(updatedUser));
 });
 
 // @desc    Delete user (soft delete)
@@ -352,7 +426,9 @@ const deleteUser = asyncHandler(async (req, res) => {
   }
 
   user.isActive = false;
+  user.tokenVersion = (user.tokenVersion || 0) + 1;
   await user.save();
+  await revokeAllSessions(user._id);
 
   res.json({ message: 'User deactivated successfully' });
 });
@@ -361,8 +437,8 @@ const deleteUser = asyncHandler(async (req, res) => {
 // @route   GET /api/admin/orders
 // @access  Private/Admin
 const getAllOrders = asyncHandler(async (req, res) => {
-  const pageSize = Number(req.query.pageSize) || 20;
-  const page = Number(req.query.page) || 1;
+  const pageSize = clampInt(req.query.pageSize || req.query.limit, 20, 1, 500);
+  const page = clampInt(req.query.page, 1, 1, 100000);
 
   const filter = {};
   if (req.query.status) {
@@ -380,8 +456,8 @@ const getAllOrders = asyncHandler(async (req, res) => {
   const orders = await Order.find(filter)
     .populate('user', 'name email')
     .sort({ createdAt: -1 })
-    .limit(pageSize)
-    .skip(pageSize * (page - 1));
+    .skip(pageSize * (page - 1))
+    .limit(pageSize);
 
   res.json({
     orders,
@@ -424,27 +500,30 @@ const updateOrderStatus = asyncHandler(async (req, res) => {
 
   if (!status || !validStatuses.includes(status)) {
     res.status(400);
-    throw new Error(
-      `Invalid status. Must be one of: ${validStatuses.join(', ')}`
-    );
+    throw new Error(`Invalid status. Must be one of: ${validStatuses.join(', ')}`);
   }
 
-  const statusTransitions = {
-    Pending: ['Processing', 'Cancelled'],
-    Processing: ['Shipped', 'Cancelled'],
-    Shipped: ['Out for Delivery', 'Delivered'],
-    'Out for Delivery': ['Delivered'],
-    Delivered: [],
-    Cancelled: [],
-  };
-
-  if (!statusTransitions[order.status]?.includes(status)) {
+  if (!STATUS_TRANSITIONS[order.status]?.includes(status)) {
     res.status(400);
-    throw new Error(
-      `Cannot transition from ${order.status} to ${status}`
-    );
+    throw new Error(`Cannot transition from ${order.status} to ${status}`);
   }
 
+  if (status === 'Cancelled') {
+    const cancelled = await cancelOrderAtomically({
+      orderId: order._id,
+      allowedStatuses: [order.status],
+      reason: note || 'Cancelled by admin',
+      actorId: req.user._id,
+      stockReason: 'Stock restored: order cancelled by admin',
+    });
+    if (!cancelled) {
+      res.status(409);
+      throw new Error('Order was modified by another request. Reload and try again.');
+    }
+    return res.json(cancelled);
+  }
+
+  const now = Date.now();
   const trackingEventMap = {
     Processing: {
       status: 'Order Confirmed',
@@ -470,38 +549,31 @@ const updateOrderStatus = asyncHandler(async (req, res) => {
       icon: 'where_to_vote',
       location: order.shippingAddress?.city || 'Destination',
     },
-    Cancelled: {
-      status: 'Cancelled',
-      description: note || 'Order has been cancelled',
-      icon: 'cancel',
-      location: '',
-    },
   };
 
   const updateOps = {
     $set: { status },
     $push: {
-      statusHistory: { status, date: Date.now(), note: note || `Status updated to ${status}` },
+      statusHistory: { status, date: now, note: note || `Status updated to ${status}` },
     },
   };
 
   const trackingEvent = trackingEventMap[status];
   if (trackingEvent) {
-    updateOps.$push.trackingEvents = {
-      ...trackingEvent,
-      timestamp: Date.now(),
-    };
+    updateOps.$push.trackingEvents = { ...trackingEvent, timestamp: now };
   }
 
   if (status === 'Delivered') {
-    updateOps.$set.deliveredAt = Date.now();
-    updateOps.$set.isPaid = true;
-    updateOps.$set.paidAt = order.paidAt || new Date();
-  }
-
-  if (status === 'Cancelled') {
-    updateOps.$set.cancelledAt = Date.now();
-    updateOps.$set.cancelReason = note || '';
+    updateOps.$set.deliveredAt = now;
+    // COD is collected at the door. A card order is only paid after the
+    // provider confirms the charge; delivery alone is not payment evidence.
+    if (order.paymentMethod === 'Cash on Delivery' || order.paymentMethod === 'COD') {
+      if (!order.isPaid) {
+        updateOps.$set.isPaid = true;
+        updateOps.$set.paidAt = order.paidAt || now;
+        updateOps.$set.paymentStatus = 'paid';
+      }
+    }
   }
 
   if (req.body.trackingNumber) updateOps.$set.trackingNumber = req.body.trackingNumber;
@@ -509,12 +581,10 @@ const updateOrderStatus = asyncHandler(async (req, res) => {
   if (req.body.trackingUrl) updateOps.$set.trackingUrl = req.body.trackingUrl;
   if (req.body.estimatedDelivery) updateOps.$set.estimatedDelivery = req.body.estimatedDelivery;
 
-  const updatedOrder = await Order.findByIdAndUpdate(req.params.id, updateOps, { new: true });
-
-  if (status === 'Cancelled') {
-    for (const item of order.orderItems) {
-      await incrementStock(item.product, item.qty, 'Stock restored: order cancelled by admin', req.user._id);
-    }
+  const updatedOrder = await transitionOrder(order._id, order.status, status, updateOps);
+  if (!updatedOrder) {
+    res.status(409);
+    throw new Error('Order was modified by another request. Reload and try again.');
   }
 
   res.json(updatedOrder);
@@ -541,25 +611,19 @@ const cancelOrder = asyncHandler(async (req, res) => {
     throw new Error('Order is already cancelled');
   }
 
-  // Refund a paid order. Cancelled / Paid / Refunded stay independent facts.
-  if (order.isPaid) {
-    const refundStatus = await processRefund(order, req.body.reason || 'Cancelled by admin');
-    order.refundStatus = refundStatus;
-    order.refundedAmount = refundStatus === 'refunded' ? order.totalPrice : 0;
-    order.refundReason = req.body.reason || 'Cancelled by admin';
-    if (refundStatus === 'refunded') order.refundedAt = Date.now();
+  const reason = req.body.reason || 'Cancelled by admin';
+  const updatedOrder = await cancelOrderAtomically({
+    orderId: order._id,
+    allowedStatuses: ADMIN_CANCELLABLE,
+    reason,
+    actorId: req.user._id,
+    stockReason: 'Stock restored: order cancelled by admin',
+  });
+
+  if (!updatedOrder) {
+    res.status(400);
+    throw new Error('This order can no longer be cancelled');
   }
-
-  order.status = 'Cancelled';
-  order.cancelledAt = Date.now();
-  order.cancelReason = req.body.reason || 'Cancelled by admin';
-
-  // Restore stock exactly once (the guard above prevents a second cancel).
-  for (const item of order.orderItems) {
-    await incrementStock(item.product, item.qty, 'Stock restored: order cancelled by admin', req.user._id);
-  }
-
-  const updatedOrder = await order.save();
 
   res.json(updatedOrder);
 });
@@ -604,6 +668,7 @@ const getAnalytics = asyncHandler(async (req, res) => {
   ]);
 
   const topCategories = await Order.aggregate([
+    { $match: revenueMatch() },
     { $unwind: '$orderItems' },
     {
       $lookup: {
@@ -627,6 +692,7 @@ const getAnalytics = asyncHandler(async (req, res) => {
   ]);
 
   const topProducts = await Order.aggregate([
+    { $match: revenueMatch() },
     {
       $unwind: '$orderItems',
     },
@@ -699,30 +765,39 @@ const bulkUpdateStock = asyncHandler(async (req, res) => {
     res.status(400);
     throw new Error('updates array is required');
   }
+  if (updates.length > 500) {
+    res.status(400);
+    throw new Error('Cannot update more than 500 products at once');
+  }
 
   const results = [];
   for (const update of updates) {
     const { productId, stock, note } = update;
-    if (productId === undefined || stock === undefined) continue;
+    if (!ObjectId.isValid(productId) || !Number.isFinite(stock) || !Number.isInteger(stock) || stock < 0 || stock > 1000000) {
+      results.push({ productId, success: false, error: 'Invalid product id or stock value' });
+      continue;
+    }
 
-    const product = await Product.findById(productId);
-    if (!product) continue;
-
-    const previousStock = product.countInStock;
-    product.countInStock = Math.max(0, Number(stock));
-    product.stockHistory.push({
-      type: 'set',
-      quantity: product.countInStock - previousStock,
-      previousStock,
-      newStock: product.countInStock,
-      note: note || 'Bulk update',
-      createdBy: req.user._id,
-    });
-    await product.save();
-    results.push({ productId, success: true, newStock: product.countInStock });
+    const updated = await setStock(productId, stock, note || 'Bulk update', req.user._id);
+    if (!updated) {
+      const exists = await Product.exists({ _id: productId });
+      if (!exists) {
+        results.push({ productId, success: false, error: 'Product not found' });
+      } else {
+        results.push({ productId, success: true, newStock: stock, unchanged: true });
+      }
+      continue;
+    }
+    if (updated.countInStock === 0 && updated.status !== 'out of stock') {
+      await Product.updateOne({ _id: productId }, { $set: { status: 'out of stock' } });
+    } else if (updated.countInStock > 0 && updated.status === 'out of stock') {
+      await Product.updateOne({ _id: productId }, { $set: { status: 'active' } });
+    }
+    results.push({ productId, success: true, newStock: updated.countInStock });
   }
 
-  res.json({ updated: results.length, results });
+  const failed = results.filter((r) => !r.success).length;
+  res.json({ updated: results.length - failed, failed, results });
 });
 
 // @desc    Adjust stock (+/-) for a product
@@ -735,10 +810,17 @@ const adjustStock = asyncHandler(async (req, res) => {
     res.status(400);
     throw new Error('adjustment and type are required');
   }
-
+  if (!Number.isFinite(adjustment) || !Number.isInteger(adjustment)) {
+    res.status(400);
+    throw new Error('adjustment must be a whole number');
+  }
   if (!['set', 'adjust', 'restock'].includes(type)) {
     res.status(400);
     throw new Error('type must be set, adjust, or restock');
+  }
+  if (type === 'set' && (adjustment < 0 || adjustment > 1000000)) {
+    res.status(400);
+    throw new Error('Stock must be between 0 and 1,000,000');
   }
 
   const product = await Product.findById(req.params.id);
@@ -747,36 +829,27 @@ const adjustStock = asyncHandler(async (req, res) => {
     throw new Error('Product not found');
   }
 
-  const previousStock = product.countInStock;
-  let newStock;
-
+  let updatedProduct;
   if (type === 'set') {
-    newStock = Math.max(0, Number(adjustment));
+    updatedProduct = await setStock(product._id, adjustment, note || 'Stock set by admin', req.user._id);
   } else if (type === 'adjust') {
-    newStock = Math.max(0, previousStock + Number(adjustment));
+    updatedProduct = await adjustStockBy(product._id, adjustment, note || 'Stock adjusted by admin', req.user._id);
   } else {
-    newStock = previousStock + Math.abs(Number(adjustment));
+    updatedProduct = await incrementStock(product._id, Math.abs(adjustment), note || 'Restocked by admin', req.user._id);
   }
 
-  product.countInStock = newStock;
-  product.stockHistory.push({
-    type,
-    quantity: newStock - previousStock,
-    previousStock,
-    newStock,
-    note: note || `Stock ${type}: ${adjustment}`,
-    createdBy: req.user._id,
-  });
+  if (!updatedProduct) updatedProduct = await Product.findById(product._id);
 
-  // Auto-update status based on stock
-  if (newStock === 0) {
-    product.status = 'out of stock';
-  } else if (product.status === 'out of stock') {
-    product.status = 'active';
+  // Keep the public status consistent with the resulting stock level.
+  if (updatedProduct.countInStock === 0) {
+    updatedProduct.status = 'out of stock';
+    await updatedProduct.save();
+  } else if (updatedProduct.status === 'out of stock') {
+    updatedProduct.status = 'active';
+    await updatedProduct.save();
   }
 
-  await product.save();
-  res.json(product);
+  res.json(updatedProduct);
 });
 
 // @desc    Get stock history for a product

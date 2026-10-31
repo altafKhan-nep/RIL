@@ -6,7 +6,12 @@ const { validateOrder } = require('../middleware/validationMiddleware');
 const { computePricing } = require('../utils/pricing');
 const { decrementStock, incrementStock } = require('../utils/stockAudit');
 const { recomputeCategoryCount } = require('../utils/categoryCounts');
-const { processRefund } = require('../utils/refunds');
+const {
+  STATUS_TRANSITIONS,
+  CUSTOMER_CANCELLABLE,
+  transitionOrder,
+  cancelOrderAtomically,
+} = require('../utils/orderLifecycle');
 
 
 // @desc    Create new order
@@ -21,9 +26,11 @@ const addOrderItems = async (req, res) => {
 
   const { orderItems, shippingAddress, paymentMethod, promoCode, notes, idempotencyKey } = req.body;
 
-  // Idempotency: reject duplicate order submissions with the same key.
+  // Idempotency keys are scoped to the authenticated customer. Looking up a
+  // key without the user filter would let customer B supply customer A's key
+  // and receive A's order back (an IDOR disguised as idempotency).
   if (idempotencyKey) {
-    const existing = await Order.findOne({ idempotencyKey });
+    const existing = await Order.findOne({ idempotencyKey, user: req.user._id });
     if (existing) {
       res.status(200);
       return res.json(existing);
@@ -76,7 +83,8 @@ const addOrderItems = async (req, res) => {
     decremented.push(item);
   }
 
-  const method = paymentMethod || 'COD';
+  // "Stripe" is accepted as a backwards-compatible alias for the card flow.
+  const method = paymentMethod === 'Stripe' ? 'Card' : (paymentMethod || 'COD');
 
   const order = new Order({
     orderItems: validatedItems,
@@ -126,12 +134,17 @@ const addOrderItems = async (req, res) => {
     for (const item of decremented) {
       await incrementStock(item.product, item.qty, 'Rollback: order save failed', 'system');
     }
+    // Two concurrent submissions with the same key: the unique index lets
+    // exactly one insert win. The loser rolls its stock back and returns the
+    // winner's order (still scoped to the same authenticated user).
+    if (err && err.code === 11000 && idempotencyKey) {
+      const existing = await Order.findOne({ idempotencyKey, user: req.user._id });
+      if (existing) {
+        res.status(200);
+        return res.json(existing);
+      }
+    }
     throw err;
-  }
-
-  // Keep stored category counts accurate after a sale.
-  for (const cat of new Set(orderCategories.filter(Boolean))) {
-    await recomputeCategoryCount(cat);
   }
 
   // Atomically increment promo usage only after the order is committed.
@@ -165,7 +178,8 @@ const getOrderById = async (req, res) => {
   );
 
   if (order) {
-    if (order.user._id.toString() !== req.user._id.toString() && !req.user.isAdminRole()) {
+    const ownerId = order.user && (order.user._id || order.user);
+    if ((!ownerId || ownerId.toString() !== req.user._id.toString()) && !req.user.isAdminRole()) {
       res.status(403);
       throw new Error('Not authorized to view this order');
     }
@@ -204,7 +218,8 @@ const updateOrderToPaid = async (req, res) => {
     throw new Error('Payment intent does not match this order');
   }
 
-  const stripe = require('../config/stripe').getStripe();
+  const stripeConfig = require('../config/stripe');
+  const stripe = stripeConfig.getStripe();
   if (!stripe) {
     res.status(503);
     throw new Error('Payment provider is not configured');
@@ -218,7 +233,10 @@ const updateOrderToPaid = async (req, res) => {
     throw new Error('Invalid payment intent');
   }
 
-  if (intent.metadata && intent.metadata.orderId && intent.metadata.orderId !== order._id.toString()) {
+  // The intent must be provably bound to THIS order. Accepting an intent with
+  // missing metadata would let a succeeded intent for another order (or a
+  // manually created one of the same amount) satisfy this order.
+  if (!intent.metadata || intent.metadata.orderId !== order._id.toString()) {
     res.status(400);
     throw new Error('Payment intent belongs to a different order');
   }
@@ -230,6 +248,10 @@ const updateOrderToPaid = async (req, res) => {
   if (Math.round(intent.amount / 100 * 100) / 100 !== Math.round(order.totalPrice * 100) / 100) {
     res.status(400);
     throw new Error('Payment amount does not match order total');
+  }
+  if (intent.currency && intent.currency !== stripeConfig.resolveCurrency()) {
+    res.status(400);
+    throw new Error('Payment currency does not match the store currency');
   }
 
   // Idempotent: re-confirming a paid order keeps the original paidAt.
@@ -305,21 +327,28 @@ const updateOrderStatus = async (req, res) => {
     throw new Error(`Invalid status. Must be one of: ${validStatuses.join(', ')}`);
   }
 
-  const statusTransitions = {
-    Pending: ['Processing', 'Cancelled'],
-    Processing: ['Shipped', 'Cancelled'],
-    Shipped: ['Out for Delivery', 'Delivered'],
-    'Out for Delivery': ['Delivered'],
-    Delivered: [],
-    Cancelled: [],
-  };
-
-  const allowed = statusTransitions[order.status] || [];
+  const allowed = STATUS_TRANSITIONS[order.status] || [];
   if (!allowed.includes(status)) {
     res.status(400);
     throw new Error(`Cannot transition from "${order.status}" to "${status}". Allowed: ${allowed.join(', ') || 'none'}`);
   }
 
+  if (status === 'Cancelled') {
+    const cancelled = await cancelOrderAtomically({
+      orderId: order._id,
+      allowedStatuses: [order.status],
+      reason: note || 'Order has been cancelled',
+      actorId: req.user._id,
+      stockReason: 'Stock restored: order cancelled',
+    });
+    if (!cancelled) {
+      res.status(409);
+      throw new Error('Order was modified by another request. Reload and try again.');
+    }
+    return res.json(cancelled);
+  }
+
+  const now = Date.now();
   const trackingEventMap = {
     Processing: {
       status: 'Order Confirmed',
@@ -345,36 +374,31 @@ const updateOrderStatus = async (req, res) => {
       icon: 'where_to_vote',
       location: order.shippingAddress?.city || 'Destination',
     },
-    Cancelled: {
-      status: 'Cancelled',
-      description: note || 'Order has been cancelled',
-      icon: 'cancel',
-      location: '',
-    },
   };
 
   const updateOps = {
     $set: { status },
     $push: {
-      statusHistory: { status, date: Date.now(), note: note || `Status updated to ${status}` },
+      statusHistory: { status, date: now, note: note || `Status updated to ${status}` },
     },
   };
 
   const trackingEvent = trackingEventMap[status];
   if (trackingEvent) {
-    updateOps.$push.trackingEvents = {
-      ...trackingEvent,
-      timestamp: Date.now(),
-    };
+    updateOps.$push.trackingEvents = { ...trackingEvent, timestamp: now };
   }
 
   if (status === 'Delivered') {
-    updateOps.$set.deliveredAt = Date.now();
-  }
-
-  if (status === 'Cancelled') {
-    updateOps.$set.cancelledAt = Date.now();
-    updateOps.$set.cancelReason = note || '';
+    updateOps.$set.deliveredAt = now;
+    // Cash is collected on delivery. Card orders must remain unpaid until the
+    // payment provider confirms the charge; delivery is not payment evidence.
+    if (order.paymentMethod === 'Cash on Delivery' || order.paymentMethod === 'COD') {
+      if (!order.isPaid) {
+        updateOps.$set.isPaid = true;
+        updateOps.$set.paidAt = order.paidAt || now;
+        updateOps.$set.paymentStatus = 'paid';
+      }
+    }
   }
 
   if (req.body.trackingNumber) updateOps.$set.trackingNumber = req.body.trackingNumber;
@@ -382,22 +406,10 @@ const updateOrderStatus = async (req, res) => {
   if (req.body.trackingUrl) updateOps.$set.trackingUrl = req.body.trackingUrl;
   if (req.body.estimatedDelivery) updateOps.$set.estimatedDelivery = req.body.estimatedDelivery;
 
-  const updatedOrder = await Order.findByIdAndUpdate(req.params.id, updateOps, { new: true });
-
-  if (status === 'Cancelled') {
-    // Refund a paid order. Cancelled / Paid / Refunded stay independent facts.
-    if (order.isPaid) {
-      const refundStatus = await processRefund(order, note || 'Cancelled by admin');
-      updatedOrder.refundStatus = refundStatus;
-      updatedOrder.refundedAmount = refundStatus === 'refunded' ? order.totalPrice : 0;
-      updatedOrder.refundReason = note || 'Cancelled by admin';
-      await updatedOrder.save();
-    }
-    // Restore stock exactly once. The transition guard above already prevents a
-    // second cancellation of the same order, so this cannot double-restore.
-    for (const item of order.orderItems) {
-      await incrementStock(item.product, item.qty, 'Stock restored: order cancelled', req.user._id);
-    }
+  const updatedOrder = await transitionOrder(order._id, order.status, status, updateOps);
+  if (!updatedOrder) {
+    res.status(409);
+    throw new Error('Order was modified by another request. Reload and try again.');
   }
 
   res.json(updatedOrder);
@@ -419,42 +431,28 @@ const cancelOrder = async (req, res) => {
     throw new Error('Not authorized to cancel this order');
   }
 
-  const cancelableStatuses = ['Pending', 'Processing'];
-  if (!cancelableStatuses.includes(order.status)) {
+  if (!CUSTOMER_CANCELLABLE.includes(order.status)) {
     res.status(400);
     throw new Error(`Cannot cancel order with status "${order.status}". Only Pending or Processing orders can be cancelled.`);
   }
 
-  // Refund a paid order before marking it cancelled, so we never represent an
-  // order as cancelled while money is still held. Cancelled / Paid / Refunded
-  // are tracked as independent facts.
-  let refundStatus = 'none';
-  let refundedAmount = 0;
-  let refundReason = '';
-  if (order.isPaid) {
-    refundStatus = await processRefund(order, req.body.reason || 'Cancelled by customer');
-    refundedAmount = refundStatus === 'refunded' ? order.totalPrice : 0;
-    refundReason = req.body.reason || 'Cancelled by customer';
-  }
-
-  order.status = 'Cancelled';
-  order.cancelledAt = Date.now();
-  order.cancelReason = req.body.reason || 'Cancelled by customer';
-  order.refundStatus = refundStatus;
-  order.refundedAmount = refundedAmount;
-  order.refundReason = refundReason;
-  order.statusHistory.push({
-    status: 'Cancelled',
-    date: Date.now(),
-    note: req.body.reason || 'Cancelled by customer',
+  // The atomic claim means two concurrent cancel requests cannot both restore
+  // stock or issue two refunds.
+  const reason = req.body.reason || 'Cancelled by customer';
+  const updatedOrder = await cancelOrderAtomically({
+    orderId: order._id,
+    userId: req.user._id,
+    allowedStatuses: CUSTOMER_CANCELLABLE,
+    reason,
+    actorId: req.user._id,
+    stockReason: 'Stock restored: order cancelled',
   });
 
-  // Restore stock through the audited helper so every movement is recorded.
-  for (const item of order.orderItems) {
-    await incrementStock(item.product, item.qty, 'Stock restored: order cancelled', req.user._id);
+  if (!updatedOrder) {
+    res.status(400);
+    throw new Error('This order can no longer be cancelled');
   }
 
-  const updatedOrder = await order.save();
   res.json(updatedOrder);
 };
 

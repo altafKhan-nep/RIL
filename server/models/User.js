@@ -80,8 +80,8 @@ const ROLE_PERMISSIONS = {
 
 const userSchema = mongoose.Schema(
   {
-    name: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
+    name: { type: String, required: true, trim: true, maxlength: 50 },
+    email: { type: String, required: true, unique: true, lowercase: true, trim: true, maxlength: 254 },
     password: { type: String, required: true },
     isAdmin: { type: Boolean, default: false },
     role: {

@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-10-06T16:36:20.479Z",
-  "commitAudited": "uncommitted working tree (Stripe card flow + tooling fixes, on top of b7b9729)",
+  "generatedAt": "2026-10-31T13:55:52.776111Z",
+  "commitAudited": "uncommitted working tree (production-readiness hardening, on top of b7b9729)",
   "target": "Life In Pieces storefront (formerly NovaCart)",
   "environment": {
     "api": "node server (isolated QA run)",
@@ -8,13 +8,13 @@
     "note": "Never touches production Atlas. NODE_ENV=test, dedicated JWT secret, raised rate limits."
   },
   "totals": {
-    "suites": 15,
-    "tests": 128,
-    "passed": 128,
+    "suites": 16,
+    "tests": 142,
+    "passed": 142,
     "failed": 0,
     "passRate": 100
   },
-  "determinism": "128/128 on three consecutive runs; client production build clean.",
+  "determinism": "142/142 on the final run; client production build clean and production bootstrap/SIGTERM smoke test passed.",
   "suites": [
     {
       "name": "Smoke & Baseline",
@@ -85,7 +85,7 @@
     },
     {
       "name": "Roles & Permission Matrix",
-      "count": 9,
+      "count": 11,
       "tests": [
         "content_manager CANNOT delete products (privilege escalation)",
         "content_manager CANNOT edit inventory",
@@ -95,7 +95,9 @@
         "customer CANNOT access admin dashboard stats",
         "customer CANNOT access admin orders list",
         "admin CAN create and delete products",
-        "unauthenticated CANNOT create products"
+        "unauthenticated CANNOT create products",
+        "Admin user update never returns the password hash",
+        "Settings update rejects unknown/unsafe fields"
       ]
     },
     {
@@ -112,19 +114,20 @@
     },
     {
       "name": "Promotions & Discounts",
-      "count": 6,
+      "count": 7,
       "tests": [
         "Percentage promo discount is computed server-side",
         "Fixed promo discount is applied",
         "Expired promo is rejected",
         "Invalid promo code is rejected",
         "Usage limit is enforced (usageLimit=1, two orders)",
-        "Client cannot inflate discount via cartTotal"
+        "Client cannot inflate discount via cartTotal",
+        "Public active promotions never expose usedByUsers or internal targeting"
       ]
     },
     {
       "name": "Orders, Cancellation & Idempotency",
-      "count": 8,
+      "count": 12,
       "tests": [
         "Legal status transition Pending -> Processing -> Shipped -> Delivered",
         "Illegal transition Delivered -> Cancelled is rejected",
@@ -133,18 +136,23 @@
         "Double cancellation does not double-restore stock",
         "Idempotency key prevents duplicate orders",
         "Customer cannot view another customer's order (IDOR)",
-        "Order tracking requires authentication"
+        "Order tracking requires authentication",
+        "Idempotency keys are scoped per customer (no IDOR)",
+        "Concurrent duplicate idempotency key creates one order and one stock decrement",
+        "Order owner can track an order (user field selected)",
+        "Admin marking a card order Delivered does not mark it paid"
       ]
     },
     {
       "name": "Admin ↔ Storefront Synchronization",
-      "count": 5,
+      "count": 6,
       "tests": [
         "Admin-created product appears in public listing",
         "Admin price update propagates to storefront",
         "Admin-created category appears publicly",
         "Admin deactivated category is hidden publicly",
-        "Admin stock update changes storefront availability"
+        "Admin stock update changes storefront availability",
+        "Admin bulk draft toggle hides and restores the product publicly"
       ]
     },
     {
@@ -233,6 +241,18 @@
         "INV-19: Duplicate idempotency key does not create duplicate orders",
         "INV-20: Failed order does not leave partial state"
       ]
+    },
+    {
+      "name": "Storefront Asset Integrity",
+      "count": 6,
+      "tests": [
+        "Every local image path in the catalog resolves to a real file",
+        "Product images use a path distinct from their category image",
+        "No orphan product image files (a file no product references)",
+        "The logo asset is present and referenced by the storefront",
+        "Catalog banners reference real products and resolvable images",
+        "Every catalog product has the fields the storefront needs"
+      ]
     }
   ],
   "notExecuted": [
@@ -245,38 +265,28 @@
   "knownBlockers": [
     {
       "severity": "BLOCKER",
-      "issue": "Render has no JWT_SECRET; admin login fails with \"secretOrPrivateKey must have a value\". CONFIRMED against production.",
-      "action": "Runbook Step 1. The app now refuses to boot without it."
-    },
-    {
-      "severity": "BLOCKER",
-      "issue": "Production API still returns \"name\":\"NovaCart\". CONFIRMED live via /api/settings.",
-      "action": "Runbook Step 2."
-    },
-    {
-      "severity": "BLOCKER",
-      "issue": "Production runs commit 36778a9; the fixes in c7d6f76, c29abff, b7b9729 and the current work are not pushed.",
-      "action": "git push, then redeploy on Render."
+      "issue": "Previously observed in production: missing JWT_SECRET, stale “NovaCart” settings and an older running commit. Not re-checked in this pass.",
+      "action": "Re-run DEPLOY_RUNBOOK.md; the server now fails fast without required secrets."
     },
     {
       "severity": "HIGH",
-      "issue": "Product and category image paths collide, so editing a product photo changes the category tile.",
-      "action": "Runbook Step 3."
+      "issue": "Uploads default to local disk and are lost on redeploy unless UPLOAD_DIR points at persistent storage.",
+      "action": "Mount a persistent volume or move to object storage."
     },
     {
       "severity": "HIGH",
-      "issue": "Uploads go to Render local disk and are lost on redeploy.",
-      "action": "Runbook Step 4."
+      "issue": "Existing deployments must confirm the compound {user, idempotencyKey} index exists after redeploy.",
+      "action": "Check db.orders.getIndexes(); Mongoose autoIndex normally creates it on boot."
     },
     {
       "severity": "MEDIUM",
-      "issue": "MongoDB is standalone, so checkout is not ACID.",
-      "action": "Convert to a replica set."
+      "issue": "Local MongoDB is standalone, so checkout spans collections without transactions.",
+      "action": "Use a replica set for ACID guarantees."
     },
     {
       "severity": "LOW",
-      "issue": "An Atlas password has been exposed in chat and must be treated as compromised.",
-      "action": "Rotate it (Runbook Step 6) before using the URI again."
+      "issue": "A previously exposed Atlas password should be treated as compromised.",
+      "action": "Rotate it before reusing the URI."
     }
   ],
   "resolvedThisSession": [
@@ -289,6 +299,15 @@
     "Added paymentStatus and paymentError to the Order schema; Mongoose was silently stripping them, losing every failure and refund state.",
     "Refunds use an idempotency key and never report success unless Stripe confirmed it.",
     "Removed the dead StripeProvider component, which hardcoded a build-time key and would have broken silently if reused.",
-    "Fixed a bug in my own tooling: both maintenance scripts tested /srv=/ which never matches mongodb+srv://, so every real Atlas URI was rejected. A regression test now covers it."
+    "Fixed a bug in my own tooling: both maintenance scripts tested /srv=/ which never matches mongodb+srv://, so every real Atlas URI was rejected. A regression test now covers it.",
+    "Closed idempotency-key IDOR and the concurrent duplicate-order race; added a unique partial index on {user, idempotencyKey}.",
+    "Fixed order tracking (missing user select) and made cancellations atomic/one-time for stock and refunds.",
+    "Card orders are no longer auto-marked paid when an admin marks them Delivered; payment proof requires a matching succeeded intent.",
+    "Draft products are hidden from all public product endpoints and cannot be ordered.",
+    "Public promotions no longer leak usedByUsers or internal targeting; cart and checkout use the same discount evaluator.",
+    "Fixed cart tax normalisation (0.08 vs 8), promo preview math and free-shipping display.",
+    "Checkout now sends an idempotency key, uses the real /order-success/:id return URL, and reconciles Stripe redirects.",
+    "Admin inventory/orders use supported endpoints and include Out for Delivery; product bulk/partial updates work again.",
+    "Added settings field whitelisting, banner/navigation URL validation, duplicate-key/CastError handling, Helmet CSP, JSON 404 for unknown API paths and clean SIGTERM shutdown."
   ]
 }

@@ -68,11 +68,21 @@ const AdminSettings = () => {
     try {
       setLoading(true);
       const res = await api.getSettings();
+      // The API historically stored the rate as a fraction (0.08). The admin
+      // form is labelled in percent, so convert for display; saving sends the
+      // percent value and the server normalises it back.
+      const tax = { ...(res?.tax || {}) };
+      if (tax.rate !== undefined && tax.rate !== null && tax.rate !== '') {
+        const numeric = Number(tax.rate);
+        if (Number.isFinite(numeric) && numeric <= 1) {
+          tax.rate = Number((numeric * 100).toFixed(4));
+        }
+      }
       setForm({
         store: res?.store || {},
         payment: res?.payment || {},
         shipping: res?.shipping || {},
-        tax: res?.tax || {},
+        tax,
         notifications: res?.notifications || {},
         security: res?.security || {},
         seo: res?.seo || {},

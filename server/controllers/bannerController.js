@@ -2,6 +2,8 @@ const Banner = require('../models/Banner');
 const asyncHandler = require('../utils/asyncHandler');
 const { validateBanner } = require('../middleware/validationMiddleware');
 
+const SAFE_LINK = /^(\/|#|https?:\/\/)/i;
+
 // @desc    Create a banner
 // @route   POST /api/banners
 // @access  Private/Admin
@@ -120,7 +122,12 @@ const updateBanner = asyncHandler(async (req, res) => {
     title: banner.title,
     image: banner.image,
     position: banner.position,
+    link: banner.link,
   });
+  if (banner.link && (!SAFE_LINK.test(banner.link) || banner.link.startsWith('//'))) {
+    res.status(400);
+    throw new Error('Link must be an app path or an http(s) URL');
+  }
   if (!validation.isValid) {
     res.status(400);
     throw new Error(validation.errors.join(', '));

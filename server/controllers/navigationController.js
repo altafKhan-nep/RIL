@@ -1,5 +1,6 @@
 const Navigation = require('../models/Navigation');
 const asyncHandler = require('../utils/asyncHandler');
+const { isSafeLink } = require('../middleware/validationMiddleware');
 
 // @desc    Create a navigation item
 // @route   POST /api/navigation
@@ -10,6 +11,14 @@ const createNavigation = asyncHandler(async (req, res) => {
   if (!label || !url) {
     res.status(400);
     throw new Error('Label and URL are required');
+  }
+  if (typeof label !== 'string' || label.trim().length < 1 || label.length > 80) {
+    res.status(400);
+    throw new Error('Label must be between 1 and 80 characters');
+  }
+  if (!isSafeLink(url)) {
+    res.status(400);
+    throw new Error('URL must be an app path or an http(s) URL');
   }
 
   if (parent) {
@@ -97,6 +106,11 @@ const updateNavigation = asyncHandler(async (req, res) => {
   if (!item) {
     res.status(404);
     throw new Error('Navigation item not found');
+  }
+
+  if (req.body.url !== undefined && !isSafeLink(req.body.url)) {
+    res.status(400);
+    throw new Error('URL must be an app path or an http(s) URL');
   }
 
   if (req.body.parent) {

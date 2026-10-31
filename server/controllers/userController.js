@@ -9,7 +9,7 @@ const {
   revokeAllSessions,
 } = require('../utils/refreshToken');
 const asyncHandler = require('../utils/asyncHandler');
-const { validateUser } = require('../middleware/validationMiddleware');
+const { validateUser, validateProfile } = require('../middleware/validationMiddleware');
 
 const authUser = async (req, res) => {
   const { email, password } = req.body;
@@ -95,19 +95,28 @@ const getUserProfile = async (req, res) => {
 };
 
 const updateUserProfile = async (req, res) => {
+  const validation = validateProfile(req.body);
+  if (!validation.isValid) {
+    res.status(400);
+    throw new Error(validation.errors.join(', '));
+  }
+
   const user = await User.findById(req.user._id);
   if (user) {
-    if (req.body.email && req.body.email.toLowerCase() !== user.email) {
-      const taken = await User.findOne({ email: req.body.email.toLowerCase() });
+    const nextEmail = req.body.email !== undefined ? req.body.email.toLowerCase().trim() : user.email;
+    if (nextEmail !== user.email) {
+      const taken = await User.findOne({ email: nextEmail, _id: { $ne: user._id } });
       if (taken) {
         res.status(400);
         throw new Error('Email is already in use');
       }
     }
-    user.name = req.body.name || user.name;
-    user.email = req.body.email || user.email;
-    user.phone = req.body.phone || user.phone;
-    user.address = req.body.address || user.address;
+    if (req.body.name !== undefined) user.name = req.body.name.trim();
+    user.email = nextEmail;
+    if (req.body.phone !== undefined) user.phone = req.body.phone;
+    if (req.body.address !== undefined) user.address = req.body.address;
+
+    let passwordChanged = false;
     if (req.body.password) {
       // Changing a password requires proving knowledge of the current one, and
       // invalidates every previously issued token.
@@ -127,23 +136,29 @@ const updateUserProfile = async (req, res) => {
       user.password = req.body.password;
       user.tokenVersion = (user.tokenVersion || 0) + 1;
       user.passwordChangedAt = new Date();
+      passwordChanged = true;
     }
     const updatedUser = await user.save();
-    // A password change bumps tokenVersion and revokes every existing session,
-    // then mints a replacement so the current device stays signed in.
-    await revokeAllSessions(updatedUser._id);
-    const token = generateToken(updatedUser._id, updatedUser.tokenVersion || 0);
-    const session = await createSession(updatedUser._id, {
-      userAgent: req.headers['user-agent'] || '',
-      ip: req.ip || '',
-    });
-    setAuthCookies(res, { accessToken: token, refreshToken: session.raw });
+
+    // Only a password change invalidates sessions. A name/address edit must
+    // not sign the customer out of their other devices.
+    if (passwordChanged) {
+      await revokeAllSessions(updatedUser._id);
+      const token = generateToken(updatedUser._id, updatedUser.tokenVersion || 0);
+      const session = await createSession(updatedUser._id, {
+        userAgent: req.headers['user-agent'] || '',
+        ip: req.ip || '',
+      });
+      setAuthCookies(res, { accessToken: token, refreshToken: session.raw });
+    }
+
     res.json({
       _id: updatedUser._id, name: updatedUser.name, email: updatedUser.email,
       isAdmin: updatedUser.isAdmin, role: updatedUser.role,
       permissions: updatedUser.getEffectivePermissions(),
       loyaltyPoints: updatedUser.loyaltyPoints, address: updatedUser.address,
-      phone: updatedUser.phone, token,
+      phone: updatedUser.phone,
+      ...(passwordChanged ? { token: generateToken(updatedUser._id, updatedUser.tokenVersion || 0) } : {}),
     });
   } else {
     res.status(404); throw new Error('User not found');

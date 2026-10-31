@@ -21,7 +21,9 @@ router.get('/sidebar', asyncHandler(async (req, res) => {
     showInSidebar: true,
     startDate: { $lte: now },
     endDate: { $gte: now },
-  }).sort({ createdAt: -1 });
+  })
+    .select('name code description type value minPurchase maxDiscount showInSidebar sidebarTitle sidebarSubtitle sidebarButtonText sidebarBgColor')
+    .sort({ createdAt: -1 });
 
   res.json(promo || null);
 }));

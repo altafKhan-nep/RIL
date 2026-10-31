@@ -10,20 +10,20 @@ const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 // @route   GET /api/products
 // @access  Public
 const getProducts = async (req, res) => {
-  const pageSize = 9;
-  const page = Number(req.query.pageNumber) || 1;
+  const pageSize = Math.min(Math.max(parseInt(req.query.pageSize, 10) || 9, 1), 100);
+  const page = Math.min(Math.max(parseInt(req.query.pageNumber || req.query.page, 10) || 1, 1), 100000);
 
   const keyword = req.query.keyword
     ? {
         name: {
-          $regex: escapeRegex(req.query.keyword),
+          $regex: escapeRegex(String(req.query.keyword)),
           $options: 'i',
         },
       }
     : {};
 
   const category = req.query.category
-    ? { category: { $regex: new RegExp(`^${req.query.category.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/-/g, '[ -]')}$`, 'i') } }
+    ? { category: { $regex: new RegExp(`^${String(req.query.category).replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/-/g, '[ -]')}$`, 'i') } }
     : {};
 
   const flash = req.query.flash ? { isFlashDeal: true } : {};
@@ -39,14 +39,20 @@ const getProducts = async (req, res) => {
     sort.rating = -1;
     sort.numReviews = -1;
   }
+  // Stable ordering for deterministic pagination.
+  sort._id = -1;
 
-  const count = await Product.countDocuments({ ...keyword, ...category, ...flash });
-  const products = await Product.find({ ...keyword, ...category, ...flash })
+  // Drafts are internal work-in-progress and must never appear in the
+  // storefront API, even if someone guesses a URL or searches by name.
+  const filter = { status: { $ne: 'draft' }, ...keyword, ...category, ...flash };
+
+  const count = await Product.countDocuments(filter);
+  const products = await Product.find(filter)
     .sort(sort)
     .limit(pageSize)
     .skip(pageSize * (page - 1));
 
-  res.json({ products, page, pages: Math.ceil(count / pageSize), count });
+  res.json({ products, page, pages: Math.ceil(count / pageSize) || 1, count, pageSize });
 };
 
 // @desc    Fetch single product
@@ -55,19 +61,18 @@ const getProducts = async (req, res) => {
 const getProductById = async (req, res) => {
   const product = await Product.findById(req.params.id);
 
-  if (product) {
-    res.json(product);
-  } else {
+  if (!product || product.status === 'draft') {
     res.status(404);
     throw new Error('Product not found');
   }
+  res.json(product);
 };
 
 // @desc    Fetch product categories
 // @route   GET /api/products/categories
 // @access  Public
 const getCategories = async (req, res) => {
-  const categories = await Product.distinct('category');
+  const categories = await Product.distinct('category', { status: { $ne: 'draft' } });
   res.json(categories);
 };
 
@@ -75,7 +80,7 @@ const getCategories = async (req, res) => {
 // @route   GET /api/products/flash-deals
 // @access  Public
 const getFlashDeals = async (req, res) => {
-  const products = await Product.find({ isFlashDeal: true });
+  const products = await Product.find({ isFlashDeal: true, status: { $ne: 'draft' } });
   res.json(products);
 };
 
@@ -140,71 +145,81 @@ const createProduct = async (req, res) => {
 // @route   PUT /api/products/:id
 // @access  Private/Admin
 const updateProduct = async (req, res) => {
-  const validation = validateProduct(req.body);
+  const product = await Product.findById(req.params.id);
+  if (!product) {
+    res.status(404);
+    throw new Error('Product not found');
+  }
+
+  // Validate the merged document so partial updates (for example the admin
+  // bulk status action, which sends only { status }) remain valid while still
+  // rejecting malformed values.
+  const candidate = { ...product.toObject(), ...req.body };
+  const validation = validateProduct(candidate);
   if (!validation.isValid) {
     res.status(400);
     throw new Error(validation.errors.join(', '));
   }
 
-    const {
-      name,
-      slug,
-      sku,
-      status,
-      category,
-      description,
-      price,
-      originalPrice,
-      countInStock,
-      images,
-      colors,
-      features,
-      badge,
-      isFeatured,
-      isBestseller,
-      isFlashDeal,
-      isNewArrival,
-    } = req.body;
+  const {
+    name,
+    slug,
+    sku,
+    status,
+    category,
+    description,
+    price,
+    originalPrice,
+    countInStock,
+    images,
+    colors,
+    features,
+    badge,
+    isFeatured,
+    isBestseller,
+    isFlashDeal,
+    isNewArrival,
+  } = req.body;
 
-    const product = await Product.findById(req.params.id);
+  // Captured before any mutation so a category move can fix both counts.
+  const previousCategory = product.category;
+  const stockChanged = countInStock !== undefined && Number(countInStock) !== product.countInStock;
 
-    // Captured before any mutation so a category move can fix both counts.
-    const previousCategory = product ? product.category : null;
+  product.name = name !== undefined ? name : product.name;
+  product.slug = slug !== undefined ? slug : product.slug;
+  product.sku = sku !== undefined ? sku : product.sku;
+  product.status = status !== undefined ? status : product.status;
+  product.category = category !== undefined ? category : product.category;
+  product.description = description !== undefined ? description : product.description;
+  product.price = price !== undefined ? price : product.price;
+  product.originalPrice = originalPrice !== undefined ? originalPrice : product.originalPrice;
+  product.images = images || product.images;
+  product.colors = colors || product.colors;
+  product.features = features || product.features;
+  product.badge = badge !== undefined ? badge : product.badge;
+  product.isFeatured = isFeatured !== undefined ? isFeatured : product.isFeatured;
+  product.isBestseller = isBestseller !== undefined ? isBestseller : product.isBestseller;
+  product.isFlashDeal = isFlashDeal !== undefined ? isFlashDeal : product.isFlashDeal;
+  product.isNewArrival = isNewArrival !== undefined ? isNewArrival : product.isNewArrival;
 
-    if (product) {
-      product.name = name || product.name;
-      product.slug = slug || product.slug;
-      product.sku = sku !== undefined ? sku : product.sku;
-      product.status = status !== undefined ? status : product.status;
-      product.category = category || product.category;
-      product.description = description || product.description;
-      product.price = price !== undefined ? price : product.price;
-      product.originalPrice = originalPrice !== undefined ? originalPrice : product.originalPrice;
-      // Stock is applied through the audited helper so every change is
-      // recorded in stockHistory. categoryCount is kept in sync below.
-      if (countInStock !== undefined && Number(countInStock) !== product.countInStock) {
-        await setStock(product._id, Number(countInStock), 'Stock updated via product edit', req.user._id);
-      }
-      product.images = images || product.images;
-      product.colors = colors || product.colors;
-      product.features = features || product.features;
-      product.badge = badge !== undefined ? badge : product.badge;
-      product.isFeatured = isFeatured !== undefined ? isFeatured : product.isFeatured;
-      product.isBestseller = isBestseller !== undefined ? isBestseller : product.isBestseller;
-      product.isFlashDeal = isFlashDeal !== undefined ? isFlashDeal : product.isFlashDeal;
-      product.isNewArrival = isNewArrival !== undefined ? isNewArrival : product.isNewArrival;
-
-    const updatedProduct = await product.save();
-    // Category may have changed, and draft/active transitions change the count.
-    if (previousCategory !== updatedProduct.category) {
-      await recomputeCategoryCount(previousCategory);
-    }
-    await recomputeCategoryCount(updatedProduct.category);
-    res.json(updatedProduct);
-  } else {
-    res.status(404);
-    throw new Error('Product not found');
+  let updatedProduct = await product.save();
+  // Apply stock through the audited helper AFTER save: the in-memory document
+  // still holds the old value, and a subsequent save would overwrite it.
+  if (stockChanged) {
+    updatedProduct = (await setStock(
+      product._id,
+      Number(countInStock),
+      'Stock updated via product edit',
+      req.user._id
+    )) || updatedProduct;
   }
+
+  // Category may have changed, and draft/active transitions change the count.
+  if (previousCategory !== updatedProduct.category) {
+    await recomputeCategoryCount(previousCategory);
+  }
+  await recomputeCategoryCount(updatedProduct.category);
+  res.json(updatedProduct);
 };
 
 module.exports = {

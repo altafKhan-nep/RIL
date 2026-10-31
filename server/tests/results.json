@@ -1,5 +1,5 @@
 {
-  "passed": 134,
+  "passed": 142,
   "failed": 0,
   "results": [
     {
@@ -211,6 +211,14 @@
       "ok": true
     },
     {
+      "name": "Admin user update never returns the password hash",
+      "ok": true
+    },
+    {
+      "name": "Settings update rejects unknown/unsafe fields",
+      "ok": true
+    },
+    {
       "name": "Order total is server-computed from DB prices (not client)",
       "ok": true
     },
@@ -259,6 +267,10 @@
       "ok": true
     },
     {
+      "name": "Public active promotions never expose usedByUsers or internal targeting",
+      "ok": true
+    },
+    {
       "name": "Legal status transition Pending -> Processing -> Shipped -> Delivered",
       "ok": true
     },
@@ -291,6 +303,22 @@
       "ok": true
     },
     {
+      "name": "Idempotency keys are scoped per customer (no IDOR)",
+      "ok": true
+    },
+    {
+      "name": "Concurrent duplicate idempotency key creates one order and one stock decrement",
+      "ok": true
+    },
+    {
+      "name": "Order owner can track an order (user field selected)",
+      "ok": true
+    },
+    {
+      "name": "Admin marking a card order Delivered does not mark it paid",
+      "ok": true
+    },
+    {
       "name": "Admin-created product appears in public listing",
       "ok": true
     },
@@ -308,6 +336,10 @@
     },
     {
       "name": "Admin stock update changes storefront availability",
+      "ok": true
+    },
+    {
+      "name": "Admin bulk draft toggle hides and restores the product publicly",
       "ok": true
     },
     {

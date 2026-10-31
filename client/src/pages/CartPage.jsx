@@ -3,11 +3,11 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../api';
-import { formatPrice, formatDate } from '../utils/helpers';
+import { formatPrice } from '../utils/helpers';
 import ConfirmDialog from '../components/ConfirmDialog';
 
 const CartPage = () => {
-  const { cartItems, removeFromCart, updateQty, itemsPrice, shippingPrice, taxPrice, totalPrice, itemsCount, promoCode: appliedPromo, promoDiscount: appliedDiscount, applyPromo, clearPromo } = useCart();
+  const { cartItems, removeFromCart, updateQty, itemsPrice, shippingPrice, taxPrice, totalPrice, itemsCount, taxRatePercent, promoCode: appliedPromo, promoDiscount: appliedDiscount, applyPromo, clearPromo } = useCart();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [promoCode, setPromoCode] = useState(appliedPromo || '');
@@ -26,11 +26,17 @@ const CartPage = () => {
     setPromoError('');
     setPromoLoading(true);
     try {
-      const result = await api.validatePromotion(promoCode.trim(), totalPrice);
+      // Discounts are computed on merchandise only (the server's rule), not
+      // on tax/shipping, so preview and authoritative totals agree.
+      const result = await api.validatePromotion(promoCode.trim(), itemsPrice);
       if (result.valid) {
         setPromoApplied(true);
         setPromoDiscount(result.discount);
-        applyPromo(promoCode.trim().toUpperCase(), result.discount);
+        applyPromo(
+          promoCode.trim().toUpperCase(),
+          result.discount,
+          result.promotion?.type === 'free_shipping'
+        );
         setPromoError('');
       } else {
         setPromoApplied(false);
@@ -195,7 +201,7 @@ const CartPage = () => {
                   </span>
                 </div>
                 <div className="flex justify-between items-center text-sm text-on-surface-variant">
-                  <span>Tax (8.5%)</span>
+                  <span>Tax ({taxRatePercent}%)</span>
                   <span className="font-semibold text-on-surface">${formatPrice(taxPrice)}</span>
                 </div>
               </div>

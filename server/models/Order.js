@@ -10,7 +10,7 @@ const orderSchema = mongoose.Schema(
     orderItems: [
       {
         name: { type: String, required: true },
-        qty: { type: Number, required: true },
+        qty: { type: Number, required: true, min: 1 },
         image: { type: String, required: true },
         price: { type: Number, required: true },
         product: {
@@ -171,7 +171,7 @@ const orderSchema = mongoose.Schema(
     idempotencyKey: {
       type: String,
       default: '',
-      index: true,
+      maxlength: 128,
     },
   },
   {
@@ -182,6 +182,17 @@ const orderSchema = mongoose.Schema(
 orderSchema.index({ user: 1, createdAt: -1 });
 orderSchema.index({ status: 1 });
 orderSchema.index({ createdAt: -1 });
+// Idempotency is per customer. A unique compound index closes the race where
+// two identical submissions both pass the pre-insert lookup.
+orderSchema.index(
+  { user: 1, idempotencyKey: 1 },
+  {
+    unique: true,
+    // Only index non-empty keys. `$gt: ''` is the supported way to express
+    // "non-empty string" in a partial index; `$ne` is rejected by MongoDB.
+    partialFilterExpression: { idempotencyKey: { $type: 'string', $gt: '' } },
+  }
+);
 
 const Order = mongoose.model('Order', orderSchema);
 

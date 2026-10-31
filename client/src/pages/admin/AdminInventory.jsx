@@ -148,7 +148,7 @@ const AdminInventory = () => {
     try {
       setLoading(true);
       setError(null);
-      const res = await api.getProducts({ pageSize: 500 });
+      const res = await api.getAdminProducts();
       const data = Array.isArray(res) ? res : res.products || res.data || [];
       setProducts(data);
     } catch (err) {

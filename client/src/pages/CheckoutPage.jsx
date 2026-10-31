@@ -14,7 +14,7 @@ import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-
 const buildTimeKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || null;
 const loadStripeFor = (publishableKey) => loadStripe(publishableKey || buildTimeKey);
 
-const CheckoutForm = ({ amount, onSuccess }) => {
+const CheckoutForm = ({ amount, onSuccess, returnUrl }) => {
   const stripe = useStripe();
   const elements = useElements();
   const [processing, setProcessing] = useState(false);
@@ -36,7 +36,7 @@ const CheckoutForm = ({ amount, onSuccess }) => {
 
     const { error } = await stripe.confirmPayment({
       elements,
-      confirmParams: { return_url: window.location.origin + '/order-success' },
+      confirmParams: { return_url: returnUrl || window.location.origin + '/order-success' },
       redirect: 'if_required',
     });
 
@@ -108,6 +108,21 @@ const CheckoutPage = () => {
   // re-creating callbacks mid-checkout.
   const pendingOrderId = useRef(null);
   const pendingIntentIdRef = useRef('');
+  // One key per checkout attempt. Reusing it on retry makes order creation
+  // idempotent, so a double click or a dropped connection cannot create two
+  // orders (and two charges).
+  const idempotencyKeyRef = useRef(
+    typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+      ? crypto.randomUUID()
+      : `ord_${Date.now()}_${Math.random().toString(36).slice(2)}`
+  );
+
+  const resetCheckoutKey = () => {
+    idempotencyKeyRef.current =
+      typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+        ? crypto.randomUUID()
+        : `ord_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -161,6 +176,7 @@ const CheckoutPage = () => {
     discountPrice,
     totalPrice,
     promoCode,
+    idempotencyKey: idempotencyKeyRef.current,
   });
 
   const placeCodOrder = async () => {
@@ -172,6 +188,7 @@ const CheckoutPage = () => {
     try {
       const order = await api.createOrder(buildOrderPayload('Cash on Delivery'));
       clearCart();
+      resetCheckoutKey();
       if (user) await refreshProfile();
       navigate(`/order-success/${order._id}`);
     } catch (err) {
@@ -202,10 +219,18 @@ const CheckoutPage = () => {
     setLoadingIntent(true);
     setError('');
     try {
-      const order = await api.createOrder(buildOrderPayload('Card'));
-      pendingOrderId.current = order._id;
+      // If an order was already created for this attempt (for example the
+      // intent call failed or the customer came back), reuse it instead of
+      // creating a duplicate order.
+      let orderId = pendingOrderId.current;
+      if (!orderId) {
+        const order = await api.createOrder(buildOrderPayload('Card'));
+        orderId = order._id;
+        pendingOrderId.current = orderId;
+        if (user) await refreshProfile();
+      }
 
-      const result = await api.createPaymentIntent(order._id);
+      const result = await api.createPaymentIntent(orderId);
       if (!result.clientSecret) {
         setError('Could not initialise the payment. Please try again.');
         return;
@@ -213,7 +238,6 @@ const CheckoutPage = () => {
       setClientSecret(result.clientSecret);
       setPendingIntentId(result.paymentIntentId);
       pendingIntentIdRef.current = result.paymentIntentId;
-      if (user) await refreshProfile();
     } catch (err) {
       setError(err.message);
     } finally {
@@ -236,6 +260,7 @@ const CheckoutPage = () => {
       pendingIntentIdRef.current = '';
       setClientSecret('');
       setPendingIntentId('');
+      resetCheckoutKey();
       navigate(`/order-success/${orderId}`);
     } catch (err) {
       setError(err.message);
@@ -503,7 +528,7 @@ const CheckoutPage = () => {
                           },
                         }}
                       >
-                        <CheckoutForm amount={totalPrice} onSuccess={handleStripeSuccess} />
+                        <CheckoutForm amount={totalPrice} onSuccess={handleStripeSuccess} returnUrl={`${window.location.origin}/order-success/${pendingOrderId.current || ''}`} />
                       </Elements>
                     </div>
                   )}

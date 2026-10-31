@@ -6,7 +6,7 @@ import { formatPrice } from '../utils/helpers';
 const STATUS_STEPS = [
   { key: 'Pending', label: 'Order Placed', icon: 'receipt', activeStatuses: ['Pending', 'Processing', 'Shipped', 'Delivered'] },
   { key: 'Processing', label: 'Confirmed', icon: 'check_circle', activeStatuses: ['Processing', 'Shipped', 'Delivered'] },
-  { key: 'Shipped', label: 'Shipped', icon: 'local_shipping', activeStatuses: ['Shipped', 'Delivered'] },
+  { key: 'Shipped', label: 'Shipped', icon: 'local_shipping', activeStatuses: ['Shipped', 'Out for Delivery', 'Delivered'] },
   { key: 'Delivered', label: 'Delivered', icon: 'where_to_vote', activeStatuses: ['Delivered'] },
 ];
 
@@ -102,12 +102,13 @@ const OrderTrackingPage = () => {
             )}
             <span className={`inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg ${
               order.status === 'Delivered' ? 'bg-green-50 text-green-700' :
+              order.status === 'Out for Delivery' ? 'bg-indigo-50 text-indigo-700' :
               order.status === 'Shipped' ? 'bg-blue-50 text-blue-700' :
               order.status === 'Cancelled' ? 'bg-red-50 text-red-700' :
               'bg-amber-50 text-amber-700'
             }`}>
               <span className="material-symbols-outlined text-[14px]" style={{ fontVariationSettings: "'FILL' 1" }}>
-                {order.status === 'Delivered' ? 'check_circle' : order.status === 'Shipped' ? 'local_shipping' : order.status === 'Cancelled' ? 'cancel' : 'schedule'}
+                {order.status === 'Delivered' ? 'check_circle' : (order.status === 'Shipped' || order.status === 'Out for Delivery') ? 'local_shipping' : order.status === 'Cancelled' ? 'cancel' : 'schedule'}
               </span>
               {order.status}
             </span>
@@ -229,13 +230,14 @@ const OrderTrackingPage = () => {
                       className="h-full bg-gradient-to-r from-primary to-green-500 rounded-full transition-all duration-700"
                       style={{
                         width: order.status === 'Delivered' ? '100%' :
+                               order.status === 'Out for Delivery' ? '85%' :
                                order.status === 'Shipped' ? '65%' :
                                order.status === 'Processing' ? '30%' : '5%'
                       }}
                     />
                   </div>
                   {/* Truck icon on the line */}
-                  {order.status === 'Shipped' && (
+                  {(order.status === 'Shipped' || order.status === 'Out for Delivery') && (
                     <div className="absolute top-1/2 -translate-y-1/2 transition-all duration-700" style={{ left: '60%' }}>
                       <span className="material-symbols-outlined text-primary text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>local_shipping</span>
                     </div>

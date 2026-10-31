@@ -42,11 +42,12 @@ const cartReducer = (state, action) => {
         ...state,
         promoCode: action.payload.code,
         promoDiscount: action.payload.discount,
+        promoFreeShipping: Boolean(action.payload.freeShipping),
       };
     case 'CLEAR_PROMO':
-      return { ...state, promoCode: '', promoDiscount: 0 };
+      return { ...state, promoCode: '', promoDiscount: 0, promoFreeShipping: false };
     case 'CLEAR':
-      return { cartItems: [], promoCode: '', promoDiscount: 0 };
+      return { cartItems: [], promoCode: '', promoDiscount: 0, promoFreeShipping: false };
     default:
       return state;
   }
@@ -61,13 +62,23 @@ const DEFAULT_SETTINGS = {
 export const CartProvider = ({ children }) => {
   const [settings, setSettings] = useState(DEFAULT_SETTINGS);
 
-  const [state, dispatch] = useReducer(cartReducer, { cartItems: [], promoCode: '', promoDiscount: 0 }, () => {
-    const stored = localStorage.getItem('novacart_cart');
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      return { cartItems: parsed.cartItems || [], promoCode: parsed.promoCode || '', promoDiscount: parsed.promoDiscount || 0 };
+  const [state, dispatch] = useReducer(cartReducer, { cartItems: [], promoCode: '', promoDiscount: 0, promoFreeShipping: false }, () => {
+    try {
+      const stored = localStorage.getItem('novacart_cart');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        return {
+          cartItems: Array.isArray(parsed.cartItems) ? parsed.cartItems : [],
+          promoCode: parsed.promoCode || '',
+          promoDiscount: Number(parsed.promoDiscount) || 0,
+          promoFreeShipping: Boolean(parsed.promoFreeShipping),
+        };
+      }
+    } catch {
+      // Corrupt or legacy cached cart: start clean rather than crash the app.
+      try { localStorage.removeItem('novacart_cart'); } catch {}
     }
-    return { cartItems: [], promoCode: '', promoDiscount: 0 };
+    return { cartItems: [], promoCode: '', promoDiscount: 0, promoFreeShipping: false };
   });
 
   useEffect(() => {
@@ -86,7 +97,7 @@ export const CartProvider = ({ children }) => {
     if (qty < 1) return;
     dispatch({ type: 'UPDATE_QTY', payload: { product: id, qty } });
   }, []);
-  const applyPromo = useCallback((code, discount) => dispatch({ type: 'SET_PROMO', payload: { code, discount } }), []);
+  const applyPromo = useCallback((code, discount, freeShipping = false) => dispatch({ type: 'SET_PROMO', payload: { code, discount, freeShipping } }), []);
   const clearPromo = useCallback(() => dispatch({ type: 'CLEAR_PROMO' }), []);
   const clearCart = useCallback(() => dispatch({ type: 'CLEAR' }), []);
 
@@ -97,25 +108,32 @@ export const CartProvider = ({ children }) => {
   const shipping = settings?.shipping || DEFAULT_SETTINGS.shipping;
   const tax = settings?.tax || DEFAULT_SETTINGS.tax;
 
-  const freeThreshold = shipping.freeShippingThreshold || 50;
-  const standardRate = shipping.standardRate || 5.99;
-  const taxRate = (tax.rate || 8) / 100;
+  const freeThreshold = Number(shipping.freeShippingThreshold ?? 50);
+  const standardRate = Number(shipping.standardRate ?? 5.99);
+  // Settings may store the tax rate either as a fraction (0.08) or a percent
+  // (8). Normalising here keeps the cart preview identical to the server's
+  // authoritative total; previously 0.08 was divided by 100 again and the
+  // displayed tax was almost zero.
+  const rawTaxRate = Number(tax.rate ?? 0.08);
+  const taxRate = Number.isFinite(rawTaxRate) && rawTaxRate > 1 ? rawTaxRate / 100 : (Number.isFinite(rawTaxRate) ? rawTaxRate : 0);
+  const taxRatePercent = Number((taxRate * 100).toFixed(2));
   const taxEnabled = tax.enabled !== false;
 
-  const shippingPrice = itemsPrice >= freeThreshold ? 0 : standardRate;
+  const shippingPrice = (itemsPrice >= freeThreshold || state.promoFreeShipping) ? 0 : standardRate;
   const taxPrice = taxEnabled ? Number((itemsPrice * taxRate).toFixed(2)) : 0;
   const discountPrice = state.promoDiscount || 0;
   const totalPrice = Number((itemsPrice + shippingPrice + taxPrice - discountPrice).toFixed(2));
 
   const value = useMemo(() => ({
     cartItems, itemsCount, itemsPrice, shippingPrice, taxPrice,
-    discountPrice, totalPrice, settings,
+    discountPrice, totalPrice, settings, taxRatePercent,
     promoCode: state.promoCode,
     promoDiscount: state.promoDiscount,
+    promoFreeShipping: state.promoFreeShipping,
     addToCart, removeFromCart, updateQty, applyPromo, clearPromo, clearCart,
   }), [cartItems, itemsCount, itemsPrice, shippingPrice, taxPrice,
-    discountPrice, totalPrice, settings, state.promoCode, state.promoDiscount,
-    addToCart, removeFromCart, updateQty, applyPromo, clearPromo, clearCart]);
+    discountPrice, totalPrice, settings, taxRatePercent, state.promoCode, state.promoDiscount,
+    state.promoFreeShipping, addToCart, removeFromCart, updateQty, applyPromo, clearPromo, clearCart]);
 
   return (
     <CartContext.Provider value={value}>

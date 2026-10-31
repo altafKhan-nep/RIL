@@ -22,7 +22,10 @@ router.get('/track/:orderId', protect, asyncHandler(async (req, res) => {
   }
 
   const order = await Order.findById(req.params.orderId)
-    .select('orderItems shippingAddress status trackingNumber shippingPartner trackingUrl estimatedDelivery trackingEvents statusHistory createdAt shippingOrigin shippingDestination totalPrice itemsPrice shippingPrice taxPrice')
+    // `user` must be selected: the ownership check below calls
+    // order.user.toString(). Omitting it made every valid tracking request
+    // throw a 500 before the check could run.
+    .select('user orderItems shippingAddress status trackingNumber shippingPartner trackingUrl estimatedDelivery trackingEvents statusHistory createdAt shippingOrigin shippingDestination totalPrice itemsPrice shippingPrice taxPrice')
     .populate('orderItems.product', 'name images');
 
   if (!order) {
@@ -31,7 +34,7 @@ router.get('/track/:orderId', protect, asyncHandler(async (req, res) => {
   }
 
   // Ownership check: only the order owner or an admin may track it.
-  if (order.user.toString() !== req.user._id.toString() && !req.user.isAdminRole()) {
+  if ((!order.user || order.user.toString() !== req.user._id.toString()) && !req.user.isAdminRole()) {
     res.status(403);
     throw new Error('Not authorized to view this order');
   }

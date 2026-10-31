@@ -89,5 +89,26 @@ module.exports = {
         );
       },
     },
+    {
+      name: 'Admin user update never returns the password hash',
+      fn: async ({ BASE, request, fixtures, db }) => {
+        const t = await token({ BASE, request, fixtures }, 'admin');
+        const user = await db.col('users').findOne({ email: fixtures.USERS.customer2.email });
+        const res = await request.put(BASE, `/api/admin/users/${user._id}`, { token: t, body: { name: 'QA Customer Two Renamed' } });
+        assert.strictEqual(res.status, 200, res.body.message);
+        assert.strictEqual(res.body.password, undefined, 'password hash must never be serialized');
+        assert.strictEqual(res.body.name, 'QA Customer Two Renamed');
+      },
+    },
+    {
+      name: 'Settings update rejects unknown/unsafe fields',
+      fn: async ({ BASE, request, fixtures }) => {
+        const t = await token({ BASE, request, fixtures }, 'admin');
+        await assert.rejects(
+          request.put(BASE, '/api/settings/tax', { token: t, body: { rate: 8, __proto__: { polluted: true }, secret: 'x' } }),
+          (e) => e.status === 400
+        );
+      },
+    },
   ],
 };

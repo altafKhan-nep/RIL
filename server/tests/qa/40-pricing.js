@@ -79,9 +79,15 @@ module.exports = {
     },
     {
       name: 'Draft product cannot be ordered',
-      fn: async ({ BASE, request, fixtures }) => {
+      fn: async ({ BASE, request, fixtures, db }) => {
         const token = await login({ BASE, request, fixtures }, fixtures.USERS.customer.email, fixtures.USERS.customer.password);
-        const p = await getProduct({ BASE, request }, 'QA Draft');
+        const p = await db.col('products').findOne({ name: 'QA Draft' });
+        assert.ok(p, 'draft fixture exists');
+        await assert.rejects(
+          request.get(BASE, `/api/products/${p._id}`),
+          (e) => e.status === 404,
+          'draft product must not be publicly readable'
+        );
         await assert.rejects(
           request.post(BASE, '/api/orders', {
             token,

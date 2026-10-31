@@ -34,7 +34,7 @@ async function setupOrder({ BASE, request, fixtures, db }, label) {
   // Bind the intent directly. Calling /create-intent would require real Stripe
   // credentials; the binding it performs is plain persisted state.
   await db.col('orders').updateOne({ _id: new ObjectId(orderId) }, { $set: { paymentIntentId: intentId } });
-  return { tok, orderId, intentId };
+  return { tok, orderId, intentId, totalPrice: created.body.totalPrice };
 }
 
 module.exports = {
@@ -83,11 +83,11 @@ module.exports = {
       name: 'Webhook accepts a correctly signed event and confirms the order',
       fn: async (ctx) => {
         const { BASE, request } = ctx;
-        const { tok, orderId, intentId } = await setupOrder(ctx, 'ok');
+        const { tok, orderId, intentId, totalPrice } = await setupOrder(ctx, 'ok');
         const payload = JSON.stringify({
           id: `evt_${orderId.slice(-6)}`,
           type: 'payment_intent.succeeded',
-          data: { object: { id: intentId, metadata: { orderId } } },
+          data: { object: { id: intentId, amount: Math.round(totalPrice * 100), currency: 'usd', metadata: { orderId } } },
         });
         const res = await request.post(BASE, '/api/payments/webhook', {
           body: payload,
@@ -105,11 +105,11 @@ module.exports = {
       name: 'Webhook does not confirm an order with a mismatched intent id',
       fn: async (ctx) => {
         const { BASE, request } = ctx;
-        const { tok, orderId } = await setupOrder(ctx, 'mismatch');
+        const { tok, orderId, totalPrice } = await setupOrder(ctx, 'mismatch');
         const payload = JSON.stringify({
           id: `evt_bad_${orderId.slice(-6)}`,
           type: 'payment_intent.succeeded',
-          data: { object: { id: `pi_someone_elses`, metadata: { orderId } } },
+          data: { object: { id: `pi_someone_elses`, amount: Math.round(totalPrice * 100), currency: 'usd', metadata: { orderId } } },
         });
         const res = await request.post(BASE, '/api/payments/webhook', {
           body: payload,
@@ -124,11 +124,11 @@ module.exports = {
       name: 'Webhook replay for an already-paid order is idempotent',
       fn: async (ctx) => {
         const { BASE, request } = ctx;
-        const { tok, orderId, intentId } = await setupOrder(ctx, 'replay');
+        const { tok, orderId, intentId, totalPrice } = await setupOrder(ctx, 'replay');
         const payload = JSON.stringify({
           id: `evt_replay_${orderId.slice(-6)}`,
           type: 'payment_intent.succeeded',
-          data: { object: { id: intentId, metadata: { orderId } } },
+          data: { object: { id: intentId, amount: Math.round(totalPrice * 100), currency: 'usd', metadata: { orderId } } },
         });
         const headers = { 'Content-Type': 'application/json', 'stripe-signature': stripeSignature(payload, SECRET) };
         const first = await request.post(BASE, '/api/payments/webhook', { body: payload, headers });

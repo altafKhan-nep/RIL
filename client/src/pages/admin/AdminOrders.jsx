@@ -6,6 +6,7 @@ const ORDER_STATUS_STYLES = {
   Pending: 'bg-amber-100 text-amber-800',
   Processing: 'bg-blue-100 text-blue-800',
   Shipped: 'bg-teal-100 text-teal-800',
+  'Out for Delivery': 'bg-indigo-100 text-indigo-800',
   Delivered: 'bg-green-100 text-green-800',
   Cancelled: 'bg-red-100 text-red-800',
 };
@@ -13,12 +14,13 @@ const ORDER_STATUS_STYLES = {
 const STATUS_FLOW = {
   Pending: ['Processing', 'Cancelled'],
   Processing: ['Shipped', 'Cancelled'],
-  Shipped: ['Delivered'],
+  Shipped: ['Out for Delivery', 'Delivered'],
+  'Out for Delivery': ['Delivered'],
   Delivered: [],
   Cancelled: [],
 };
 
-const STATUS_TABS = ['All', 'Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'];
+const STATUS_TABS = ['All', 'Pending', 'Processing', 'Shipped', 'Out for Delivery', 'Delivered', 'Cancelled'];
 
 const formatDate = (date) => {
   if (!date) return 'N/A';
@@ -419,7 +421,7 @@ const AdminOrders = () => {
     try {
       setLoading(true);
       setError(null);
-      const res = await api.getAllOrders({ limit: 200 });
+      const res = await api.getAllOrders({ pageSize: 500 });
       const data = Array.isArray(res) ? res : res.orders || res.data || [];
       setOrders(data);
     } catch (err) {
@@ -435,6 +437,7 @@ const AdminOrders = () => {
 
   const showToast = (message, type = 'success') => setToast({ message, type });
 
+  const ADMIN_CANCELLABLE = ['Pending', 'Processing', 'Shipped', 'Out for Delivery'];
   const statusCounts = orders.reduce(
     (acc, o) => {
       const s = o.status || 'Pending';
@@ -601,8 +604,8 @@ const AdminOrders = () => {
         )}
 
         {/* Status Summary Bar */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-          {['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'].map((status) => (
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          {['Pending', 'Processing', 'Shipped', 'Out for Delivery', 'Delivered', 'Cancelled'].map((status) => (
             <button
               key={status}
               onClick={() => setStatusFilter(status)}
@@ -719,7 +722,7 @@ const AdminOrders = () => {
                     {paginated.map((order) => {
                       const id = order._id || order.id || '';
                       const status = order.status || 'Pending';
-                      const canCancel = status === 'Pending' || status === 'Processing';
+                      const canCancel = ADMIN_CANCELLABLE.includes(status);
                       return (
                         <tr
                           key={id}

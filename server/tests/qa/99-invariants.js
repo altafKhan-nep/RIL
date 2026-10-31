@@ -58,9 +58,10 @@ module.exports = {
     },
     {
       name: 'INV-9: Draft products are not publicly purchasable',
-      fn: async ({ BASE, request, fixtures }) => {
+      fn: async ({ BASE, request, fixtures, db }) => {
         const t = await custToken({ BASE, request, fixtures });
-        const p = await getProduct({ BASE, request }, 'QA Draft');
+        const p = await db.col('products').findOne({ name: 'QA Draft' });
+        assert.ok(p, 'draft fixture exists');
         await assert.rejects(
           request.post(BASE, '/api/orders', {
             token: t,

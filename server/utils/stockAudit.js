@@ -79,17 +79,77 @@ const incrementStock = async (productId, qty, reason, actor) => {
   return updated || null;
 };
 
+
+/**
+ * Sets an absolute stock value atomically. The delta and the audit entry are
+ * computed inside the database, so concurrent admin edits cannot record a
+ * stale previousStock or silently overwrite one another.
+ */
+const setStockAbsolute = async (productId, newQty, reason = 'Stock set by admin', actor) => {
+  const Product = require('../models/Product');
+  const entry = {
+    type: 'set',
+    quantity: { $subtract: [newQty, '$countInStock'] },
+    previousStock: '$countInStock',
+    newStock: newQty,
+    note: reason,
+    date: new Date(),
+  };
+  if (actor && actor !== 'system') entry.createdBy = actor;
+
+  return Product.findOneAndUpdate(
+    { _id: productId },
+    [
+      {
+        $set: {
+          countInStock: newQty,
+          stockHistory: { $concatArrays: [{ $ifNull: ['$stockHistory', []] }, [entry]] },
+        },
+      },
+    ],
+    { new: true }
+  );
+};
+
+/**
+ * Applies a signed adjustment atomically and clamps the result at zero. The
+ * recorded delta is the actual change after clamping, not the requested one.
+ */
+const adjustStockBy = async (productId, delta, reason = 'Stock adjusted', actor) => {
+  const Product = require('../models/Product');
+  const newStockExpr = { $max: [0, { $add: ['$countInStock', delta] }] };
+  const entry = {
+    type: 'adjust',
+    quantity: { $subtract: [newStockExpr, '$countInStock'] },
+    previousStock: '$countInStock',
+    newStock: newStockExpr,
+    note: reason,
+    date: new Date(),
+  };
+  if (actor && actor !== 'system') entry.createdBy = actor;
+
+  return Product.findOneAndUpdate(
+    { _id: productId },
+    [
+      {
+        $set: {
+          countInStock: newStockExpr,
+          stockHistory: { $concatArrays: [{ $ifNull: ['$stockHistory', []] }, [entry]] },
+        },
+      },
+    ],
+    { new: true }
+  );
+};
+
 /**
  * Applies an absolute stock value (admin "set stock" flow) and records the
  * difference as an audited 'set' adjustment. Returns null when unchanged.
+ *
+ * Delegates to setStockAbsolute so the read and write are not separated.
  */
 const setStock = async (productId, newQty, reason = 'Stock set by admin', actor) => {
-  const Product = require('../models/Product');
-  const before = await Product.findById(productId).select('countInStock').lean();
-  if (!before) return null;
-  const delta = newQty - before.countInStock;
-  if (delta === 0) return null;
-  return incrementStock(productId, delta, reason, actor);
+  return setStockAbsolute(productId, newQty, reason, actor);
 };
 
 /**
@@ -114,4 +174,4 @@ const recordOpeningStock = async (productId, qty, actor) => {
   );
 };
 
-module.exports = { decrementStock, incrementStock, setStock, recordOpeningStock };
+module.exports = { decrementStock, incrementStock, setStock, setStockAbsolute, adjustStockBy, recordOpeningStock };

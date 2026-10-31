@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, useSearchParams, Link } from 'react-router-dom';
 import { api } from '../api';
 import { formatPrice } from '../utils/helpers';
 
@@ -10,11 +10,45 @@ const formatDateShort = (date) => {
 
 const OrderSuccessPage = () => {
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
+  const paymentIntent = searchParams.get('payment_intent');
   const [order, setOrder] = useState(null);
 
   useEffect(() => {
-    if (id) api.getOrderById(id).then(setOrder).catch(() => {});
-  }, [id]);
+    if (!id) return;
+    let cancelled = false;
+
+    const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+    const load = async () => {
+      // Coming back from Stripe's redirect: ask the server to verify and
+      // reconcile the intent immediately instead of waiting for the webhook.
+      if (paymentIntent) {
+        try {
+          await api.confirmPayment(paymentIntent);
+        } catch {
+          // The webhook remains the source of truth if reconciliation fails.
+        }
+      }
+
+      // Webhooks can lag a second or two behind the redirect; poll briefly so
+      // the page does not show an unpaid order for a successful card payment.
+      for (let attempt = 0; attempt < 6; attempt += 1) {
+        try {
+          const next = await api.getOrderById(id);
+          if (cancelled) return;
+          setOrder(next);
+          if (!paymentIntent || next.isPaid || next.paymentStatus === 'failed') return;
+        } catch {
+          if (cancelled) return;
+        }
+        await sleep(1500);
+      }
+    };
+
+    load();
+    return () => { cancelled = true; };
+  }, [id, paymentIntent]);
 
   const orderNumber = order ? `#NC-${order._id.toString().slice(-5).toUpperCase()}` : '';
 

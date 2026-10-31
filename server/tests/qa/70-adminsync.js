@@ -60,9 +60,30 @@ module.exports = {
         const t = await token({ BASE, request, fixtures }, 'admin');
         const slug = `qa-stock-${Date.now()}`;
         const created = await request.post(BASE, '/api/products', { token: t, body: { name: 'QA Stock Product', slug, price: 10, category: 'QA Cat', description: 'A stock test product.', countInStock: 5 } });
-        await request.put(BASE, `/api/products/${created.body._id}`, { token: t, body: { name: 'QA Stock Product', slug, price: 10, category: 'QA Cat', description: 'A stock test product.', countInStock: 0 } });
+        // Partial update mirrors the admin bulk action, which sends only the
+        // fields being changed.
+        const upd = await request.put(BASE, `/api/products/${created.body._id}`, { token: t, body: { countInStock: 0 } });
+        assert.strictEqual(upd.status, 200, upd.body.message);
+        assert.strictEqual(upd.body.countInStock, 0, 'update response must reflect the new stock');
         const pub = await request.get(BASE, `/api/products/${created.body._id}`);
         assert.strictEqual(pub.body.countInStock, 0, 'storefront should show zero stock');
+      },
+    },
+    {
+      name: 'Admin bulk draft toggle hides and restores the product publicly',
+      fn: async ({ BASE, request, fixtures }) => {
+        const t = await token({ BASE, request, fixtures }, 'admin');
+        const slug = `qa-draft-toggle-${Date.now()}`;
+        const created = await request.post(BASE, '/api/products', { token: t, body: { name: 'QA Draft Toggle', slug, price: 10, category: 'QA Cat', description: 'A draft toggle test product.', countInStock: 5 } });
+        const draft = await request.put(BASE, `/api/products/${created.body._id}`, { token: t, body: { status: 'draft' } });
+        assert.strictEqual(draft.status, 200, draft.body.message);
+        await assert.rejects(request.get(BASE, `/api/products/${created.body._id}`), (e) => e.status === 404);
+        const listed = await request.get(BASE, '/api/products', { query: { keyword: 'QA Draft Toggle', pageSize: 50 } });
+        assert.ok(!listed.body.products.some((p) => p._id === created.body._id), 'draft must be absent from public listing');
+        const active = await request.put(BASE, `/api/products/${created.body._id}`, { token: t, body: { status: 'active' } });
+        assert.strictEqual(active.status, 200, active.body.message);
+        const pub = await request.get(BASE, `/api/products/${created.body._id}`);
+        assert.strictEqual(pub.body.status, 'active');
       },
     },
   ],

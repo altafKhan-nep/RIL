@@ -51,6 +51,15 @@ const DEFAULT_SETTINGS = {
 };
 
 const VALID_SECTIONS = ['store', 'payment', 'shipping', 'tax', 'notifications', 'security', 'seo'];
+const SECTION_FIELDS = {
+  store: ['name', 'tagline', 'logo', 'favicon', 'contactEmail', 'phone', 'address'],
+  payment: ['currency', 'currencySymbol', 'acceptCreditCards', 'acceptPaypal', 'stripePublicKey'],
+  shipping: ['freeShippingThreshold', 'standardRate', 'expressRate', 'enableLocalDelivery'],
+  tax: ['enabled', 'rate', 'includeInPrice'],
+  notifications: ['orderConfirmation', 'shippingUpdates', 'lowStockAlert', 'lowStockThreshold', 'newOrderAlert'],
+  security: ['requireEmailVerification', 'enableTwoFactor', 'sessionTimeout', 'maxLoginAttempts'],
+  seo: ['metaTitle', 'metaDescription', 'ogImage'],
+};
 const SENSITIVE_FIELDS = ['stripePublicKey'];
 
 const filterSensitive = (obj) => {
@@ -92,14 +101,19 @@ const updateSettings = asyncHandler(async (req, res) => {
     settings = await Settings.create(DEFAULT_SETTINGS);
   }
 
-  const updateData = {};
-  const sectionData = settings[section] || {};
+  const allowedFields = SECTION_FIELDS[section] || [];
+  const unknown = Object.keys(req.body).filter((key) => !allowedFields.includes(key));
+  if (unknown.length > 0) {
+    res.status(400);
+    throw new Error(`Unknown field(s) for ${section}: ${unknown.join(', ')}`);
+  }
 
-  Object.keys(req.body).forEach((key) => {
-    if (sectionData.hasOwnProperty(key) || req.body[key] !== undefined) {
+  const updateData = {};
+  for (const key of allowedFields) {
+    if (req.body[key] !== undefined) {
       updateData[`${section}.${key}`] = req.body[key];
     }
-  });
+  }
 
   if (Object.keys(updateData).length === 0) {
     res.status(400);

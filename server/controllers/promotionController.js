@@ -1,6 +1,7 @@
 const Promotion = require('../models/Promotion');
 const asyncHandler = require('../utils/asyncHandler');
 const { validatePromotion: validatePromotionInput } = require('../middleware/validationMiddleware');
+const { computeDiscount } = require('../utils/pricing');
 
 // @desc    Create a promotion
 // @route   POST /api/promotions
@@ -184,6 +185,8 @@ const deletePromotion = asyncHandler(async (req, res) => {
 // @access  Public
 const getActivePromotions = asyncHandler(async (req, res) => {
   const now = new Date();
+  // Public response: never expose the customer ObjectIds in usedByUsers or
+  // internal product/category targeting.
   const promotions = await Promotion.find({
     isActive: true,
     $and: [
@@ -200,7 +203,9 @@ const getActivePromotions = asyncHandler(async (req, res) => {
         ],
       },
     ],
-  }).sort({ createdAt: -1 });
+  })
+    .select('name code description type value minPurchase maxDiscount usageLimit usedCount isActive startDate endDate showInSidebar sidebarTitle sidebarSubtitle sidebarButtonText sidebarBgColor')
+    .sort({ createdAt: -1 });
 
   res.json(promotions);
 });
@@ -216,60 +221,20 @@ const validatePromotion = asyncHandler(async (req, res) => {
     throw new Error('Promotion code is required');
   }
 
-  const promotion = await Promotion.findOne({ code: code.trim().toUpperCase() });
-
-  if (!promotion) {
-    res.status(404);
-    throw new Error('Invalid promotion code');
-  }
-
-  if (!promotion.isActive) {
+  const total = cartTotal === undefined ? 0 : Number(cartTotal);
+  if (!Number.isFinite(total) || total < 0) {
     res.status(400);
-    throw new Error('This promotion is no longer active');
+    throw new Error('cartTotal must be a non-negative number');
   }
 
-  const now = new Date();
-  if (now < new Date(promotion.startDate)) {
-    res.status(400);
-    throw new Error('This promotion has not started yet');
-  }
-  if (now > new Date(promotion.endDate)) {
-    res.status(400);
-    throw new Error('This promotion has expired');
-  }
-
-  if (promotion.usageLimit > 0 && promotion.usedCount >= promotion.usageLimit) {
-    res.status(400);
-    throw new Error('This promotion has reached its usage limit');
-  }
-
-  // Per-user usage check
-  if (req.user && promotion.maxPerUser > 0) {
-    const userUsageCount = promotion.usedByUsers.filter(
-      (uid) => uid.toString() === req.user._id.toString()
-    ).length;
-    if (userUsageCount >= promotion.maxPerUser) {
-      res.status(400);
-      throw new Error(`You have already used this code ${promotion.maxPerUser} time(s)`);
-    }
-  }
-
-  if (promotion.minPurchase > 0 && cartTotal && cartTotal < promotion.minPurchase) {
-    res.status(400);
-    throw new Error(`Minimum purchase of $${promotion.minPurchase} required`);
-  }
-
-  let discount = 0;
-  if (promotion.type === 'percentage') {
-    discount = (cartTotal || 0) * (promotion.value / 100);
-    if (promotion.maxDiscount > 0 && discount > promotion.maxDiscount) {
-      discount = promotion.maxDiscount;
-    }
-  } else if (promotion.type === 'fixed') {
-    discount = promotion.value;
-  } else if (promotion.type === 'free_shipping') {
-    discount = 0;
-  }
+  // Use the exact same evaluator as checkout, so the cart preview cannot
+  // disagree with the amount actually charged (percentage caps, fixed-value
+  // caps, per-user limits, free shipping and date boundaries).
+  const { discount, freeShipping, promotion } = await computeDiscount(
+    code,
+    total,
+    req.user ? req.user._id : null
+  );
 
   res.json({
     valid: true,
@@ -281,7 +246,8 @@ const validatePromotion = asyncHandler(async (req, res) => {
       value: promotion.value,
       maxDiscount: promotion.maxDiscount,
     },
-    discount: Math.round(discount * 100) / 100,
+    discount,
+    freeShipping,
   });
 });
 
