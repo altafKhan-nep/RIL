@@ -300,7 +300,7 @@ const Navbar = () => {
           <div className="flex items-center justify-between flex-1 gap-4 lg:gap-6 px-2 md:px-4 lg:px-6">
             {/* Logo */}
             <Link to="/" className="flex items-center gap-2.5 shrink-0 group">
-              <span className="bg-[#F9F4ED] rounded-xl p-0.5 shrink-0 transition-opacity group-hover:opacity-85">
+              <span className="bg-black rounded-xl p-0.5 shrink-0 transition-opacity group-hover:opacity-85">
                 <img
                   src="/logo_lip.png"
                   alt="Life In Pieces"
