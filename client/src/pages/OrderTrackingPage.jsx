@@ -38,6 +38,11 @@ const OrderTrackingPage = () => {
   useEffect(() => {
     if (id) {
       api.trackOrder(id)
+        // Older API deployments did not return `user` from the tracking
+        // endpoint, which made it fail with a 500. The full order endpoint is
+        // equivalent for this page, so fall back to it instead of showing a
+        // misleading "Order Not Found" screen.
+        .catch((err) => (err.status >= 500 ? api.getOrderById(id) : Promise.reject(err)))
         .then(setOrder)
         .catch((err) => setError(err.message))
         .finally(() => setLoading(false));
